@@ -28,7 +28,7 @@ If you're new, begin with Chapter 0. It introduces the core ideas (data, computa
 
 **[Chapter 1 - Booleans](ch1)**: True and false values. The simplest data type, and your first complete pass through the five questions.
 
-**[[Chapter 2 - Numbers]]**: Integers and decimals. Arithmetic, comparisons, and counting loops.
+**[Chapter 2 - Integers and Doubles](ch2)**: Integers and decimals. Arithmetic, comparisons, and numeric computations.
 
 **[[Chapter 3 - Arrays]]**: Ordered sequences. Indexing, iteration, and strings as sequences of characters.
 
