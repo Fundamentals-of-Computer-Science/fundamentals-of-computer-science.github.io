@@ -18,5 +18,8 @@ We will start by understanding how arrays live in memory and how we access indiv
 
 1. **[Data and Memory](ch3-1.md):** How C# represents arrays and how we access elements through references
 2. **[Basic Computation](ch3-2.md):** How we process arrays through traversal and standard patterns
+3. **[Problem Solving with Arrays](ch3-3.md):** How we use accumulation, searching, filtering, and sorting to solve larger array problems
+4. **[Functions on Arrays](ch3-4.md):** How we package array operations into reusable functions and generalize common loop patterns
+5. **[Complex Data with Arrays](ch3-5.md):** How arrays combine with structs so related data stays together
 
 We begin with a fundamental question: how does C# represent collections of values?
