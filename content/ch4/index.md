@@ -6,3 +6,5 @@ permalink: ch4
 ## Chapter Sections
 
 1. **[Data and Memory](ch4-1.md):** How C# represents classes and how we can use them to define Linked Lists.
+2. **[Basic Computation](ch4-2.md):** 
+3. **[Problem Solving with Linked Lists](ch4-3.md):**
