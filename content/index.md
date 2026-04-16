@@ -32,4 +32,4 @@ If you're new, begin with Chapter 0. It introduces the core ideas (data, computa
 
 **[Chapter 3 - Arrays](ch3)**: Ordered sequences. Indexing, traversal, and working with collections of values.
 
-**[[Chapter 4 - Classes]]**: Defining your own types. Modeling real things with structured data.
+**[Chapter 4 - Classes and Linked Lists](ch4)**: Defining your own reference types, building linked lists, and generalizing them with generics.

@@ -22,4 +22,4 @@ We will start by understanding how arrays live in memory and how we access indiv
 4. **[Functions on Arrays](ch3-4.md):** How we package array operations into reusable functions and generalize common loop patterns
 5. **[Complex Data with Arrays](ch3-5.md):** How arrays combine with structs so related data stays together
 
-We begin with a fundamental question: how does C# represent collections of values?
+We begin with [Section 1 - Data and Memory](ch3-1.md): how does C# represent collections of values?

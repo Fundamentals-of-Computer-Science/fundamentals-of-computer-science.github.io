@@ -18,6 +18,6 @@ This chapter explores booleans through five sections:
 2. **[Computation](ch1-2.md):** How we transform boolean values
 3. **[Control Flow](ch1-3.md):** How booleans determine which code runs
 4. **[Functions](ch1-4.md):** How we create our own boolean computations
-5. **[Structured Data](ch1-5.md):** How we group related booleans together
+5. **[Custom Types](ch1-5.md):** How we group related booleans together
 
-We begin with the fundamentals: what is a boolean, and how do we hold onto one?
+We begin with [Section 1 - Data and Memory](ch1-1.md): what is a boolean, and how do we hold onto one?
