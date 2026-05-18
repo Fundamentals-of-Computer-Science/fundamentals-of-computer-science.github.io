@@ -14,13 +14,13 @@ const config: QuartzConfig = {
     enablePopovers: true,
     analytics: null,
     locale: "en-US",
-    baseUrl: "https://fundamentals-of-computer-science.github.io",
+    baseUrl: "fundamentals-of-computer-science.github.io",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
     generateSocialImages: false,
     theme: {
       fontOrigin: "googleFonts",
-      cdnCaching: true,
+      cdnCaching: false,
       typography: {
         // header: "Inter",
         // header: "Playfair Display",
@@ -92,6 +92,7 @@ const config: QuartzConfig = {
       Plugin.Assets(),
       Plugin.Static(),
       Plugin.NotFoundPage(),
+      Plugin.OfflinePWA(),
     ],
   },
 }

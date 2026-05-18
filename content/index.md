@@ -24,12 +24,12 @@ Practice comes in two directions. Sometimes you'll see code and translate it to 
 
 If you're new, begin with Chapter 0. It introduces the core ideas (data, computation, types) and walks you through the practice method you'll use throughout.
 
-**[Chapter 0 - Before Beginning](ch0)**: What programming is, how this book teaches, and how to practice effectively.
+**[Chapter 0 - Before Beginning](ch0/)**: What programming is, how this book teaches, and how to practice effectively.
 
-**[Chapter 1 - Booleans](ch1)**: True and false values. The simplest data type, and your first complete pass through the five questions.
+**[Chapter 1 - Booleans](ch1/)**: True and false values. The simplest data type, and your first complete pass through the five questions.
 
-**[Chapter 2 - Integers and Doubles](ch2)**: Integers and decimals. Arithmetic, comparisons, and numeric computations.
+**[Chapter 2 - Integers and Doubles](ch2/)**: Integers and decimals. Arithmetic, comparisons, and numeric computations.
 
-**[Chapter 3 - Arrays](ch3)**: Ordered sequences. Indexing, traversal, and working with collections of values.
+**[Chapter 3 - Arrays](ch3/)**: Ordered sequences. Indexing, traversal, and working with collections of values.
 
-**[Chapter 4 - Classes and Linked Lists](ch4)**: Defining your own reference types, building linked lists, and generalizing them with generics.
+**[Chapter 4 - Classes and Linked Lists](ch4/)**: Defining your own reference types, building linked lists, and generalizing them with generics.

@@ -143,7 +143,25 @@ const cssVars = [
   "--codeFont",
 ] as const
 
-let mermaidImport = undefined
+let mermaidImport: Promise<any> | undefined = undefined
+const loadMermaid = () => {
+  mermaidImport ||= new Promise((resolve, reject) => {
+    const existing = (window as any).mermaid
+    if (existing) {
+      resolve(existing)
+      return
+    }
+
+    const script = document.createElement("script")
+    script.src = "/static/vendor/mermaid/mermaid.min.js"
+    script.async = true
+    script.onload = () => resolve((window as any).mermaid)
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+  return mermaidImport
+}
+
 document.addEventListener("nav", async () => {
   const center = document.querySelector(".center") as HTMLElement
   const nodes = center.querySelectorAll("code.mermaid") as NodeListOf<HTMLElement>
@@ -157,11 +175,7 @@ document.addEventListener("nav", async () => {
     {} as Record<(typeof cssVars)[number], string>,
   )
 
-  mermaidImport ||= await import(
-    //@ts-ignore
-    "https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs"
-  )
-  const mermaid = mermaidImport.default
+  const mermaid = await loadMermaid()
 
   const darkMode = document.documentElement.getAttribute("saved-theme") === "dark"
   mermaid.initialize({

@@ -3,6 +3,7 @@ import { QuartzPluginData } from "../plugins/vfile"
 import {
   joinSegments,
   resolveRelative,
+  resolveRelativePage,
   clone,
   simplifySlug,
   SimpleSlug,
@@ -176,7 +177,7 @@ export function ExplorerNode({ node, opts, fullPath, fileData }: ExplorerNodePro
       {node.file ? (
         // Single file node
         <li key={node.file.slug}>
-          <a href={resolveRelative(fileData.slug!, node.file.slug!)} data-for={node.file.slug}>
+          <a href={resolveRelativePage(fileData.slug!, node.file.slug!)} data-for={node.file.slug}>
             {node.displayName}
           </a>
         </li>

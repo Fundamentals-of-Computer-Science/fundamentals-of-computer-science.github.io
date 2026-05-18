@@ -166,6 +166,31 @@ export function resolveRelative(current: FullSlug, target: FullSlug | SimpleSlug
   return res
 }
 
+export function withPageExtension(url: RelativeURL): RelativeURL {
+  const [path, anchor] = url.split("#", 2)
+  if (path === "." || path === "/" || path.endsWith("/") || path.endsWith(".html")) {
+    return url
+  }
+
+  return `${path}.html${anchor === undefined ? "" : `#${anchor}`}` as RelativeURL
+}
+
+export function resolveRelativePage(current: FullSlug, target: FullSlug | SimpleSlug): RelativeURL {
+  const targetPath = target.toString()
+  const rel = resolveRelative(current, target)
+  if (
+    targetPath === "/" ||
+    targetPath.endsWith("/") ||
+    endsWith(targetPath, "index") ||
+    endsWith(targetPath, "index.md") ||
+    endsWith(targetPath, "index.html")
+  ) {
+    return rel
+  }
+
+  return withPageExtension(rel)
+}
+
 export function splitAnchor(link: string): [string, string] {
   let [fp, anchor] = link.split("#", 2)
   if (fp.endsWith(".pdf")) {
@@ -240,12 +265,16 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
       // only match, just use it
       if (matchingFileNames.length === 1) {
         const targetSlug = matchingFileNames[0]
-        return (resolveRelative(src, targetSlug) + targetAnchor) as RelativeURL
+        const url = (resolveRelative(src, targetSlug) + targetAnchor) as RelativeURL
+        return folderTail ? url : withPageExtension(url)
       }
     }
 
     // if it's not unique, then it's the absolute path from the vault root
-    return (joinSegments(pathToRoot(src), canonicalSlug) + folderTail) as RelativeURL
+    const url = (joinSegments(pathToRoot(src), canonicalSlug) +
+      folderTail +
+      targetAnchor) as RelativeURL
+    return folderTail ? url : withPageExtension(url)
   }
 }
 

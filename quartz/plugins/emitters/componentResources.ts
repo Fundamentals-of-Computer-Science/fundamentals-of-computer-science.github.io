@@ -173,6 +173,16 @@ function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentReso
       document.dispatchEvent(event)
     `)
   }
+
+  componentResources.afterDOMLoaded.push(`
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
+          console.warn("Service worker registration failed", err)
+        })
+      })
+    }
+  `)
 }
 
 // This emitter should not update the `resources` parameter. If it does, partial
@@ -212,7 +222,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
 
           googleFontsStyleSheet = googleFontsStyleSheet.replace(
             url,
-            `https://${cfg.baseUrl}/static/fonts/${filename}.ttf`,
+            `static/fonts/${filename}.${ext}`,
           )
 
           promises.push(

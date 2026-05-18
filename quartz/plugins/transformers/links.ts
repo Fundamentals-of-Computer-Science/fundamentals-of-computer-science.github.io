@@ -115,6 +115,9 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                   if (destCanonical.endsWith("/")) {
                     destCanonical += "index"
                   }
+                  if (destCanonical.endsWith(".html")) {
+                    destCanonical = destCanonical.slice(0, -".html".length)
+                  }
 
                   // need to decodeURIComponent here as WHATWG URL percent-encodes everything
                   const full = decodeURIComponent(stripSlashes(destCanonical, true)) as FullSlug

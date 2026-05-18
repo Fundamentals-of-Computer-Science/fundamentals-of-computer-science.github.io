@@ -1,4 +1,10 @@
-import { FilePath, FullSlug, joinSegments, resolveRelative, simplifySlug } from "../../util/path"
+import {
+  FilePath,
+  FullSlug,
+  joinSegments,
+  resolveRelativePage,
+  simplifySlug,
+} from "../../util/path"
 import { QuartzEmitterPlugin } from "../types"
 import path from "path"
 import { write } from "./helpers"
@@ -54,7 +60,7 @@ export const AliasRedirects: QuartzEmitterPlugin = () => ({
           slug = joinSegments(slug, "index") as FullSlug
         }
 
-        const redirUrl = resolveRelative(slug, file.data.slug!)
+        const redirUrl = resolveRelativePage(slug, file.data.slug!)
         const fp = await write({
           ctx,
           content: `
