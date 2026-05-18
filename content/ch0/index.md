@@ -27,17 +27,17 @@ Where we represent computation with an arrow. It takes what's on the left and pr
 ```
 2 + 2 → 4
 ```
-With addition, two numbers go in and One number comes out.
+With addition, two numbers go in and one number comes out.
 
 ```
 uppercase "hello" → "HELLO"
 ```
-Uppercase takes some text, and producs an all uppercase version. The data being computed is "hello", computed by uppercase to produce "HELLO".
+Uppercase takes text and produces an all-uppercase version: "hello" becomes "HELLO".
 
 ```
 5 > 3 → true
 ```
-> (greater than) takes two numbers and produces a boolean value.
+`>` (greater than) takes two numbers and produces a boolean value.
 
 Every program you write will follow this pattern: define what data you're working with, then describe what transformations to apply.
 
@@ -51,7 +51,7 @@ First, you need to know how the library is organized. Books are grouped by genre
 
 Once you know this structure, you can search systematically. Compare the genre you want to each aisle until you find a match. Compare author names until you find the right section. Compare titles until you find your book. Each comparison is a computation: two pieces of data go in (what you're looking for, what you're looking at), and a result comes out (match or no match).
 
-If you don't know how the data is structured, finding a book is hard. You'd have to check every book in the library. But once you understand the structure, finding a specific book becomes almost trivial.
+If you don't know how the data is structured, finding a book is hard. You'd have to check every book in the library. But once you understand the structure, finding a specific book becomes much easier.
 
 This is why we start with data. Understand how information is organized, and the computation follows naturally.
 
@@ -85,7 +85,7 @@ When you see a definition, learn it. Don't paraphrase. The precision matters bec
 
 ### Translations
 
-Each piece of code has a corresponding English translation. These translations help you read and discuss code out loud. 
+Each piece of code has a corresponding English translation. These translations help you read and discuss code out loud.
 
 **Example:**
 
@@ -94,11 +94,11 @@ bool x = true;
 ```
 → "Create a boolean variable named x, and store the value true in it."
 
-These translations are precise renderings of the code. Try to internalize these, as it helps when reading code to have precise language to describe and think about it in.
+These translations are precise renderings of the code. Internalize them so you have exact language for reading and discussing code.
 
 ### Visualizations
 
-Abstract concepts are accompanied by diagrams: memory layouts, flowcharts, data structures. The computer does things you cannot see from the code alone, and visualizations are one of the tools we use to try and show this behavior.
+Abstract concepts are accompanied by diagrams: memory layouts, flowcharts, data structures. The computer does things you cannot see from the code alone, and visualizations help show this behavior.
 
 ---
 
@@ -116,7 +116,7 @@ Practice works in two directions:
 
 Both directions matter. Reading code and writing code are different skills. You need both.
 
-There are also more hands on practice problems requiring you to solve problems from a prompt. The goal is to build your skills first in reading and writing correct syntax, then to solving problems with those tools.
+Some problems also ask you to solve from a prompt. The goal is to build skill first in reading and writing correct syntax, then in solving problems with those tools.
 
 ### The Protocol
 
@@ -124,7 +124,7 @@ The process below is more involved than you might expect. Each step has a purpos
 
 For each exercise:
 
-1. **Write the problem by hand.** Writing them by hand uses more of your attention than typing.
+1. **Write the problem by hand.** Writing by hand uses more of your attention than typing.
 
 2. **Attempt without looking back.** Turn off your screen. Work from memory.
 
@@ -142,7 +142,7 @@ For each exercise:
 
 9. **Write the corrected version.** Produce the correct answer yourself, not just read it.
 
-This takes time. That's the point. Each step makes learning intentional.
+This takes time because each step makes learning deliberate.
 
 Why not skip steps? Because if you don't have a question in mind, finding an answer is hard. And if you don't have a question in mind, *remembering* the answer is harder. Copying patterns from examples without understanding produces weak knowledge that disappears before exams.
 
