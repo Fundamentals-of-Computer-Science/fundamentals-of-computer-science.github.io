@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Interactive Textbook — Layout Exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+* { box-sizing: border-box; margin: 0; }
+</style>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tb-core.jsx"></script>
+<script type="text/babel" src="tb-eval-detail.jsx"></script>
+<script type="text/babel" src="tb-approach-a.jsx"></script>
+<script type="text/babel" src="tb-approach-b.jsx"></script>
+<script type="text/babel" src="tb-approach-c.jsx"></script>
+<script type="text/babel" src="tb-pages.jsx"></script>
+<script type="text/babel" src="tb-annotated.jsx"></script>
+<script type="text/babel" src="tb-integrated.jsx"></script>
+<script type="text/babel" src="tb-quiz.jsx"></script>
+<script type="text/babel" src="tb-quiz-2.jsx"></script>
+<script type="text/babel" src="tb-cycle-components.jsx"></script>
+<script type="text/babel" src="tb-chapter-flow.jsx"></script>
+<script type="text/babel" src="tb-ch1-sequence.jsx"></script>
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard } = window;
+const { ApproachA } = window;
+const { ApproachB } = window;
+const { ApproachC } = window;
+const { PageInlineEmbed, PageStickyCompanion, PageFullExample, PageProgressiveReveal } = window;
+const { QuizPredictState, QuizWhatPrints } = window;
+const { QuizEvalTree, QuizCompleteCode } = window;
+const { AnnotatedInline, AnnotatedRosetta, AnnotatedGuided } = window;
+const { IntegratedAnnotationsMemory, IntegratedFullPageExample } = window;
+const { ChapterFlowCh1Cycles, ChapterFlowExampleFirst, ChapterFlowCompactAlt } = window;
+const { Ch1DataMemorySequence } = window;
+
+function App() {
+  return (
+    <DesignCanvas title="Interactive Textbook — Layout Exploration">
+      <DCSection id="annotated" title="Annotated Code — Self-teaching examples with definitions & translations">
+        <DCArtboard id="ann-inline" label="A · Inline + Memory" width={960} height={560}>
+          <IntegratedAnnotationsMemory />
+        </DCArtboard>
+        <DCArtboard id="ann-rosetta" label="B · Parallel Translation" width={960} height={560}>
+          <AnnotatedRosetta />
+        </DCArtboard>
+        <DCArtboard id="ann-guided" label="C · Guided Flashcard" width={960} height={620}>
+          <AnnotatedGuided />
+        </DCArtboard>
+      </DCSection>
+      <DCSection id="quizzes" title="Quiz Pages — Drag-and-drop exercises mirroring the example view">
+        <DCArtboard id="q-predict" label="A · Predict the State" width={960} height={620}>
+          <QuizPredictState />
+        </DCArtboard>
+        <DCArtboard id="q-prints" label="B · What Gets Printed?" width={960} height={540}>
+          <QuizWhatPrints />
+        </DCArtboard>
+        <DCArtboard id="q-eval" label="C · Build the Evaluation" width={960} height={540}>
+          <QuizEvalTree />
+        </DCArtboard>
+        <DCArtboard id="q-code" label="D · Complete the Code" width={960} height={620}>
+          <QuizCompleteCode />
+        </DCArtboard>
+      </DCSection>
+      <DCSection id="pages" title="Page Integration — How interactive panels live inside the textbook">
+        <DCArtboard id="p-inline" label="A · Inline Embed" width={960} height={900}>
+          <PageInlineEmbed />
+        </DCArtboard>
+        <DCArtboard id="p-sticky" label="B · Sticky Companion" width={960} height={620}>
+          <PageStickyCompanion />
+        </DCArtboard>
+        <DCArtboard id="p-full" label="C · Full Example Page" width={960} height={540}>
+          <IntegratedFullPageExample />
+        </DCArtboard>
+        <DCArtboard id="p-reveal" label="D · Progressive Reveal" width={960} height={900}>
+          <PageProgressiveReveal />
+        </DCArtboard>
+        <DCArtboard id="p-ch1-sequence" label="E · ch1-1 Page Sequence" width={1180} height={760}>
+          <Ch1DataMemorySequence />
+        </DCArtboard>
+      </DCSection>
+      <DCSection id="chapter-flow" title="Chapter Progression — comparing example, quiz, prose, and assessment order">
+        <DCArtboard id="flow-ch1-cycles" label="A · ch1-1 Cycle Pilot" width={1120} height={620}>
+          <ChapterFlowCh1Cycles />
+        </DCArtboard>
+        <DCArtboard id="flow-example-first" label="B · Example-first sequence" width={1120} height={520}>
+          <ChapterFlowExampleFirst />
+        </DCArtboard>
+        <DCArtboard id="flow-teach-first" label="C · Teach-first comparison" width={960} height={560}>
+          <ChapterFlowCompactAlt />
+        </DCArtboard>
+      </DCSection>
+      <DCSection id="approaches" title="Panel Internals — 3 visualization layout approaches (for reference)">
+        <DCArtboard id="a-split" label="A · Classic Split Panel" width={960} height={540}>
+          <ApproachA />
+        </DCArtboard>
+        <DCArtboard id="b-inline" label="B · Inline Annotations" width={960} height={540}>
+          <ApproachB />
+        </DCArtboard>
+        <DCArtboard id="c-timeline" label="C · State Timeline" width={960} height={540}>
+          <ApproachC />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</head>
+<body><div id="root"></div></body>
+</html>

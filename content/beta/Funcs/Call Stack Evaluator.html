@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Call Stack Evaluator — Fundamentals of CS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+:root{
+  --ink:#1a1a1a;--ink-soft:#4a4a4a;--ink-faint:#9a9a9a;
+  --paper:#fafaf6;--paper-2:#f2efe4;--paper-3:#ebe8d8;
+  --accent:#c65d3a;--accent-wash:#f3d8c9;
+  --hi:#ffe9a8;--grid:#e8e3d2;
+  --g2:#2f6b55;--red:#b84747;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--paper);color:var(--ink);background-image:radial-gradient(var(--grid) 1px,transparent 1px);background-size:22px 22px;min-height:100vh}
+body{display:flex;align-items:center;justify-content:center;padding:24px}
+
+.cse-card{width:100%;max-width:1100px;border:2px solid var(--ink);background:var(--paper);box-shadow:5px 5px 0 var(--ink)}
+
+.cse-header{background:var(--paper-2);padding:10px 18px;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.cse-title{font-family:'Caveat',cursive;font-weight:700;font-size:30px;line-height:1}
+.cse-tabs{display:flex;gap:0}
+.cse-tab{font-family:'Caveat',cursive;font-weight:700;font-size:17px;border:1.5px solid var(--ink);padding:4px 14px;cursor:pointer;background:var(--paper);color:var(--ink-soft);transition:background .12s}
+.cse-tab+.cse-tab{border-left:none}
+.cse-tab.active{background:var(--accent);color:#fff}
+.cse-tab:hover:not(.active){background:var(--paper-3)}
+
+.cse-info{padding:10px 18px;background:var(--accent-wash);min-height:52px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--grid)}
+.cse-info .label{font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+.cse-info .desc{font-family:'Kalam',cursive;font-size:14.5px;color:var(--ink-soft);line-height:1.45}
+.cse-info code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--paper);padding:1px 5px;border:1px solid var(--grid);border-radius:2px;color:var(--ink)}
+
+.cse-hint-bar{display:flex;justify-content:space-between;padding:4px 18px;font-family:'Kalam',cursive;font-size:12px;color:var(--ink-faint);font-style:italic;background:var(--paper-2);border-bottom:1.5px solid var(--grid)}
+.cse-hint-bar kbd{font-family:'JetBrains Mono',monospace;font-size:10px;border:1.2px solid var(--ink);padding:0 4px;background:var(--paper);border-radius:2px;font-style:normal}
+
+.cse-canvas{overflow-x:auto;overflow-y:hidden;cursor:crosshair;scroll-behavior:smooth}
+.cse-svg text,.cse-svg line{transition:fill .25s,stroke .25s,opacity .25s}
+
+.cse-footer{padding:8px 18px;background:var(--paper-2);border-top:1.5px solid var(--ink);display:flex;align-items:center;gap:10px}
+.cse-pbar{flex:1;display:flex;gap:3px}
+.cse-tick{flex:1;height:12px;border:1.2px solid var(--ink);background:var(--paper);cursor:pointer;transition:background .15s}
+.cse-tick:hover{background:var(--hi)}
+.cse-tick.done{background:var(--ink)}
+.cse-tick.cur{background:var(--accent);box-shadow:inset 0 0 0 1.5px var(--paper)}
+.cse-stamp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap}
+.cse-nav{display:flex;gap:4px}
+.cse-btn{font-family:'Caveat',cursive;font-weight:700;font-size:18px;border:1.5px solid var(--ink);padding:2px 12px;cursor:pointer;background:var(--paper);color:var(--ink);display:flex;align-items:center;gap:3px;transition:background .12s;line-height:1.2}
+.cse-btn:hover{background:var(--paper-3)}
+.cse-btn:disabled{opacity:.35;cursor:not-allowed}
+.cse-btn.primary{background:var(--accent);color:#fff;box-shadow:2px 2px 0 var(--ink)}
+.cse-btn.primary:hover{background:#b8502f}
+.cse-btn.primary:disabled{opacity:.35}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+/* ── Layout Engine & DSL ── */
+class SceneBuilder {
+  constructor() {
+    this.elems = [];
+    this.CW = 10.8;
+  }
+  addText(id, step, text, x, y, activeSteps = []) {
+    const width = text.length * this.CW;
+    this.elems.push({ id, step, type: 'text', text, x, y, width, active: activeSteps, anchor: 'start' });
+    return { x, y, width, center: x + width / 2 };
+  }
+  addCenteredText(id, step, text, cx, y, activeSteps = []) {
+    const width = text.length * this.CW;
+    const x = cx - width / 2;
+    this.elems.push({ id, step, type: 'text', text, x: cx, y, width, active: activeSteps, anchor: 'middle' });
+    return { x, y, width, center: cx };
+  }
+  addLine(id, step, x1, x2, y, activeSteps = [], label = '') {
+    this.elems.push({ id, step, type: 'line', x1, x2, y, active: activeSteps, label });
+  }
+  addArrow(id, step, x, y, activeSteps = [], label = 'subst.') {
+    this.elems.push({ id, step, type: 'arrow', x, y, active: activeSteps, label });
+  }
+  addStrike(id, step, x1, x2, y, activeSteps = []) {
+    this.elems.push({ id, step, type: 'strike', x1, x2, y, active: activeSteps });
+  }
+}
+
+/* ── Data: Arithmetic ── */
+function getArithmeticData() {
+  const b = new SceneBuilder();
+  const LH = 40, Y_BASE = 250, L_OFF = 24, PAD = 40;
+  let bx = 50;
+  const getSpan = (x, text, start, end) => ({
+    start: x + start * b.CW, end: x + end * b.CW,
+    center: x + ((start + end) / 2) * b.CW
+  });
+
+  let t0_1 = b.addText('b1_0', 0, '(x + 3) * 5', bx, Y_BASE, [0]);
+  let span1_1 = getSpan(bx, '(x + 3) * 5', 0, 7);
+  b.addLine('l1_1', 1, span1_1.start, span1_1.end, Y_BASE - L_OFF, [1], '+');
+  let t1_1 = b.addCenteredText('t1_1', 1, 'x + 3', span1_1.center, Y_BASE - LH, [1]);
+  let span1_2 = getSpan(t1_1.x, 'x + 3', 0, 1);
+  b.addLine('l1_2', 2, span1_2.start, span1_2.end, Y_BASE - LH - L_OFF, [2], 'var');
+  let t2_1 = b.addCenteredText('t1_2', 2, '2', span1_2.center, Y_BASE - 2 * LH, [2]);
+  let span1_x_l1 = getSpan(t1_1.x, 'x + 3', 0, 1);
+  b.addStrike('s1_l1', 3, span1_x_l1.start, span1_x_l1.end, Y_BASE - LH, [3]);
+
+  let block1Width = Math.max(t0_1.width, t1_1.width, t2_1.width);
+  bx += block1Width + PAD;
+  b.addArrow('a1', 3, bx, Y_BASE - LH - 10, [3]);
+  bx += 40;
+
+  let t0_2 = b.addText('b2_0', 3, '(x + 3) * 5', bx, Y_BASE, []);
+  let span2_1 = getSpan(bx, '(x + 3) * 5', 0, 7);
+  b.addLine('l2_1', 3, span2_1.start, span2_1.end, Y_BASE - L_OFF, [3], '+');
+  let t1_2 = b.addCenteredText('t2_1', 3, '2 + 3', span2_1.center, Y_BASE - LH, [3]);
+  let span2_2 = getSpan(t1_2.x, '2 + 3', 0, 5);
+  b.addLine('l2_2', 4, span2_2.start, span2_2.end, Y_BASE - LH - L_OFF, [4], '+');
+  let t2_2 = b.addCenteredText('t2_2', 4, '5', span2_2.center, Y_BASE - 2 * LH, [4]);
+  let span2_23_l1 = getSpan(t1_2.x, '2 + 3', 0, 5);
+  b.addStrike('s2_l1', 5, span2_23_l1.start, span2_23_l1.end, Y_BASE - LH, [5]);
+  let span2_xp3_base = getSpan(bx, '(x + 3) * 5', 0, 7);
+  b.addStrike('s2_b0', 5, span2_xp3_base.start, span2_xp3_base.end, Y_BASE, [5]);
+
+  let block2Width = Math.max(t0_2.width, t1_2.width, t2_2.width);
+  bx += block2Width + PAD;
+  b.addArrow('a2', 5, bx, Y_BASE - 10, [5]);
+  bx += 40;
+
+  let t0_3 = b.addText('b3_0', 5, '5 * 5', bx, Y_BASE, [5]);
+  let span3_1 = getSpan(bx, '5 * 5', 0, 5);
+  b.addLine('l3_1', 6, span3_1.start, span3_1.end, Y_BASE - L_OFF, [6], '*');
+  let t1_3 = b.addCenteredText('t3_1', 6, '25', span3_1.center, Y_BASE - LH, [6]);
+  let span3_55_base = getSpan(t0_3.x, '5 * 5', 0, 5);
+  b.addStrike('s3_b0', 7, span3_55_base.start, span3_55_base.end, Y_BASE, [7]);
+
+  let block3Width = Math.max(t0_3.width, t1_3.width);
+  bx += block3Width + PAD;
+  b.addArrow('a3', 7, bx, Y_BASE - 10, [7]);
+  bx += 40;
+
+  let t0_4 = b.addText('b4_0', 7, '25', bx, Y_BASE, [7]);
+
+  return {
+    elems: b.elems,
+    canvasWidth: bx + t0_4.width + 100,
+    descriptions: [
+      "Start with the base expression. We are given the state `x = 2`.",
+      "To perform multiplication, we must evaluate the left operand `(x + 3)`. Push it to the stack.",
+      "To evaluate `x + 3`, look up the variable `x` in memory — it evaluates to `2`.",
+      "`x` has returned a value (`2`). Substitute it into the current level, preserving the unevaluated lower stack.",
+      "Evaluate the addition `2 + 3`, which computes the final value `5`.",
+      "The left operand is fully resolved to `5`. Pop back to the base expression and substitute it.",
+      "Evaluate the final multiplication `5 * 5`, which computes to `25`.",
+      "The multiplication is resolved. Substitute the final value to complete the evaluation tree."
+    ]
+  };
+}
+
+/* ── Data: Linked List ── */
+function getLinkedListData() {
+  const b = new SceneBuilder();
+  const LH = 40, Y_BASE = 250, L_OFF = 24, PAD = 40;
+  let bx = 50;
+  const getSpan = (x, text, start, end) => ({
+    start: x + start * b.CW, end: x + end * b.CW,
+    center: x + ((start + end) / 2) * b.CW
+  });
+
+  let t0_1 = b.addText('b1_0', 0, 'len([A]->[B]->[])', bx, Y_BASE, [0]);
+  let span1_1 = getSpan(bx, 'len([A]->[B]->[])', 0, 17);
+  b.addLine('l1_1', 1, span1_1.start, span1_1.end, Y_BASE - L_OFF, [1], 'len');
+  let t1_1 = b.addCenteredText('t1_1', 1, '1 + len([B]->[])', span1_1.center, Y_BASE - LH, [1]);
+  let span1_2 = getSpan(t1_1.x, '1 + len([B]->[])', 4, 16);
+  b.addLine('l1_2', 2, span1_2.start, span1_2.end, Y_BASE - LH - L_OFF, [2], 'len');
+  let t2_1 = b.addCenteredText('t1_2', 2, '1 + len([])', span1_2.center, Y_BASE - 2 * LH, [2]);
+  let span1_3 = getSpan(t2_1.x, '1 + len([])', 4, 11);
+  b.addLine('l1_3', 3, span1_3.start, span1_3.end, Y_BASE - 2 * LH - L_OFF, [3], 'base');
+  let t3_1 = b.addCenteredText('t1_3', 3, '0', span1_3.center, Y_BASE - 3 * LH, [3]);
+  let span1_len_l2 = getSpan(t2_1.x, '1 + len([])', 4, 11);
+  b.addStrike('s1_l2', 4, span1_len_l2.start, span1_len_l2.end, Y_BASE - 2 * LH, [4]);
+
+  let block1Width = Math.max(t0_1.width, t1_1.width, t2_1.width, t3_1.width);
+  bx += block1Width + PAD;
+  b.addArrow('a1', 4, bx, Y_BASE - 2 * LH - 10, [4]);
+  bx += 40;
+
+  let t0_2 = b.addText('b2_0', 4, 'len([A]->[B]->[])', bx, Y_BASE, []);
+  let span2_1 = getSpan(bx, 'len([A]->[B]->[])', 0, 17);
+  b.addLine('l2_1', 4, span2_1.start, span2_1.end, Y_BASE - L_OFF, [], 'len');
+  let t1_2 = b.addCenteredText('t2_1', 4, '1 + len([B]->[])', span2_1.center, Y_BASE - LH, []);
+  let span2_2 = getSpan(t1_2.x, '1 + len([B]->[])', 4, 16);
+  b.addLine('l2_2', 4, span2_2.start, span2_2.end, Y_BASE - LH - L_OFF, [4], 'len');
+  let t2_2 = b.addCenteredText('t2_2', 4, '1 + 0', span2_2.center, Y_BASE - 2 * LH, [4]);
+  let span2_3 = getSpan(t2_2.x, '1 + 0', 0, 5);
+  b.addLine('l2_3', 5, span2_3.start, span2_3.end, Y_BASE - 2 * LH - L_OFF, [5], '+');
+  let t3_2 = b.addCenteredText('t2_3', 5, '1', span2_3.center, Y_BASE - 3 * LH, [5]);
+  let span2_10_l2 = getSpan(t2_2.x, '1 + 0', 0, 5);
+  b.addStrike('s2_l2', 6, span2_10_l2.start, span2_10_l2.end, Y_BASE - 2 * LH, [6]);
+  b.addStrike('s2_l1', 6, span2_2.start, span2_2.end, Y_BASE - LH, [6]);
+
+  let block2Width = Math.max(t0_2.width, t1_2.width, t2_2.width, t3_2.width);
+  bx += block2Width + PAD;
+  b.addArrow('a2', 6, bx, Y_BASE - LH - 10, [6]);
+  bx += 40;
+
+  let t0_3 = b.addText('b3_0', 6, 'len([A]->[B]->[])', bx, Y_BASE, []);
+  let span3_1 = getSpan(bx, 'len([A]->[B]->[])', 0, 17);
+  b.addLine('l3_1', 6, span3_1.start, span3_1.end, Y_BASE - L_OFF, [6], 'len');
+  let t1_3 = b.addCenteredText('t3_1', 6, '1 + 1', span3_1.center, Y_BASE - LH, [6]);
+  let span3_2 = getSpan(t1_3.x, '1 + 1', 0, 5);
+  b.addLine('l3_2', 7, span3_2.start, span3_2.end, Y_BASE - LH - L_OFF, [7], '+');
+  let t2_3 = b.addCenteredText('t3_2', 7, '2', span3_2.center, Y_BASE - 2 * LH, [7]);
+  let span3_11_l1 = getSpan(t1_3.x, '1 + 1', 0, 5);
+  b.addStrike('s3_l1', 8, span3_11_l1.start, span3_11_l1.end, Y_BASE - LH, [8]);
+  b.addStrike('s3_b0', 8, span3_1.start, span3_1.end, Y_BASE, [8]);
+
+  let block3Width = Math.max(t0_3.width, t1_3.width, t2_3.width);
+  bx += block3Width + PAD;
+  b.addArrow('a3', 8, bx, Y_BASE - 10, [8]);
+  bx += 40;
+
+  let t0_4 = b.addText('b4_0', 8, '2', bx, Y_BASE, [8]);
+
+  return {
+    elems: b.elems,
+    canvasWidth: bx + t0_4.width + 100,
+    descriptions: [
+      "Start with the function call `len([A]->[B]->[])`.",
+      "The function unrolls to `1 + len([B]->[])`. Push this expression to the stack.",
+      "To evaluate that, we must evaluate the inner call. It unrolls to `1 + len([])`.",
+      "Evaluate the inner-most call. It hits the base case and evaluates immediately to `0`.",
+      "The base case returned `0`. Substitute it back into the caller's level.",
+      "Evaluate the addition `1 + 0`, which computes to `1`.",
+      "The sub-call has fully resolved to `1`. Substitute it back into its caller's expression.",
+      "Evaluate the addition `1 + 1`, which computes to `2`.",
+      "The highest-level call is fully resolved. Substitute the final value `2` back into the base."
+    ]
+  };
+}
+
+/* ── Render backtick `code` spans ── */
+function renderDesc(text) {
+  const parts = text.split(/`([^`]+)`/);
+  return parts.map((p, i) => i % 2 === 1 ? <code key={i}>{p}</code> : p);
+}
+
+/* ── Main Component ── */
+function App() {
+  const [example, setExample] = useState('arithmetic');
+  const [step, setStep] = useState(0);
+
+  const data = useMemo(() =>
+    example === 'arithmetic' ? getArithmeticData() : getLinkedListData()
+  , [example]);
+
+  const maxStep = data.descriptions.length - 1;
+
+  useEffect(() => { setStep(0); }, [example]);
+
+  const dynamicCanvasWidth = useMemo(() => {
+    let maxW = 850;
+    data.elems.forEach(el => {
+      if (el.step <= step) {
+        let r = 0;
+        if (el.type === 'text') r = el.x + el.width;
+        else if (el.type === 'line' || el.type === 'strike') r = Math.max(el.x1, el.x2);
+        else if (el.type === 'arrow') r = el.x + 30;
+        if (r + 100 > maxW) maxW = r + 100;
+      }
+    });
+    return maxW;
+  }, [data, step]);
+
+  useEffect(() => {
+    const c = document.getElementById('cse-canvas');
+    if (c) setTimeout(() => c.scrollTo({ left: c.scrollWidth, behavior: 'smooth' }), 10);
+  }, [step, dynamicCanvasWidth]);
+
+  useEffect(() => {
+    const h = e => {
+      if (e.key === 'ArrowRight') setStep(s => Math.min(maxStep, s + 1));
+      if (e.key === 'ArrowLeft') setStep(s => Math.max(0, s - 1));
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [maxStep]);
+
+  return (
+    <div className="cse-card">
+      {/* Header */}
+      <div className="cse-header">
+        <h1 className="cse-title">Call Stack Evaluator</h1>
+        <div className="cse-tabs">
+          <button className={`cse-tab ${example === 'arithmetic' ? 'active' : ''}`}
+            onClick={() => setExample('arithmetic')}>Arithmetic</button>
+          <button className={`cse-tab ${example === 'linkedlist' ? 'active' : ''}`}
+            onClick={() => setExample('linkedlist')}>Recursive List</button>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div className="cse-info">
+        <span className="label">Step {step}:</span>
+        <span className="desc">{renderDesc(data.descriptions[step])}</span>
+      </div>
+
+      {/* Hint bar */}
+      <div className="cse-hint-bar">
+        <span>read left → right · each block shows a stage of evaluation</span>
+        <span><kbd>←</kbd> <kbd>→</kbd> to step</span>
+      </div>
+
+      {/* SVG Canvas */}
+      <div id="cse-canvas" className="cse-canvas">
+        <svg width={dynamicCanvasWidth} height="320" className="cse-svg"
+          style={{ background: 'var(--paper)', fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: '0px' }}>
+          <defs>
+            <pattern id="dot-grid" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="0.8" fill="#e8e3d2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dot-grid)" />
+
+          {data.elems.map(el => {
+            if (el.step > step) return null;
+            const isActive = el.active && el.active.includes(step);
+
+            const textFill = isActive ? '#c65d3a' : '#b5a99a';
+            const lineStroke = isActive ? '#c65d3a' : '#d4cbb8';
+            const fw = isActive ? 'bold' : 'normal';
+            const sw = isActive ? 3 : 2;
+
+            if (el.type === 'text') {
+              return <text key={el.id} x={el.x} y={el.y} textAnchor={el.anchor}
+                fontSize="18" fontWeight={fw} fill={textFill}>{el.text}</text>;
+            }
+            if (el.type === 'line') {
+              return (
+                <g key={el.id}>
+                  <line x1={el.x1} y1={el.y} x2={el.x2} y2={el.y}
+                    stroke={lineStroke} strokeWidth={sw} strokeLinecap="round" />
+                  {el.label && (
+                    <text x={el.x1 - 6} y={el.y} textAnchor="end"
+                      dominantBaseline="middle"
+                      fontSize="12" fontStyle="italic" fontWeight="600"
+                      fontFamily="'Kalam', cursive"
+                      fill={isActive ? '#c65d3a' : '#b5a99a'}>
+                      {el.label}
+                    </text>
+                  )}
+                </g>
+              );
+            }
+            if (el.type === 'arrow') {
+              return (
+                <g key={el.id}>
+                  {el.label && (
+                    <text x={el.x + 12} y={el.y - 12} textAnchor="middle"
+                      fontSize="11" fontStyle="italic"
+                      fontFamily="'Kalam', cursive"
+                      fill={isActive ? '#c65d3a' : '#b5a99a'}>
+                      {el.label}
+                    </text>
+                  )}
+                  <text x={el.x} y={el.y} fontSize="22"
+                    fill={isActive ? '#c65d3a' : '#d4cbb8'} fontWeight="bold">→</text>
+                </g>
+              );
+            }
+            if (el.type === 'strike') {
+              return <line key={el.id} x1={el.x1} y1={el.y - 6} x2={el.x2} y2={el.y - 6}
+                stroke={isActive ? '#b84747' : '#d4cbb8'}
+                strokeWidth={isActive ? 3 : 2} strokeLinecap="round" opacity={0.8} />;
+            }
+            return null;
+          })}
+        </svg>
+      </div>
+
+      {/* Footer */}
+      <div className="cse-footer">
+        <div className="cse-nav">
+          <button className="cse-btn" onClick={() => setStep(0)} title="Reset">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button className="cse-btn" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}>← prev</button>
+        </div>
+        <div className="cse-pbar">
+          {Array.from({ length: maxStep + 1 }, (_, i) => (
+            <div key={i}
+              className={`cse-tick ${i < step ? 'done' : ''} ${i === step ? 'cur' : ''}`}
+              onClick={() => setStep(i)} title={`Step ${i}`} />
+          ))}
+        </div>
+        <span className="cse-stamp">step {step} / {maxStep}</span>
+        <div className="cse-nav">
+          <button className="cse-btn primary" onClick={() => setStep(s => Math.min(maxStep, s + 1))} disabled={step === maxStep}>next →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

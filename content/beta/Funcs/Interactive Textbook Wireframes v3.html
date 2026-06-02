@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Interactive Textbook — v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-soft:#4a4a4a; --ink-faint:#9a9a9a;
+    --paper:#fafaf6; --paper-2:#f2efe4;
+    --accent:#c65d3a; --accent-wash:#f3d8c9; --highlight:#ffe9a8;
+    --grid:#e8e3d2;
+    --g1:#c65d3a; --g2:#2f6b55; --g3:#4a5aa8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:Georgia,serif}
+  body{background-image:radial-gradient(var(--grid) 1px,transparent 1px);background-size:22px 22px;min-height:100vh}
+  .page{max-width:1480px;margin:0 auto;padding:32px 36px 120px}
+
+  .hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+  .hdr h1{font-family:'Caveat',cursive;font-weight:700;font-size:50px;line-height:.95;margin:0}
+  .hdr h1 .sub{display:block;font-family:'Kalam';font-weight:300;font-size:15px;color:var(--ink-soft);margin-top:4px}
+
+  /* ---------- Sentence-level spans ---------- */
+  .sent{border-radius:3px;transition:background .12s, box-shadow .12s;cursor:default}
+  .mode-sentence .sent[data-sent]{cursor:pointer}
+  .mode-sentence .sent[data-sent]:hover{background:var(--highlight);box-shadow:0 0 0 2px var(--highlight)}
+  .sent.sent-hl{background:var(--highlight);box-shadow:0 0 0 2px var(--highlight)}
+  .sent.sent-faded{}
+  /* In sentence mode, suppress paragraph-level active tint on hover (keep border markers visible) */
+  .mode-sentence .pblock[data-group]{cursor:default}
+  /* Mode toggle */
+  .mode-toggle{display:inline-flex;border:1.5px solid var(--ink);overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;margin-bottom:10px}
+  .mode-toggle button{padding:4px 12px;background:var(--paper-2);border:none;cursor:pointer;color:var(--ink-soft);border-right:1.5px solid var(--ink)}
+  .mode-toggle button:last-child{border-right:none}
+  .mode-toggle button.active{background:var(--accent);color:#fff}
+  .hdr .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.7}
+  .hdr .meta b{color:var(--ink)}
+
+  .notes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0 22px}
+  .notes .card{border:1.5px solid var(--ink);background:var(--paper);padding:10px 12px;position:relative;transform:rotate(-.2deg);font-family:'Kalam'}
+  .notes .card:nth-child(2n){transform:rotate(.25deg)}
+  .notes .card h4{font-family:'Caveat';font-size:22px;margin:0 0 4px;font-weight:700}
+  .notes .card p{margin:0;line-height:1.4;font-size:13.5px;color:var(--ink-soft)}
+  .notes .card .pin{position:absolute;top:-8px;left:12px;width:16px;height:16px;border-radius:50%;background:var(--accent);border:1.5px solid var(--ink)}
+
+  .tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);align-items:flex-end;flex-wrap:wrap}
+  .tab{font-family:'Caveat',cursive;font-weight:700;font-size:22px;background:var(--paper-2);border:2px solid var(--ink);border-bottom:none;padding:8px 16px;margin-right:5px;cursor:pointer;position:relative;top:2px;color:var(--ink-soft);transform:rotate(-.3deg)}
+  .tab:nth-child(even){transform:rotate(.2deg)}
+  .tab.active{background:var(--paper);color:var(--ink);box-shadow:0 -2px 0 var(--paper);z-index:2}
+  .tab .n{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent);margin-right:6px;font-weight:600}
+  .tab-cap{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);padding-bottom:8px}
+
+  .frame{border:2px solid var(--ink);border-top:none;background:var(--paper);padding:22px 24px 26px;position:relative;min-height:820px}
+  .frame .corner{position:absolute;font-family:'Caveat';font-size:18px;color:var(--accent);font-weight:700}
+  .frame .corner.tl{top:8px;left:14px}
+  .frame .corner.tr{top:8px;right:14px}
+  .hidden{display:none !important}
+
+  .browser-chrome{border:1.5px solid var(--ink);background:var(--paper-2);display:flex;align-items:center;gap:10px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft)}
+  .browser-chrome .dots{display:flex;gap:5px}
+  .browser-chrome .dots i{width:10px;height:10px;border:1.2px solid var(--ink);border-radius:50%;background:var(--paper)}
+  .browser-chrome .url{flex:1;background:var(--paper);border:1.2px solid var(--ink);padding:3px 8px;border-radius:3px}
+
+  .ch-crumb{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;margin-top:14px}
+  .ch-title{font-family:'Caveat';font-weight:700;font-size:38px;line-height:1;margin:4px 0 10px;display:flex;align-items:baseline;gap:14px}
+  .ch-title .num{color:var(--accent);font-size:26px}
+
+  .vhint{display:flex;gap:12px;align-items:center;margin:4px 0 14px;flex-wrap:wrap;font-family:'Kalam';font-size:14px;color:var(--ink-soft)}
+  .vhint b{color:var(--ink);font-weight:700}
+  .vhint .sep{color:var(--ink-faint)}
+
+  /* ---------- Prose ---------- */
+  .prose{font-family:Georgia,serif;font-size:17px;line-height:1.62;color:var(--ink)}
+  .prose p{margin:0 0 14px}
+  .pblock{margin:0 0 14px;padding:4px 6px 4px 12px;border-left:3px solid transparent;border-radius:2px;transition:background .2s, border-color .2s}
+  .pblock code{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--paper-2);padding:1px 5px;border:1px solid var(--ink-faint);border-radius:2px}
+  .pblock[data-group]{cursor:pointer;position:relative}
+  .pblock[data-group]::before{
+    content:attr(data-group-label);position:absolute;left:-30px;top:4px;width:22px;height:22px;
+    border:1.5px solid var(--ink);background:var(--paper);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono';font-size:10px;font-weight:600;color:var(--accent);
+    transform:rotate(-3deg);
+  }
+  .pblock[data-group].g1{border-left-color:var(--g1)}
+  .pblock[data-group].g2{border-left-color:var(--g2)}
+  .pblock[data-group].g3{border-left-color:var(--g3)}
+  .pblock[data-group].active{background:var(--accent-wash)}
+  .pblock[data-group].active.g2{background:#d8ecde}
+  .pblock[data-group].active.g3{background:#d9deef}
+  .pblock[data-group].faded{opacity:.38}
+
+  /* ---------- Diagram ---------- */
+  .diagram{border:1.5px solid var(--ink);background:var(--paper-2);padding:12px 14px;position:relative}
+  .diagram .label{font-family:'Caveat';font-size:20px;font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+  .diagram .label .x{font-family:'JetBrains Mono';font-size:11px;cursor:pointer;color:var(--ink-soft);border:1.2px solid var(--ink);padding:1px 6px;background:var(--paper)}
+  .memboxes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+  .memboxes .cell{border:1.5px solid var(--ink);background:var(--paper);padding:8px 6px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;min-height:62px;transition:background .2s,box-shadow .2s,transform .2s;position:relative}
+  .memboxes .cell .addr{display:block;font-size:9px;color:var(--ink-soft);margin-bottom:3px}
+  .memboxes .cell .val{font-weight:600}
+  .memboxes .cell .name{display:block;font-family:'Caveat';font-size:16px;color:var(--accent);font-weight:700;margin-top:2px}
+
+  /* group tints on cells */
+  .memboxes .cell[data-group="g1"]{border-color:var(--g1)}
+  .memboxes .cell[data-group="g2"]{border-color:var(--g2)}
+  .memboxes .cell[data-group="g3"]{border-color:var(--g3)}
+  .memboxes .cell.group-hl{background:var(--accent-wash);box-shadow:0 0 0 2px var(--accent), 0 0 0 4px var(--paper)}
+  .memboxes .cell.group-hl[data-group="g2"]{background:#d8ecde;box-shadow:0 0 0 2px var(--g2), 0 0 0 4px var(--paper)}
+  .memboxes .cell.group-hl[data-group="g3"]{background:#d9deef;box-shadow:0 0 0 2px var(--g3), 0 0 0 4px var(--paper)}
+  .memboxes .cell.hl{background:var(--highlight);box-shadow:0 0 0 3px var(--accent),0 0 0 5px var(--paper);animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 2px var(--accent),0 0 0 4px var(--paper)}50%{box-shadow:0 0 0 5px var(--accent),0 0 0 7px var(--paper)}}
+  .memboxes .cell.faded{opacity:.25}
+
+  /* Code */
+  .code{border:1.5px solid var(--ink);background:#fbf9ef;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;position:relative}
+  .code .ln{display:block;white-space:pre;padding:1px 4px;border-radius:2px;transition:background .2s,box-shadow .2s;cursor:default}
+  .code .ln[data-link]{cursor:pointer}
+  .code .ln .kw{color:var(--accent);font-weight:600}
+  .code .ln .cm{color:var(--ink-faint);font-style:italic}
+  .code .ln.hl{background:var(--highlight);box-shadow:inset 3px 0 0 var(--accent)}
+  .code .ln.group-g1{box-shadow:inset 3px 0 0 var(--g1)}
+  .code .ln.group-g2{box-shadow:inset 3px 0 0 var(--g2)}
+  .code .ln.group-g3{box-shadow:inset 3px 0 0 var(--g3)}
+  .code .ln.group-hl{background:var(--accent-wash)}
+  .code .ln.group-hl.group-g2{background:#d8ecde}
+  .code .ln.group-hl.group-g3{background:#d9deef}
+  .code .ln.faded{opacity:.35}
+  /* sentence highlight on code lines */
+  .code .ln.sent-hl{background:var(--highlight);box-shadow:inset 3px 0 0 var(--accent)}
+  /* cell sentence highlight */
+  .memboxes .cell.sent-hl{background:var(--highlight);box-shadow:0 0 0 3px var(--accent),0 0 0 5px var(--paper);animation:pulse 1.2s ease-in-out infinite}
+
+  /* ---------- Translation panel ---------- */
+  .translation{border:1.5px solid var(--ink);background:var(--paper);padding:10px 12px;font-family:'Kalam',cursive;font-size:13.5px;line-height:1.5}
+  .translation .tl-hdr{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;display:block}
+  .tl-group{margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--ink-faint)}
+  .tl-group:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+  .tl-code-ref{font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink-soft);display:block;margin-bottom:4px;padding:2px 4px;background:var(--paper-2);border-left:2px solid var(--ink-faint)}
+  .tl-step{display:flex;gap:6px;align-items:baseline;padding:3px 6px;border-radius:2px;cursor:pointer;transition:background .12s;margin:2px 0}
+  .tl-step .step-n{font-family:'JetBrains Mono';font-size:10px;color:var(--accent);min-width:14px;font-weight:600}
+  .tl-step .step-txt{flex:1}
+  .tl-step .step-result{font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
+  .tl-step[data-sent]:hover,.tl-step.sent-hl{background:var(--highlight)}
+  .tl-step.group-hl{background:var(--accent-wash)}
+  .tl-step.group-hl.tl-g2{background:#d8ecde}
+  .tl-step.group-hl.tl-g3{background:#d9deef}
+  .tl-step.faded{opacity:.3}
+  /* ---------- Sub-expression token highlights ---------- */
+  .tok{border-radius:2px;padding:0 1px;transition:background .1s,box-shadow .1s,outline .1s}
+  .tok.tok-hl{background:var(--highlight);outline:2px solid var(--accent);outline-offset:1px}
+  #connector-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:4}
+  .connector-path{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3;opacity:0;transition:opacity .15s}
+  .connector-path.visible{opacity:1;animation:dash-in .3s ease-out forwards}
+  @keyframes dash-in{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
+  .connector-dot{fill:var(--accent);opacity:0;transition:opacity .15s}
+  .connector-dot.visible{opacity:1}
+  /* code+translation side by side */
+  .code-trans-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;position:relative}
+  @media(max-width:1100px){.code-trans-wrap{grid-template-columns:1fr}}
+
+  .tag{display:inline-block;border:1.2px solid var(--ink);background:var(--paper);font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;margin-right:4px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+
+  .progress{margin-top:18px;border-top:1.5px dashed var(--ink);padding-top:12px;display:flex;gap:10px;align-items:center;font-family:Georgia,serif}
+  .progress .pbar{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(14px,1fr);gap:4px}
+  .progress .pbar .tick{height:14px;border:1.2px solid var(--ink);background:var(--paper-2);position:relative;cursor:pointer}
+  .progress .pbar .tick.done{background:var(--ink)}
+  .progress .pbar .tick.cur{background:var(--accent);box-shadow:inset 0 0 0 2px var(--paper)}
+  .progress .pbar .tick.quiz::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink);font-family:'JetBrains Mono';font-size:9px;font-weight:700}
+  .progress .pbar .tick .t{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .progress .nav button{font-family:'Caveat';font-weight:700;font-size:18px;border:1.5px solid var(--ink);background:var(--paper);padding:2px 12px;cursor:pointer;color:var(--ink)}
+  .progress .nav button:hover{background:var(--paper-2)}
+  .progress .stamp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);min-width:120px;text-align:right}
+
+  /* ======================= V1 LAYOUT (reading) ======================= */
+  .reading{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .reading .left{padding-left:36px}
+  .reading .right{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 60px);overflow:auto}
+
+  .legend{display:flex;gap:14px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);margin:6px 0}
+  .legend .swatch{display:inline-block;width:10px;height:10px;border:1.2px solid var(--ink);margin-right:4px;vertical-align:-1px}
+
+  .scribble{display:block;height:5px;background-image:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 14px);opacity:.4;margin:10px 0}
+  .callout{font-family:'Caveat';color:var(--accent);font-weight:700;font-size:18px}
+
+  /* ======================= QUIZ LAYOUT ======================= */
+  .quiz-wrap{max-width:1000px;margin:0 auto}
+  .quiz-card{border:2px solid var(--ink);background:var(--paper);padding:16px 18px;position:relative;box-shadow:5px 5px 0 var(--ink)}
+  .quiz-card .quiz-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .quiz-card .quiz-hdr .q-type{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.05em;color:var(--accent);text-transform:uppercase}
+  .quiz-card .quiz-hdr h3{font-family:'Caveat';font-size:28px;margin:2px 0 0;font-weight:700}
+  .quiz-card .quiz-sub{font-family:'Kalam';color:var(--ink-soft);margin:0 0 14px;font-size:14px}
+
+  .quiz-mode-pick{display:flex;gap:10px;margin:10px 0 16px;flex-wrap:wrap}
+  .quiz-mode-pick .mode{border:1.5px solid var(--ink);padding:8px 12px;cursor:pointer;background:var(--paper);font-family:'Kalam';transform:rotate(-.3deg)}
+  .quiz-mode-pick .mode:nth-child(2){transform:rotate(.25deg)}
+  .quiz-mode-pick .mode.sel{background:var(--accent);color:#fff}
+  .quiz-mode-pick .mode b{font-family:'Caveat';display:block;font-size:20px}
+  .quiz-mode-pick .mode span{font-size:12px;color:var(--ink-soft)}
+  .quiz-mode-pick .mode.sel span{color:#fff1ea}
+
+  .quiz-body{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:820px){.quiz-body{grid-template-columns:1fr}}
+
+  .quiz-blank{border:2px dashed var(--ink);background:var(--paper-2);padding:10px 12px}
+  .quiz-blank .cap{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block}
+
+  .mb-blank{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .mb-blank .cell{border:1.5px dashed var(--ink);background:var(--paper);padding:8px 6px;min-height:66px;display:flex;flex-direction:column;gap:3px;justify-content:center;align-items:center;font-family:'JetBrains Mono';font-size:12px;cursor:pointer;position:relative;transition:background .2s}
+  .mb-blank .cell .addr{font-size:9px;color:var(--ink-faint)}
+  .mb-blank .cell .val-in{width:54px;border:1.2px solid var(--ink);background:var(--paper-2);font-family:'JetBrains Mono';font-size:13px;text-align:center;padding:2px;font-weight:600}
+  .mb-blank .cell .name-in{width:54px;border:none;background:transparent;font-family:'Caveat';font-size:16px;text-align:center;font-weight:700;color:var(--accent)}
+  .mb-blank .cell.right{background:#e6f2e0;border-style:solid;border-color:var(--g2)}
+  .mb-blank .cell.wrong{background:#f6dcdc;border-style:solid;border-color:#b84747}
+
+  .drag-tray{margin-top:8px;border:1.2px solid var(--ink);padding:8px;background:var(--paper);display:flex;gap:6px;flex-wrap:wrap}
+  .drag-tray .chip{font-family:'JetBrains Mono';font-size:12px;border:1.2px solid var(--ink);background:var(--paper-2);padding:3px 8px;cursor:grab;user-select:none}
+  .drag-tray .chip.used{opacity:.3}
+
+  .code-blank{border:1.5px dashed var(--ink);background:#fbf9ef;padding:10px 12px;font-family:'JetBrains Mono';font-size:13px;line-height:1.7}
+  .code-blank .ln{display:block;white-space:pre}
+  .code-blank .ln .blank{display:inline-block;min-width:60px;border-bottom:1.5px solid var(--ink);font-family:'JetBrains Mono';font-size:13px;padding:0 6px;background:var(--paper-2)}
+  .code-blank .ln .blank[contenteditable]{cursor:text;outline:none}
+  .code-blank .ln .blank.right{background:#e6f2e0;border-bottom-color:var(--g2);color:var(--g2)}
+  .code-blank .ln .blank.wrong{background:#f6dcdc;border-bottom-color:#b84747}
+
+  .quiz-actions{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .quiz-actions button{font-family:'Caveat';font-size:20px;font-weight:700;border:2px solid var(--ink);background:var(--paper);padding:4px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+  .quiz-actions button.primary{background:var(--accent);color:#fff}
+  .quiz-actions .score{font-family:'JetBrains Mono';font-size:12px;color:var(--ink-soft);margin-left:auto}
+  .quiz-actions .score b{color:var(--ink)}
+  .feedback{margin-top:10px;font-family:'Kalam';font-size:14px;color:var(--ink-soft);min-height:1.2em}
+  .feedback.ok{color:var(--g2)}
+  .feedback.no{color:#b84747}
+
+  /* ======================= MOBILE ======================= */
+  .device{max-width:420px;margin:0 auto;border:2px solid var(--ink);border-radius:28px;padding:10px;background:var(--paper);box-shadow:5px 5px 0 var(--ink);position:relative}
+  .device::before{content:"";position:absolute;top:14px;left:50%;transform:translateX(-50%);width:90px;height:6px;background:var(--ink);border-radius:4px}
+  .device .screen{border:1.5px solid var(--ink);border-radius:18px;background:var(--paper);padding:30px 14px 14px;min-height:680px;overflow:hidden}
+  .device .topbar{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono';font-size:10px;color:var(--ink-soft);margin-bottom:10px}
+  .device .screen h2{font-family:'Caveat';font-size:28px;margin:0 0 2px;font-weight:700}
+  .device .screen .crumb{font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);text-transform:uppercase}
+  .device .pblock{padding-left:22px;font-size:15px}
+  .device .pblock[data-group]::before{left:-4px;top:2px;width:18px;height:18px;font-size:9px}
+  .device .inline-diag{margin:6px 0 12px;border:1.5px dashed var(--ink);padding:8px;background:var(--paper-2);animation:slideDown .25s ease-out}
+  @keyframes slideDown{from{opacity:0;transform:scaleY(.7)}to{opacity:1;transform:scaleY(1)}}
+  .device .inline-diag .memboxes{grid-template-columns:repeat(2,1fr)}
+  .device .inline-diag .code{font-size:11px;margin-top:8px}
+  .device .bottomnav{display:flex;gap:6px;justify-content:space-between;margin-top:14px;border-top:1.5px dashed var(--ink);padding-top:10px}
+  .device .bottomnav button{flex:1;font-family:'Caveat';font-size:16px;font-weight:700;border:1.5px solid var(--ink);background:var(--paper);padding:3px 0;cursor:pointer}
+
+  .mobile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){.mobile-grid{grid-template-columns:1fr}}
+  .mobile-grid .label-caption{font-family:'Caveat';font-weight:700;font-size:24px;text-align:center;margin-bottom:8px}
+  .mobile-grid .label-caption .sub{display:block;font-family:'Kalam';font-weight:400;font-size:13px;color:var(--ink-soft)}
+
+  /* ======================= AUTHORING ======================= */
+  .author-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media(max-width:900px){.author-grid{grid-template-columns:1fr}}
+  .author-card{border:1.5px solid var(--ink);background:var(--paper);padding:12px 14px}
+  .author-card h3{font-family:'Caveat';font-size:26px;margin:0 0 6px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
+  .author-card h3 .cap{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
+  .author-card pre{font-family:'JetBrains Mono';font-size:12.5px;background:#fbf9ef;border:1.2px solid var(--ink);padding:10px 12px;margin:0;white-space:pre-wrap;line-height:1.55;overflow:auto}
+  .author-card pre .k{color:var(--accent);font-weight:600}
+  .author-card pre .c{color:var(--ink-faint);font-style:italic}
+  .author-card pre .g{background:var(--accent-wash);padding:0 3px;border-radius:2px}
+
+  .author-list{margin:10px 0 0;padding:0;list-style:none;font-family:'Kalam';font-size:14px;color:var(--ink-soft);line-height:1.55}
+  .author-list li{padding:6px 0;border-bottom:1px dashed var(--ink-faint)}
+  .author-list li:last-child{border:none}
+  .author-list li b{color:var(--ink);font-family:'JetBrains Mono';font-size:12.5px;background:var(--paper-2);padding:1px 5px;border:1px solid var(--ink-faint);border-radius:2px}
+
+  .pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;font-family:'Kalam';font-size:13px}
+  .pipeline .step{border:1.5px solid var(--ink);padding:10px;background:var(--paper);position:relative;min-height:100px}
+  .pipeline .step b{font-family:'Caveat';font-size:20px;display:block;color:var(--accent)}
+  .pipeline .step::after{content:"→";position:absolute;right:-14px;top:50%;transform:translateY(-50%);font-family:'Caveat';font-size:22px;color:var(--ink);background:var(--paper);padding:0 2px}
+  .pipeline .step:last-child::after{display:none}
+  @media(max-width:900px){.pipeline{grid-template-columns:1fr 1fr}.pipeline .step:nth-child(2)::after{display:none}}
+
+  /* ======================= TWEAKS ======================= */
+  .tweaks{position:fixed;right:18px;bottom:18px;width:280px;background:var(--paper);border:2px solid var(--ink);padding:12px 14px 14px;z-index:30;box-shadow:6px 6px 0 var(--ink);transform:rotate(-.4deg);font-family:'Kalam',cursive;font-size:14px;display:none}
+  .tweaks.open{display:block}
+  .tweaks h5{font-family:'Caveat';font-weight:700;font-size:22px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+  .tweaks h5 button{font-family:'JetBrains Mono';font-size:11px;border:1.2px solid var(--ink);background:var(--paper-2);cursor:pointer;padding:1px 6px}
+  .tweaks .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;font-size:13px;color:var(--ink-soft)}
+  .tweaks .row label{color:var(--ink)}
+  .tweaks input[type=range]{width:120px}
+  .tweaks .swatches{display:flex;gap:5px}
+  .tweaks .sw{width:20px;height:20px;border:1.2px solid var(--ink);cursor:pointer}
+  .tweaks .sw.active{box-shadow:0 0 0 2px var(--accent),0 0 0 4px var(--paper)}
+  .tweaks-toggle{position:fixed;right:18px;bottom:18px;z-index:29;font-family:'Caveat';font-weight:700;font-size:22px;border:2px solid var(--ink);background:var(--paper);padding:4px 14px;cursor:pointer;transform:rotate(-1deg);box-shadow:4px 4px 0 var(--ink)}
+
+  kbd{font-family:'JetBrains Mono';font-size:10px;border:1.2px solid var(--ink);padding:0 5px;background:var(--paper-2);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hdr">
+    <h1>Interactive Textbook — v2
+      <span class="sub">Group highlights · Diagram quizzes · Mobile stack · Authoring sketch</span>
+    </h1>
+    <div class="meta">
+      <b>VERSION</b> v2<br/>
+      <b>FIDELITY</b> wireframe<br/>
+      <b>FROM</b>&nbsp;&nbsp;v1 · Side Panel
+    </div>
+  </header>
+
+  <section class="notes">
+    <div class="card"><span class="pin"></span>
+      <h4>Diagrams span paragraphs</h4>
+      <p>One diagram ↔ a <b>group</b> of related paragraphs. Hover/tap any paragraph → its matching components pulse; other paragraphs in the same group get a light tint so you see the scope.</p>
+    </div>
+    <div class="card"><span class="pin"></span>
+      <h4>Quiz mode, same diagram</h4>
+      <p>The memory diagrams are reused as assessment: <b>code → diagram</b> (fill the boxes) and <b>diagram → code</b> (fill the code). Lives on dedicated quiz pages inside the chapter.</p>
+    </div>
+    <div class="card"><span class="pin"></span>
+      <h4>Mobile = stacked</h4>
+      <p>Side panels don't work on a phone. Mobile inlines the diagram directly under its group, collapses by default, and gives quizzes a dedicated screen.</p>
+    </div>
+    <div class="card"><span class="pin"></span>
+      <h4>Authoring stays markdown</h4>
+      <p>Extend Quartz-flavoured markdown with <code>{#group}</code> attrs and a <code>::: diagram</code> directive. Instructors write prose as normal; the build wires up the interactions.</p>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="R"><span class="n">1</span>Reading (grouped)</button>
+    <button class="tab" data-tab="Q"><span class="n">2</span>Quiz pages</button>
+    <button class="tab" data-tab="M"><span class="n">3</span>Mobile</button>
+    <button class="tab" data-tab="A"><span class="n">4</span>Authoring</button>
+    <span class="tab-cap">keys <kbd>1</kbd>–<kbd>4</kbd></span>
+  </div>
+
+  <div class="frame" id="frame">
+    <span class="corner tl">v2</span>
+    <span class="corner tr" id="variation-label">1 · READING</span>
+
+    <!-- ================== READING ================== -->
+    <section class="vslot" data-tab="R">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / data-and-memory</div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div class="ch-crumb">Chapter 2 · Values and Memory</div>
+      <div class="ch-title"><span class="num">2.1</span>Values live in boxes</div>
+
+      <div class="vhint">
+        <b>Paragraph mode:</b> hover a whole paragraph → its ①②③ group pulses in the diagram.
+        <span class="sep">·</span><b>Sentence mode (new):</b> hover an individual sentence → only the code line + cell it describes lights up.
+        <span class="sep">·</span>Groups still show as left-border colors in both modes for orientation.
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+        <div class="mode-toggle" id="read-mode-toggle">
+          <button class="active" data-mode="paragraph">¶ paragraph</button>
+          <button data-mode="sentence">— sentence</button>
+        </div>
+        <div class="legend" style="margin:0">
+          <span><i class="swatch" style="background:var(--g1)"></i> ① single value</span>
+          <span><i class="swatch" style="background:var(--g2)"></i> ② copy</span>
+          <span><i class="swatch" style="background:var(--g3)"></i> ③ independence</span>
+        </div>
+      </div>
+
+      <div class="reading">
+        <div class="left">
+          <div class="prose mode-paragraph" id="prose-R">
+
+            <div class="pblock">
+              <p>
+                <span class="sent">Before we can talk about variables, we need a word for the things variables <i>hold</i>.</span>
+                <span class="sent"> A <b>value</b> is a piece of data your program can compute with — a truth, a number, a piece of text.</span>
+                <span class="sent"> Each value has a <b>type</b>, and the type decides what you can do with it.</span>
+              </p>
+            </div>
+
+            <div class="pblock g1" data-group="g1" data-group-label="①">
+              <p>
+                <span class="sent">The simplest case is a single <b>value type</b> like <code>int</code>.</span>
+                <span class="sent" data-sent="s1"> When you write <code>int x = 5;</code>, the compiler reserves a fixed-size slot of memory and labels it <code>x</code>.</span>
+                <span class="sent" data-sent="s1"> The literal <b>5</b> is written directly into that slot — no indirection, no pointer.</span>
+              </p>
+            </div>
+
+            <div class="pblock g1" data-group="g1" data-group-label="①">
+              <p>
+                <span class="sent" data-sent="s1">The slot <i>is</i> the box.</span>
+                <span class="sent" data-sent="s1"> Its contents are the value.</span>
+                <span class="sent"> That's the entire mental model for primitive types: <i>box + contents</i>, nothing more.</span>
+              </p>
+            </div>
+
+            <div class="pblock g2" data-group="g2" data-group-label="②">
+              <p>
+                <span class="sent">Now look at the next line.</span>
+                <span class="sent" data-sent="s2"> <code>int y = x;</code> <b>copies the value</b> out of x's box into a brand-new box named <code>y</code>.</span>
+                <span class="sent" data-sent="s2"> Crucially, no link is drawn between them — each box holds its own independent copy of 5.</span>
+              </p>
+            </div>
+
+            <div class="pblock g2" data-group="g2" data-group-label="②">
+              <p>
+                <span class="sent">This is why <code>int</code> is sometimes called a <b>copy type</b>.</span>
+                <span class="sent" data-sent="s2"> Assignment copies; it does not share.</span>
+              </p>
+            </div>
+
+            <div class="pblock g3" data-group="g3" data-group-label="③">
+              <p>
+                <span class="sent">The payoff comes on the third line.</span>
+                <span class="sent" data-sent="s3"> <code>y = y + 1;</code> adds one to y — only y's box changes, from 5 to 6.</span>
+                <span class="sent" data-sent="s4"> <code>x</code> still holds 5; its box was never touched.</span>
+                <span class="sent"> That independence is the whole point of copy semantics.</span>
+              </p>
+            </div>
+
+            <div class="pblock">
+              <p>
+                <span class="sent">Chapter 4 introduces <b>reference types</b>, which behave differently.</span>
+                <span class="sent"> For this chapter, every value you create is its own little island, copied on assignment.</span>
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="diagram" id="diag-R">
+            <div class="label">Memory — walkthrough of <code>int x=5; int y=x; y=y+1;</code></div>
+            <div class="memboxes" id="mem-R">
+              <div class="cell" data-k="x" data-group="g1" data-sent="s1"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x</span></div>
+              <div class="cell" data-k="y" data-group="g2" data-sent="s2 s3"><span class="addr">0x7ffc04</span><span class="val">6</span><span class="name">y</span></div>
+              <div class="cell" data-k="x2" data-group="g3" data-sent="s4"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x (still)</span></div>
+              <div class="cell" data-k="free"><span class="addr">0x7ffc0c</span><span class="val">—</span></div>
+            </div>
+            <div class="scribble"></div>
+            <div class="code-trans-wrap">
+              <svg id="connector-svg" aria-hidden="true"></svg>
+              <div class="code" id="code-R">
+                <span class="ln group-g1" data-link="x" data-group="g1" data-sent="s1"><span class="kw">int</span> <span class="tok" data-tok="x1-lhs">x</span> = <span class="tok" data-tok="x1-rhs">5</span>;   <span class="cm">// ① box x ← 5</span></span>
+                <span class="ln group-g2" data-link="y" data-group="g2" data-sent="s2"><span class="kw">int</span> <span class="tok" data-tok="y-lhs">y</span> = <span class="tok" data-tok="y-rhs">x</span>;   <span class="cm">// ② copy into y</span></span>
+                <span class="ln group-g3" data-link="y" data-group="g3" data-sent="s3 s4"><span class="tok" data-tok="y2-lhs">y</span> = <span class="tok" data-tok="y2-rhs">y + 1</span>;    <span class="cm">// ③ only y changes</span></span>
+                <span class="ln"><span class="cm">// x is still 5</span></span>
+              </div>
+
+              <div class="translation" id="trans-R">
+                <span class="tl-hdr">translation — what the runtime does</span>
+
+                  <div class="tl-group">
+                  <span class="tl-code-ref">int x = 5;</span>
+                  <div class="tl-step" data-group="g1" data-sent="s1" data-tok="x1-rhs">
+                    <span class="step-n">①</span>
+                    <span class="step-txt">Evaluate <code>5</code></span>
+                    <span class="step-result">→ literal: 5</span>
+                  </div>
+                  <div class="tl-step" data-group="g1" data-sent="s1" data-tok="x1-lhs">
+                    <span class="step-n">②</span>
+                    <span class="step-txt">Bind <code>5</code> to <code>x</code></span>
+                    <span class="step-result">→ write into box x</span>
+                  </div>
+                </div>
+
+                <div class="tl-group">
+                  <span class="tl-code-ref">int y = x;</span>
+                  <div class="tl-step tl-g2" data-group="g2" data-sent="s2" data-tok="y-rhs">
+                    <span class="step-n">①</span>
+                    <span class="step-txt">Evaluate <code>x</code></span>
+                    <span class="step-result">→ look up x: 5</span>
+                  </div>
+                  <div class="tl-step tl-g2" data-group="g2" data-sent="s2" data-tok="y-lhs">
+                    <span class="step-n">②</span>
+                    <span class="step-txt">Bind <code>5</code> to <code>y</code></span>
+                    <span class="step-result">→ new box y ← 5</span>
+                  </div>
+                </div>
+
+                <div class="tl-group">
+                  <span class="tl-code-ref">y = y + 1;</span>
+                  <div class="tl-step tl-g3" data-group="g3" data-sent="s3" data-tok="y2-rhs">
+                    <span class="step-n">①</span>
+                    <span class="step-txt">Evaluate <code>y + 1</code></span>
+                    <span class="step-result">→ look up y (5), add 1: 6</span>
+                  </div>
+                  <div class="tl-step tl-g3" data-group="g3" data-sent="s3" data-tok="y2-lhs">
+                    <span class="step-n">②</span>
+                    <span class="step-txt">Bind <code>6</code> to <code>y</code></span>
+                    <span class="step-result">→ overwrite box y</span>
+                  </div>
+                  <div class="tl-step tl-g3" data-group="g3" data-sent="s4">
+                    <span class="step-n">③</span>
+                    <span class="step-txt"><code>x</code> is never written to</span>
+                    <span class="step-result">→ box x still 5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p style="margin:10px 0 0;font-family:'Kalam';font-size:13px;color:var(--ink-soft)" id="diag-hint">
+              <span class="tag">¶ mode</span> hover a paragraph → group pulses across all three panels. <span class="tag">— mode</span> hover a sentence → just the steps + line + cell it describes light up.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="nav"><button>← prev</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1</span></div>
+          <div class="tick done"><span class="t">1.2</span></div>
+          <div class="tick done"><span class="t">1.3</span></div>
+          <div class="tick done"><span class="t">2.0</span></div>
+          <div class="tick cur"><span class="t">2.1 Values</span></div>
+          <div class="tick quiz"><span class="t">2.1Q</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick quiz"><span class="t">2.3Q</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5</span></div>
+          <div class="tick quiz"><span class="t">2Q</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">concept 5 / 12</div>
+      </div>
+    </section>
+
+    <!-- ================== QUIZ ================== -->
+    <section class="vslot hidden" data-tab="Q">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / 2-1-values <b style="color:var(--accent)">/ practice</b></div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div class="ch-crumb">Chapter 2 · Values and Memory · <b style="color:var(--accent)">Practice page</b></div>
+      <div class="ch-title"><span class="num">2.1 Q</span>Diagram practice</div>
+
+      <div class="vhint">
+        <b>Idea:</b> the same memory diagrams from the reading, now with pieces blanked out.
+        <span class="sep">·</span>Two modes: <b>code → diagram</b> (fill the boxes) and <b>diagram → code</b> (fill the code). Marked ? on the progress bar.
+      </div>
+
+      <div class="quiz-wrap">
+        <div class="quiz-mode-pick">
+          <div class="mode sel" data-mode="c2d"><b>Code → Diagram</b><span>Given code, fill in the boxes</span></div>
+          <div class="mode" data-mode="d2c"><b>Diagram → Code</b><span>Given boxes, write the code</span></div>
+        </div>
+
+        <!-- Mode 1: Code → Diagram -->
+        <div class="quiz-card" id="quiz-c2d">
+          <div class="quiz-hdr">
+            <div>
+              <span class="q-type">◆ Question 1 of 3 · code → diagram</span>
+              <h3>Fill in the memory state after this code runs</h3>
+            </div>
+            <div class="tag">no grade · self-check</div>
+          </div>
+          <p class="quiz-sub">Drag values from the tray into the boxes. Hit <b>Check</b> to see which boxes are wrong — fix them and try again.</p>
+
+          <div class="quiz-body">
+            <div>
+              <div class="code" style="margin:0">
+                <span class="ln"><span class="kw">int</span> a = 3;</span>
+                <span class="ln"><span class="kw">int</span> b = a + 4;</span>
+                <span class="ln">a = 10;</span>
+              </div>
+              <div class="drag-tray" id="c2d-tray">
+                <span class="drag-tray-title" style="font-family:'Kalam';font-size:12px;color:var(--ink-soft);width:100%;margin-bottom:2px">drag values into boxes ↓</span>
+                <div class="chip" draggable="true" data-v="3">3</div>
+                <div class="chip" draggable="true" data-v="7">7</div>
+                <div class="chip" draggable="true" data-v="10">10</div>
+                <div class="chip" draggable="true" data-v="4">4</div>
+                <div class="chip" draggable="true" data-v="—">—</div>
+                <div class="chip" draggable="true" data-v="13">13</div>
+              </div>
+            </div>
+
+            <div class="quiz-blank">
+              <span class="cap">your memory diagram</span>
+              <div class="mb-blank" id="c2d-mem">
+                <div class="cell" data-answer="10">
+                  <span class="addr">0x100</span>
+                  <input class="val-in" placeholder="?" data-role="val"/>
+                  <input class="name-in" placeholder="name" data-role="name" value="a"/>
+                </div>
+                <div class="cell" data-answer="7">
+                  <span class="addr">0x104</span>
+                  <input class="val-in" placeholder="?" data-role="val"/>
+                  <input class="name-in" placeholder="name" data-role="name" value="b"/>
+                </div>
+                <div class="cell" data-answer="—">
+                  <span class="addr">0x108</span>
+                  <input class="val-in" placeholder="?" data-role="val"/>
+                  <input class="name-in" placeholder="name" data-role="name"/>
+                </div>
+                <div class="cell" data-answer="—">
+                  <span class="addr">0x10c</span>
+                  <input class="val-in" placeholder="?" data-role="val"/>
+                  <input class="name-in" placeholder="name" data-role="name"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button class="primary" id="c2d-check">Check</button>
+            <button id="c2d-reset">Reset</button>
+            <button id="c2d-reveal">Reveal</button>
+          </div>
+          <div class="feedback" id="c2d-feedback" style="margin-top:8px">&nbsp;</div>
+        </div>
+
+        <!-- Mode 2 (preview card) -->
+        <div class="quiz-card hidden" id="quiz-d2c" style="margin-top:16px">
+          <div class="quiz-hdr">
+            <div>
+              <span class="q-type">◆ Question 1 of 3 · diagram → code</span>
+              <h3>Write the code that produces this memory state</h3>
+            </div>
+            <div class="tag">no grade · self-check</div>
+          </div>
+          <p class="quiz-sub">The memory is given. Reconstruct the three lines that got us here. Hit <b>Check</b> — wrong blanks go red, right ones go green.</p>
+
+          <div class="quiz-body">
+            <div class="quiz-blank">
+              <span class="cap">given memory (read-only)</span>
+              <div class="memboxes">
+                <div class="cell"><span class="addr">0x100</span><span class="val">10</span><span class="name">a</span></div>
+                <div class="cell"><span class="addr">0x104</span><span class="val">7</span><span class="name">b</span></div>
+                <div class="cell"><span class="addr">0x108</span><span class="val">—</span></div>
+                <div class="cell"><span class="addr">0x10c</span><span class="val">—</span></div>
+              </div>
+              <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0">
+                Note: this is the <i>final</i> state. One value was reassigned along the way.
+              </p>
+            </div>
+
+            <div class="code-blank">
+              <span class="cap" style="font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);display:block;margin-bottom:4px">your code</span>
+              <span class="ln"><span style="color:var(--accent);font-weight:600">int</span> <span class="blank" contenteditable>a</span> = <span class="blank" contenteditable>3</span>;</span>
+              <span class="ln"><span style="color:var(--accent);font-weight:600">int</span> <span class="blank" contenteditable>b</span> = <span class="blank" contenteditable>a + 4</span>;</span>
+              <span class="ln"><span class="blank" contenteditable>a</span> = <span class="blank" contenteditable>10</span>;</span>
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button class="primary" id="d2c-check">Check</button>
+            <button id="d2c-reset">Reset</button>
+            <button id="d2c-reveal">Reveal</button>
+          </div>
+          <div class="feedback" id="d2c-feedback" style="margin-top:8px">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="nav"><button>← reading</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1</span></div>
+          <div class="tick done"><span class="t">1.2</span></div>
+          <div class="tick done"><span class="t">1.3</span></div>
+          <div class="tick done"><span class="t">2.0</span></div>
+          <div class="tick done"><span class="t">2.1</span></div>
+          <div class="tick cur quiz"><span class="t">2.1Q</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick quiz"><span class="t">2.3Q</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5</span></div>
+          <div class="tick quiz"><span class="t">2Q</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">practice 1 / 3</div>
+      </div>
+    </section>
+
+    <!-- ================== MOBILE ================== -->
+    <section class="vslot hidden" data-tab="M">
+      <div class="ch-crumb">Mobile treatment</div>
+      <div class="ch-title"><span class="num">3</span>Read · Expand · Quiz</div>
+      <div class="vhint">
+        <b>Idea:</b> on phones we stack everything. Tap a ◆ paragraph → its diagram expands inline below (never beside). Quizzes are their own full screen.
+        <span class="sep">·</span>The group-highlight behaviour still works — tap a paragraph to tint its cells in the just-expanded diagram.
+      </div>
+
+      <div class="mobile-grid">
+        <div>
+          <div class="label-caption">Reading screen
+            <span class="sub">tap ◆ paragraph → inline expand</span>
+          </div>
+          <div class="device">
+            <div class="screen">
+              <div class="topbar"><span>9:41</span><span>Ch 2.1</span><span>●●●●</span></div>
+              <span class="crumb">Chapter 2.1 · Values</span>
+              <h2>Values live in boxes</h2>
+
+              <div class="prose">
+                <div class="pblock"><p>A <b>value</b> is data your program can compute with. Each value has a <b>type</b>.</p></div>
+
+                <div class="pblock g1" data-group="g1" data-group-label="①">
+                  <p><code>int x = 5;</code> reserves a slot and writes 5 into it.</p>
+                </div>
+
+                <!-- Inline expansion under g1 -->
+                <div class="inline-diag">
+                  <div class="label" style="font-family:'Caveat';font-weight:700;font-size:16px;margin:0 0 4px">◆ memory after line 1</div>
+                  <div class="memboxes">
+                    <div class="cell group-hl" data-group="g1"><span class="addr">0x100</span><span class="val">5</span><span class="name">x</span></div>
+                    <div class="cell"><span class="addr">0x104</span><span class="val">—</span></div>
+                  </div>
+                  <div class="code">
+                    <span class="ln group-g1 group-hl"><span class="kw">int</span> x = 5;</span>
+                  </div>
+                </div>
+
+                <div class="pblock g2" data-group="g2" data-group-label="②">
+                  <p><code>int y = x;</code> <i>copies</i> 5 into a new box y.</p>
+                </div>
+                <div class="pblock"><p>Each box is independent — assignment copies, never shares.</p></div>
+              </div>
+
+              <div class="bottomnav">
+                <button>← prev</button>
+                <button>Quiz</button>
+                <button>next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label-caption">Quiz screen
+            <span class="sub">dedicated page — fill the boxes by tap</span>
+          </div>
+          <div class="device">
+            <div class="screen">
+              <div class="topbar"><span>9:42</span><span>Ch 2.1 Q</span><span>●●●●</span></div>
+              <span class="crumb">Practice · code → diagram</span>
+              <h2>Fill in the memory</h2>
+
+              <div class="code" style="margin:4px 0 10px">
+                <span class="ln"><span class="kw">int</span> a = 3;</span>
+                <span class="ln"><span class="kw">int</span> b = a + 4;</span>
+                <span class="ln">a = 10;</span>
+              </div>
+
+              <div class="mb-blank" style="grid-template-columns:repeat(2,1fr)">
+                <div class="cell"><span class="addr">0x100</span><input class="val-in" placeholder="?"/><input class="name-in" value="a"/></div>
+                <div class="cell right"><span class="addr">0x104</span><input class="val-in" value="7"/><input class="name-in" value="b"/></div>
+                <div class="cell"><span class="addr">0x108</span><input class="val-in" placeholder="?"/><input class="name-in"/></div>
+                <div class="cell"><span class="addr">0x10c</span><input class="val-in" placeholder="?"/><input class="name-in"/></div>
+              </div>
+
+              <div class="drag-tray" style="margin-top:10px">
+                <div class="chip">3</div><div class="chip">10</div><div class="chip used">7</div><div class="chip">4</div><div class="chip">—</div>
+              </div>
+
+              <div class="quiz-actions" style="margin-top:10px">
+                <button class="primary" style="flex:1">Check</button>
+                <button>Hint</button>
+              </div>
+              <p style="font-family:'Kalam';font-size:12px;color:var(--ink-soft);margin:8px 0 0">Tap a chip, then tap an empty box to place its value.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================== AUTHORING ================== -->
+    <section class="vslot hidden" data-tab="A">
+      <div class="ch-crumb">Authoring · markdown-first</div>
+      <div class="ch-title"><span class="num">4</span>Markdown → interactive page</div>
+      <div class="vhint">
+        <b>Idea:</b> keep writing prose in Quartz markdown. Add two new affordances: inline <code>{#group}</code> attrs on paragraphs, and a <code>::: diagram</code> directive that binds groups to code + memory state.
+        <span class="sep">·</span>The build step (existing Quartz pipeline) expands these into the interactive component shown in tab 1.
+      </div>
+
+      <div class="author-grid">
+        <div class="author-card">
+          <h3>Instructor writes <span class="cap">.md source</span></h3>
+<pre><span class="c"># 2.1 — Values live in boxes</span>
+
+Before we can talk about variables, we need
+a word for what they *hold*. A **value** is
+a piece of data your program can compute with.
+
+<span class="g">The simplest case is a single *value type*
+like `int`. `int x = 5;` reserves a slot of
+memory and writes 5 into it. {#mem .group-1}</span>
+
+<span class="g">The slot is the box. Its contents are the
+value. {#mem .group-1}</span>
+
+<span class="g">Now look at `int y = x;`. This **copies**
+the value into a new box. {#mem .group-2}</span>
+
+<span class="k">::: diagram id="mem"</span>
+<span class="k">code:</span>
+  int x = 5;     <span class="c"># group-1</span>
+  int y = x;     <span class="c"># group-2</span>
+  y = y + 1;     <span class="c"># group-3</span>
+<span class="k">groups:</span>
+  group-1: [x]
+  group-2: [y]
+  group-3: [y, x]
+<span class="k">:::</span></pre>
+          <ul class="author-list">
+            <li><b>{#id .class}</b> — standard Pandoc/remark attribute syntax; attaches a paragraph to a diagram + group.</li>
+            <li><b>::: diagram</b> — a fenced directive: one block per page, lists code + which variables belong to each group.</li>
+            <li>Nothing new for instructors who don't want interactivity — plain markdown still renders as plain prose.</li>
+          </ul>
+        </div>
+
+        <div class="author-card">
+          <h3>Build pipeline <span class="cap">quartz plugin</span></h3>
+          <div class="pipeline">
+            <div class="step"><b>Parse</b> markdown + attrs into an AST. Collect paragraphs by <code>{#id .group-n}</code>.</div>
+            <div class="step"><b>Resolve</b> ::: diagram blocks — turn the code + groups table into a memory model.</div>
+            <div class="step"><b>Emit</b> HTML with <code>data-group="gN"</code> on paragraphs, code lines, and cells.</div>
+            <div class="step"><b>Inject</b> shared JS that handles hover/tap group pulsing and the quiz mode.</div>
+          </div>
+
+          <h3 style="margin-top:18px">Output <span class="cap">rendered html (excerpt)</span></h3>
+<pre><span class="k">&lt;p</span> data-group="g1" data-group-label="①"<span class="k">&gt;</span>
+  The simplest case is a single <span class="k">&lt;i&gt;</span>value type<span class="k">&lt;/i&gt;</span>…
+<span class="k">&lt;/p&gt;</span>
+
+<span class="k">&lt;div class="diagram" data-diagram-id="mem"&gt;</span>
+  <span class="k">&lt;div class="cell" data-group="g1"&gt;</span>x = 5<span class="k">&lt;/div&gt;</span>
+  <span class="k">&lt;div class="cell" data-group="g2"&gt;</span>y = 6<span class="k">&lt;/div&gt;</span>
+  <span class="k">&lt;pre class="code"&gt;</span>
+    <span class="k">&lt;span class="ln" data-group="g1"&gt;</span>int x = 5;<span class="k">&lt;/span&gt;</span>
+    <span class="k">&lt;span class="ln" data-group="g2"&gt;</span>int y = x;<span class="k">&lt;/span&gt;</span>
+  <span class="k">&lt;/pre&gt;</span>
+<span class="k">&lt;/div&gt;</span></pre>
+
+          <ul class="author-list">
+            <li><b>data-group="g1"</b> — the single hook wiring prose, code, and diagram together.</li>
+            <li>Quiz pages reuse the same diagram config; the plugin just blanks selected fields and adds input controls.</li>
+            <li>Existing backlinks / table-of-contents generation is unaffected.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /frame -->
+
+  <section style="margin-top:22px" class="notes">
+    <div class="card" style="grid-column:span 2"><span class="pin"></span>
+      <h4>Open questions for v3</h4>
+      <p>
+        · Should groups <b>auto-advance</b> as you scroll — pulsing ① then ② then ③ based on reading position?<br/>
+        · In quizzes, do we want <b>partial-credit</b> scoring or strict all-or-nothing?<br/>
+        · Do we want a <b>"reveal all diagrams"</b> printable view for studying offline?<br/>
+        · For diagram → code mode, compile + run in-browser (C# via WebAssembly) or just string-match?
+      </p>
+    </div>
+    <div class="card" style="grid-column:span 2"><span class="pin"></span>
+      <h4>Likely next moves</h4>
+      <p>
+        → Commit to the <code>{#group}</code> + <code>::: diagram</code> authoring shape, then prototype against one real chapter.<br/>
+        → Decide whether quiz state (progress, scores) gets stored locally only or synced to an account.<br/>
+        → Figure out the diagram vocabulary: memory boxes cover most of Chapters 1–3, but linked lists in Chapter 4 need pointers/arrows.<br/>
+        → Mid-fi pass on the reading layout with the real typography of your site.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<!-- tweaks -->
+<button class="tweaks-toggle" id="tweaks-toggle">◆ Tweaks</button>
+<div class="tweaks" id="tweaks">
+  <h5>Tweaks <button id="tweaks-close">close</button></h5>
+  <div class="row">
+    <label>Accent</label>
+    <div class="swatches" id="sw-accent">
+      <div class="sw active" data-c="#c65d3a" style="background:#c65d3a"></div>
+      <div class="sw" data-c="#2f6b55" style="background:#2f6b55"></div>
+      <div class="sw" data-c="#4a5aa8" style="background:#4a5aa8"></div>
+      <div class="sw" data-c="#8a2f6b" style="background:#8a2f6b"></div>
+      <div class="sw" data-c="#1a1a1a" style="background:#1a1a1a"></div>
+    </div>
+  </div>
+  <div class="row">
+    <label>Highlight</label>
+    <div class="swatches" id="sw-hl">
+      <div class="sw active" data-c="#ffe9a8" style="background:#ffe9a8"></div>
+      <div class="sw" data-c="#cbe9c3" style="background:#cbe9c3"></div>
+      <div class="sw" data-c="#c3d8ef" style="background:#c3d8ef"></div>
+      <div class="sw" data-c="#f4c9c9" style="background:#f4c9c9"></div>
+    </div>
+  </div>
+  <div class="row">
+    <label>Prose font</label>
+    <select id="font-select" style="font-family:inherit">
+      <option value="Georgia, serif" selected>Georgia (textbook)</option>
+      <option value="'Kalam',cursive">Kalam (sketchy)</option>
+      <option value="'Caveat',cursive">Caveat (casual)</option>
+      <option value="'JetBrains Mono',monospace">JetBrains Mono</option>
+    </select>
+  </div>
+  <div class="row"><label>Text size</label><input type="range" id="size-slider" min="13" max="20" step="1" value="17"/></div>
+  <div class="row">
+    <label>Show groups</label>
+    <select id="groups-select" style="font-family:inherit">
+      <option value="on">Visible markers</option>
+      <option value="subtle">Only on hover</option>
+    </select>
+  </div>
+  <div class="row"><label>Grid paper bg</label><input type="checkbox" id="grid-toggle" checked/></div>
+</div>
+
+<script>
+  // Tab switching
+  const tabs=document.querySelectorAll('.tab'),slots=document.querySelectorAll('.vslot'),lbl=document.getElementById('variation-label');
+  const lmap={R:'1 · READING',Q:'2 · QUIZ',M:'3 · MOBILE',A:'4 · AUTHORING'};
+  function show(t){tabs.forEach(x=>x.classList.toggle('active',x.dataset.tab===t));slots.forEach(s=>s.classList.toggle('hidden',s.dataset.tab!==t));lbl.textContent=lmap[t];try{localStorage.setItem('tb3_tab',t)}catch(e){}}
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.tab)));
+  try{const s=localStorage.getItem('tb3_tab');if(s)show(s)}catch(e){}
+  document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea,[contenteditable]')) return;const m={'1':'R','2':'Q','3':'M','4':'A'};if(m[e.key])show(m[e.key])});
+
+  // ---- Reading tab: shared refs ----
+  const prose = document.getElementById('prose-R');
+  const mem   = document.getElementById('mem-R');
+  const code  = document.getElementById('code-R');
+  const trans = document.getElementById('trans-R');
+  const connSvg = document.getElementById('connector-svg');
+
+  // Draw bezier connector arrows from a token span to matching translation steps
+  function drawConnectors(fromEl, stepEls){
+    clearConnectors();
+    if(!fromEl || !stepEls.length) return;
+    const wrap = connSvg.parentElement;
+    const wrapR = wrap.getBoundingClientRect();
+    const fromR = fromEl.getBoundingClientRect();
+    const x1 = fromR.right - wrapR.left + 4;
+    const y1 = fromR.top - wrapR.top + fromR.height / 2;
+    stepEls.forEach(step=>{
+      const toR = step.getBoundingClientRect();
+      const x2 = toR.left - wrapR.left - 4;
+      const y2 = toR.top - wrapR.top + toR.height / 2;
+      const gap = x2 - x1;
+      const cx1 = x1 + gap * 0.5;
+      const cx2 = x2 - gap * 0.3;
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
+      path.classList.add('connector-path','visible');
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', x2); dot.setAttribute('cy', y2); dot.setAttribute('r', 3.5);
+      dot.classList.add('connector-dot','visible');
+      connSvg.appendChild(path);
+      connSvg.appendChild(dot);
+    });
+  }
+  function clearConnectors(){ connSvg.innerHTML = ''; }
+
+  // Helper: clear all token highlights
+  function clearToks(){ document.querySelectorAll('.tok').forEach(t=>t.classList.remove('tok-hl')); }
+
+  // Wire translation step hovers → token highlight + connector
+  trans.querySelectorAll('.tl-step').forEach(step=>{
+    step.addEventListener('mouseenter',()=>{
+      const tok = step.dataset.tok;
+      const tokEl = tok ? code.querySelector(`.tok[data-tok="${tok}"]`) : null;
+      const sentKeys = step.dataset.sent ? step.dataset.sent.split(' ') : [];
+      if(prose.classList.contains('mode-sentence') && sentKeys.length){
+        setSent(sentKeys);
+      } else if(step.dataset.group){
+        setGroup(step.dataset.group);
+      }
+      // Token-level highlight + connector regardless of mode
+      clearToks();
+      if(tokEl){
+        tokEl.classList.add('tok-hl');
+        drawConnectors(tokEl, [step]);
+      }
+      step.classList.add('sent-hl');
+    });
+    step.addEventListener('mouseleave',()=>{
+      clearToks(); clearConnectors();
+      step.classList.remove('sent-hl');
+      if(prose.classList.contains('mode-sentence')){ clearSent(); }
+      else if(!prose.querySelector('.pinned')){ clearAll(); }
+    });
+  });
+
+  // Wire code line hovers → token highlight + connectors for each token in the line
+  code.querySelectorAll('.ln[data-sent]').forEach(ln=>{
+    ln.addEventListener('mouseenter',()=>{
+      const sentKeys = ln.dataset.sent ? ln.dataset.sent.split(' ') : [];
+      // Highlight tokens in this line → connectors to matching steps
+      clearToks();
+      const matchingSteps = [];
+      ln.querySelectorAll('.tok[data-tok]').forEach(tok=>{
+        const matchStep = trans.querySelector(`.tl-step[data-tok="${tok.dataset.tok}"]`);
+        if(matchStep){ tok.classList.add('tok-hl'); matchingSteps.push({tok, step:matchStep}); }
+      });
+      // Draw individual connector per tok→step pair
+      clearConnectors();
+      const wrap = connSvg.parentElement;
+      const wrapR = wrap.getBoundingClientRect();
+      matchingSteps.forEach(({tok, step})=>{
+        step.classList.add('sent-hl');
+        const fromR = tok.getBoundingClientRect();
+        const toR   = step.getBoundingClientRect();
+        const x1 = fromR.right - wrapR.left + 4;
+        const y1 = fromR.top - wrapR.top + fromR.height / 2;
+        const x2 = toR.left - wrapR.left - 4;
+        const y2 = toR.top - wrapR.top + toR.height / 2;
+        const gap = x2 - x1;
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d',`M${x1},${y1} C${x1+gap*.5},${y1} ${x2-gap*.3},${y2} ${x2},${y2}`);
+        path.classList.add('connector-path','visible');
+        const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        dot.setAttribute('cx',x2); dot.setAttribute('cy',y2); dot.setAttribute('r',3.5);
+        dot.classList.add('connector-dot','visible');
+        connSvg.appendChild(path); connSvg.appendChild(dot);
+      });
+    });
+    ln.addEventListener('mouseleave',()=>{
+      clearToks(); clearConnectors();
+      trans.querySelectorAll('.tl-step').forEach(s=>s.classList.remove('sent-hl'));
+    });
+  });
+
+  // =====================================================================
+  // PARAGRAPH MODE — hover paragraph → highlight its group everywhere
+  // =====================================================================
+  function clearAll(){
+    prose.querySelectorAll('.pblock').forEach(p=>p.classList.remove('active','faded'));
+    mem.querySelectorAll('.cell').forEach(c=>c.classList.remove('group-hl','faded','hl','sent-hl'));
+    code.querySelectorAll('.ln').forEach(l=>l.classList.remove('group-hl','faded','hl','sent-hl'));
+    trans.querySelectorAll('.tl-step').forEach(s=>s.classList.remove('group-hl','faded','sent-hl'));
+  }
+  function setGroup(g){
+    prose.querySelectorAll('.pblock[data-group]').forEach(p=>{
+      p.classList.toggle('active', p.dataset.group===g);
+      p.classList.toggle('faded',  g && p.dataset.group!==g);
+    });
+    mem.querySelectorAll('.cell').forEach(c=>{
+      c.classList.toggle('group-hl', c.dataset.group===g);
+      c.classList.toggle('faded',    g && c.dataset.group && c.dataset.group!==g);
+    });
+    code.querySelectorAll('.ln').forEach(l=>{
+      l.classList.toggle('group-hl', l.dataset.group===g);
+      l.classList.toggle('faded',    g && l.dataset.group && l.dataset.group!==g);
+    });
+    trans.querySelectorAll('.tl-step').forEach(s=>{
+      const match = s.dataset.group===g;
+      s.classList.toggle('group-hl', match);
+      s.classList.toggle('faded',    g && s.dataset.group && !match);
+    });
+  }
+
+  prose.querySelectorAll('.pblock[data-group]').forEach(p=>{
+    p.addEventListener('mouseenter',()=>{ if(prose.classList.contains('mode-paragraph')) setGroup(p.dataset.group); });
+    p.addEventListener('mouseleave',()=>{ if(prose.classList.contains('mode-paragraph') && !prose.querySelector('.pinned')) clearAll(); });
+    p.addEventListener('click',()=>{
+      if(!prose.classList.contains('mode-paragraph')) return;
+      const already = p.classList.contains('pinned');
+      prose.querySelectorAll('.pblock').forEach(x=>x.classList.remove('pinned'));
+      if(already){ clearAll(); } else { p.classList.add('pinned'); setGroup(p.dataset.group); }
+    });
+  });
+
+  // Cell ↔ code line fine-grained hover (works in both modes)
+  mem.querySelectorAll('.cell[data-k]').forEach(c=>{
+    c.addEventListener('mouseenter',()=>{
+      const k=c.dataset.k;
+      code.querySelectorAll(`.ln[data-link="${k}"]`).forEach(l=>l.classList.add('hl'));
+      c.classList.add('hl');
+    });
+    c.addEventListener('mouseleave',()=>{
+      c.classList.remove('hl');
+      code.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));
+    });
+  });
+  // (code line fine-grained hover now handled by tok+connector block above)
+
+  // =====================================================================
+  // SENTENCE MODE — hover sentence → highlight matched code lines + cells
+  // =====================================================================
+  function setSent(sentKeys){
+    // sentKeys is an array like ['s1'] or ['s3','s4']
+    clearAll();
+    code.querySelectorAll('.ln[data-sent]').forEach(l=>{
+      const lSents = l.dataset.sent.split(' ');
+      const match  = lSents.some(s=>sentKeys.includes(s));
+      l.classList.toggle('sent-hl', match);
+      l.classList.toggle('faded',   !match && !!l.dataset.sent);
+    });
+    mem.querySelectorAll('.cell[data-sent]').forEach(c=>{
+      const cSents = c.dataset.sent.split(' ');
+      const match  = cSents.some(s=>sentKeys.includes(s));
+      c.classList.toggle('sent-hl', match);
+      c.classList.toggle('faded',   !match);
+    });
+    trans.querySelectorAll('.tl-step[data-sent]').forEach(s=>{
+      const sSents = s.dataset.sent.split(' ');
+      const match  = sSents.some(k=>sentKeys.includes(k));
+      s.classList.toggle('sent-hl', match);
+      s.classList.toggle('faded',   !match);
+    });
+  }
+  function clearSent(){
+    code.querySelectorAll('.ln').forEach(l=>l.classList.remove('sent-hl','faded'));
+    mem.querySelectorAll('.cell').forEach(c=>c.classList.remove('sent-hl','faded'));
+    trans.querySelectorAll('.tl-step').forEach(s=>s.classList.remove('sent-hl','faded'));
+    prose.querySelectorAll('.sent').forEach(s=>s.classList.remove('sent-hl'));
+  }
+
+  // (translation step hover handled above in the tok+connector block)
+
+  prose.querySelectorAll('.sent[data-sent]').forEach(s=>{
+    s.addEventListener('mouseenter',()=>{
+      if(!prose.classList.contains('mode-sentence')) return;
+      s.classList.add('sent-hl');
+      setSent(s.dataset.sent.split(' '));
+    });
+    s.addEventListener('mouseleave',()=>{
+      if(!prose.classList.contains('mode-sentence')) return;
+      s.classList.remove('sent-hl');
+      clearSent();
+    });
+  });
+
+  // =====================================================================
+  // MODE TOGGLE (¶ paragraph / — sentence)
+  // =====================================================================
+  const readModeToggle = document.getElementById('read-mode-toggle');
+  readModeToggle.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      readModeToggle.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      clearAll(); clearSent();
+      prose.querySelectorAll('.pblock').forEach(p=>p.classList.remove('pinned'));
+      if(btn.dataset.mode==='sentence'){
+        prose.classList.remove('mode-paragraph');
+        prose.classList.add('mode-sentence');
+      } else {
+        prose.classList.remove('mode-sentence');
+        prose.classList.add('mode-paragraph');
+      }
+      try{localStorage.setItem('tb3_read_mode', btn.dataset.mode)}catch(e){}
+    });
+  });
+  // Restore saved mode
+  try{
+    const saved = localStorage.getItem('tb3_read_mode');
+    if(saved==='sentence'){
+      readModeToggle.querySelector('[data-mode="sentence"]').click();
+    }
+  }catch(e){}
+
+  // =====================================================================
+  // QUIZ — mode switch
+  // =====================================================================
+  const modes=document.querySelectorAll('.quiz-mode-pick .mode');
+  const qc2d=document.getElementById('quiz-c2d'), qd2c=document.getElementById('quiz-d2c');
+  modes.forEach(m=>m.addEventListener('click',()=>{
+    modes.forEach(x=>x.classList.remove('sel')); m.classList.add('sel');
+    if(m.dataset.mode==='c2d'){qc2d.classList.remove('hidden');qd2c.classList.add('hidden')}
+    else{qc2d.classList.add('hidden');qd2c.classList.remove('hidden')}
+  }));
+
+  // ---- C2D: drag/tap chips into cells ----
+  const tray=document.getElementById('c2d-tray');
+  let dragVal=null, dragChip=null;
+  tray.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('dragstart',e=>{dragVal=c.dataset.v;dragChip=c;e.dataTransfer.setData('text/plain',c.dataset.v)});
+    c.addEventListener('click',()=>{
+      dragVal=c.dataset.v; dragChip=c;
+      tray.querySelectorAll('.chip').forEach(x=>x.style.outline='');
+      c.style.outline='2px solid var(--accent)';
+    });
+  });
+  document.querySelectorAll('#c2d-mem .cell').forEach(cell=>{
+    const input=cell.querySelector('[data-role="val"]');
+    cell.addEventListener('dragover',e=>e.preventDefault());
+    cell.addEventListener('drop',e=>{e.preventDefault();if(dragVal!==null){input.value=dragVal;if(dragChip)dragChip.classList.add('used')}});
+    cell.addEventListener('click',e=>{
+      if(e.target===input||e.target.dataset.role==='name') return;
+      if(dragVal!==null){input.value=dragVal;if(dragChip){dragChip.classList.add('used');dragChip.style.outline=''}dragVal=null;dragChip=null}
+    });
+  });
+
+  // ---- C2D: check (diagnostic, no score) ----
+  const C2D_ANSWERS = {0:'10', 1:'7', 2:'—', 3:'—'}; // indexed by cell order
+  document.getElementById('c2d-check').addEventListener('click',()=>{
+    const cells=[...document.querySelectorAll('#c2d-mem .cell')];
+    let allFilled=true, allRight=true;
+    cells.forEach((cell,i)=>{
+      const got=cell.querySelector('[data-role="val"]').value.trim();
+      cell.classList.remove('right','wrong');
+      if(!got){allFilled=false;return}
+      const right = got===cell.dataset.answer;
+      cell.classList.add(right?'right':'wrong');
+      if(!right) allRight=false;
+    });
+    const fb=document.getElementById('c2d-feedback');
+    if(!allFilled){fb.className='feedback';fb.textContent='Fill in all the boxes first, then check.';return}
+    if(allRight){fb.className='feedback ok';fb.textContent='✓ All correct — notice that reassigning a on line 3 left b untouched.'}
+    else{fb.className='feedback no';fb.textContent='Red boxes are wrong — look at the code line by line and try again.'}
+  });
+
+  document.getElementById('c2d-reset').addEventListener('click',()=>{
+    document.querySelectorAll('#c2d-mem .cell').forEach(cell=>{
+      cell.classList.remove('right','wrong');
+      cell.querySelectorAll('input').forEach(i=>{if(i.dataset.role==='val') i.value=''});
+    });
+    tray.querySelectorAll('.chip').forEach(c=>{c.classList.remove('used');c.style.outline=''});
+    dragVal=null; dragChip=null;
+    document.getElementById('c2d-feedback').className='feedback';
+    document.getElementById('c2d-feedback').textContent='';
+  });
+
+  document.getElementById('c2d-reveal').addEventListener('click',()=>{
+    document.querySelectorAll('#c2d-mem .cell').forEach(cell=>{
+      cell.querySelector('[data-role="val"]').value = cell.dataset.answer;
+      cell.classList.remove('wrong'); cell.classList.add('right');
+    });
+    const fb=document.getElementById('c2d-feedback');
+    fb.className='feedback'; fb.textContent='Answers revealed. Study each line: a starts at 3, b copies a+4=7, then a is reassigned to 10.';
+  });
+
+  // ---- D2C: string-match check ----
+  // Correct answers keyed by blank index (left-to-right, top-to-bottom)
+  const D2C_ANSWERS = ['a','3','b','a + 4','a','10'];
+  // Alternate acceptable forms
+  const D2C_ALT = [['a'],['3'],['b'],['a+4','a + 4','x+4'],['a'],['10']];
+
+  function getD2CBlanks(){
+    return [...document.querySelectorAll('#quiz-d2c .code-blank .blank[contenteditable]')];
+  }
+  document.getElementById('d2c-check').addEventListener('click',()=>{
+    const blanks = getD2CBlanks();
+    let allFilled=true, allRight=true;
+    blanks.forEach((b,i)=>{
+      const got = b.textContent.trim().replace(/\s+/g,' ');
+      b.classList.remove('right','wrong');
+      if(!got){allFilled=false;return}
+      const alts = D2C_ALT[i]||[];
+      const ok = alts.some(a=>a.toLowerCase()===got.toLowerCase());
+      b.classList.add(ok?'right':'wrong');
+      if(!ok) allRight=false;
+    });
+    const fb=document.getElementById('d2c-feedback');
+    if(!allFilled){fb.className='feedback';fb.textContent='Fill in every blank first.';return}
+    if(allRight){fb.className='feedback ok';fb.textContent='✓ Correct — you reconstructed the three lines perfectly.'}
+    else{fb.className='feedback no';fb.textContent='Red blanks are wrong. Trace back from the diagram: b must be 7, and a was reassigned last.'}
+  });
+
+  document.getElementById('d2c-reset').addEventListener('click',()=>{
+    getD2CBlanks().forEach(b=>{b.textContent='';b.classList.remove('right','wrong')});
+    const fb=document.getElementById('d2c-feedback');
+    fb.className='feedback'; fb.textContent='';
+  });
+
+  document.getElementById('d2c-reveal').addEventListener('click',()=>{
+    getD2CBlanks().forEach((b,i)=>{b.textContent=D2C_ANSWERS[i];b.classList.remove('wrong');b.classList.add('right')});
+    const fb=document.getElementById('d2c-feedback');
+    fb.className='feedback'; fb.textContent='Answers filled. Key insight: a+4 was evaluated before a was reassigned to 10.';
+  });
+
+  // ---- Tweaks panel ----
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "accent": "#c65d3a",
+    "highlight": "#ffe9a8",
+    "prose_font": "Georgia, serif",
+    "text_size": 17,
+    "groups": "on",
+    "grid_bg": true
+  }/*EDITMODE-END*/;
+
+  const panel=document.getElementById('tweaks'),togBtn=document.getElementById('tweaks-toggle'),closeBtn=document.getElementById('tweaks-close');
+  function openPanel(){panel.classList.add('open');togBtn.style.display='none'}
+  function closePanel(){panel.classList.remove('open');togBtn.style.display=''}
+  togBtn.addEventListener('click',openPanel);closeBtn.addEventListener('click',closePanel);
+
+  let cur={...TWEAK_DEFAULTS};
+  function applyTweaks(t){
+    document.documentElement.style.setProperty('--accent',t.accent);
+    document.documentElement.style.setProperty('--accent-wash',t.accent+'33');
+    document.documentElement.style.setProperty('--highlight',t.highlight);
+    document.querySelectorAll('.prose').forEach(el=>{el.style.fontFamily=t.prose_font;el.style.fontSize=t.text_size+'px'});
+    document.body.style.backgroundImage = t.grid_bg ? '' : 'none';
+    document.querySelectorAll('.pblock[data-group]').forEach(p=>{p.style.setProperty('--marker-op', t.groups==='subtle'?'0':'1')});
+    const style=document.getElementById('dyn-style')||Object.assign(document.createElement('style'),{id:'dyn-style'});
+    style.textContent = t.groups==='subtle'
+      ? '.pblock[data-group]::before{opacity:0;transition:opacity .2s}.pblock[data-group]:hover::before{opacity:1}'
+      : '';
+    if(!style.parentNode) document.head.appendChild(style);
+  }
+  applyTweaks(cur);
+  function setKey(k,v){cur[k]=v;applyTweaks(cur);try{window.parent.postMessage({type:'__edit_mode_set_keys',edits:{[k]:v}},'*')}catch(e){}}
+  document.querySelectorAll('#sw-accent .sw').forEach(s=>s.addEventListener('click',()=>{document.querySelectorAll('#sw-accent .sw').forEach(x=>x.classList.remove('active'));s.classList.add('active');setKey('accent',s.dataset.c)}));
+  document.querySelectorAll('#sw-hl .sw').forEach(s=>s.addEventListener('click',()=>{document.querySelectorAll('#sw-hl .sw').forEach(x=>x.classList.remove('active'));s.classList.add('active');setKey('highlight',s.dataset.c)}));
+  document.getElementById('font-select').addEventListener('change',e=>setKey('prose_font',e.target.value));
+  document.getElementById('size-slider').addEventListener('input',e=>setKey('text_size',+e.target.value));
+  document.getElementById('groups-select').addEventListener('change',e=>setKey('groups',e.target.value));
+  document.getElementById('grid-toggle').addEventListener('change',e=>setKey('grid_bg',e.target.checked));
+  window.addEventListener('message',e=>{const d=e.data||{};if(d.type==='__activate_edit_mode')openPanel();if(d.type==='__deactivate_edit_mode')closePanel()});
+  try{window.parent.postMessage({type:'__edit_mode_available'},'*')}catch(e){}
+</script>
+</body>
+</html>

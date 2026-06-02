@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Diagram Vocabulary — Fundamentals of CS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+<style>
+:root{
+  --ink:#1a1a1a; --ink-soft:#4a4a4a; --ink-faint:#9a9a9a;
+  --paper:#fafaf6; --paper-2:#f2efe4; --paper-3:#ebe8d8;
+  --accent:#c65d3a; --accent-wash:#f3d8c9;
+  --hi:#ffe9a8; --hi-wash:#fff8e0;
+  --g1:#c65d3a; --g2:#2f6b55; --g3:#4a5aa8; --g4:#8a3f7a;
+  --grid:#e8e3d2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:Georgia,serif}
+body{background-image:radial-gradient(var(--grid) 1px,transparent 1px);background-size:22px 22px;min-height:100vh}
+.page{max-width:1480px;margin:0 auto;padding:28px 36px 100px}
+
+/* ---- header ---- */
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:14px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.hdr h1{font-family:'Caveat';font-weight:700;font-size:46px;line-height:.95;margin:0}
+.hdr h1 .sub{display:block;font-family:'Kalam';font-weight:300;font-size:15px;color:var(--ink-soft);margin-top:4px}
+.hdr .meta{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.7}
+
+/* ---- tabs ---- */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);align-items:flex-end;flex-wrap:wrap}
+.tab{font-family:'Caveat';font-weight:700;font-size:20px;background:var(--paper-2);border:2px solid var(--ink);border-bottom:none;padding:7px 14px;margin-right:4px;cursor:pointer;position:relative;top:2px;color:var(--ink-soft);transform:rotate(-.3deg);white-space:nowrap}
+.tab:nth-child(even){transform:rotate(.2deg)}
+.tab.active{background:var(--paper);color:var(--ink);box-shadow:0 -2px 0 var(--paper);z-index:2}
+.tab .n{font-family:'JetBrains Mono';font-size:10px;color:var(--accent);margin-right:5px;font-weight:600}
+.tab-cap{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);padding-bottom:8px;align-self:flex-end}
+
+.frame{border:2px solid var(--ink);border-top:none;background:var(--paper);padding:20px 24px 26px;min-height:760px}
+.hidden{display:none !important}
+
+/* ---- shared ---- */
+kbd{font-family:'JetBrains Mono';font-size:10px;border:1.2px solid var(--ink);padding:0 5px;background:var(--paper-2);border-radius:3px}
+.tag{display:inline-block;border:1.2px solid var(--ink);background:var(--paper);font-family:'JetBrains Mono';font-size:10px;padding:1px 6px;margin-right:4px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+.cap{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
+.scribble{display:block;height:5px;background-image:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 14px);opacity:.35;margin:10px 0}
+
+.spec-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:980px){.spec-wrap{grid-template-columns:1fr}}
+.spec-wrap.thirds{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.spec-wrap.thirds{grid-template-columns:1fr 1fr}}
+
+.spec{border:1.5px solid var(--ink);background:var(--paper);padding:14px}
+.spec h3{font-family:'Caveat';font-size:26px;margin:0 0 4px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
+.spec h3 .badge{font-family:'JetBrains Mono';font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.spec .desc{font-family:'Kalam';font-size:14px;color:var(--ink-soft);margin:0 0 12px;line-height:1.45}
+
+.vhint{font-family:'Kalam';font-size:14px;color:var(--ink-soft);margin:0 0 16px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-wash)}
+.vhint b{color:var(--ink)}
+
+.code{border:1.5px solid var(--ink);background:#fbf9ef;padding:8px 10px;font-family:'JetBrains Mono';font-size:12.5px;line-height:1.6}
+.code .ln{display:block;white-space:pre;padding:1px 4px;border-radius:2px;transition:background .12s,box-shadow .12s}
+.code .ln .kw{color:var(--accent);font-weight:600}
+.code .ln .cm{color:var(--ink-faint);font-style:italic}
+.code .ln .tok{border-radius:2px;padding:0 1px;transition:background .1s,outline .1s}
+.code .ln .tok.hl{background:var(--hi);outline:2px solid var(--accent);outline-offset:1px}
+.code .ln.hl{background:var(--hi);box-shadow:inset 3px 0 0 var(--accent)}
+.code .ln.faded{opacity:.3}
+
+/* ============================= MEMORY VALUE ============================= */
+.mem-grid{display:grid;gap:8px;margin:10px 0}
+.mem-grid.cols4{grid-template-columns:repeat(4,1fr)}
+.mem-grid.cols2{grid-template-columns:repeat(2,1fr)}
+.mem-cell{border:1.5px solid var(--ink);background:var(--paper);padding:8px 6px;text-align:center;font-family:'JetBrains Mono';font-size:12px;min-height:60px;transition:background .15s,box-shadow .15s;position:relative;cursor:default}
+.mem-cell .addr{display:block;font-size:9px;color:var(--ink-soft);margin-bottom:2px}
+.mem-cell .val{font-weight:600}
+.mem-cell .name{display:block;font-family:'Caveat';font-size:15px;color:var(--accent);font-weight:700;margin-top:2px}
+.mem-cell.hl{background:var(--hi);box-shadow:0 0 0 3px var(--accent),0 0 0 5px var(--paper)}
+.mem-cell.faded{opacity:.25}
+.mem-cell.ptr::after{content:"→";position:absolute;right:-14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--accent);font-weight:700;background:var(--paper);padding:0 2px;z-index:1}
+
+/* ============================= EVAL TREE ============================= */
+.eval-tree{font-family:'JetBrains Mono';font-size:13px;position:relative}
+.tree-node{display:inline-flex;flex-direction:column;align-items:center;gap:2px;position:relative;cursor:pointer;padding:0 12px}
+.tree-node .n-box{border:1.5px solid var(--ink);background:var(--paper);padding:4px 10px;border-radius:3px;font-weight:600;transition:background .12s,box-shadow .12s;white-space:nowrap}
+.tree-node .n-result{font-size:10px;color:var(--ink-soft);margin-top:1px;opacity:0;transition:opacity .15s}
+.tree-node.hl .n-box{background:var(--hi);box-shadow:0 0 0 2px var(--accent)}
+.tree-node.hl .n-result{opacity:1;color:var(--g2);font-weight:600}
+.tree-node .n-box.op{background:var(--paper-2);color:var(--accent);font-weight:700}
+.tree-children{display:flex;justify-content:center;gap:0;position:relative;margin-top:0}
+.tree-row{display:flex;justify-content:center}
+.connector-v{width:1.5px;height:22px;background:var(--ink);margin:0 auto;opacity:.5}
+
+.reduction{margin:10px 0}
+.reduction .step{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono';font-size:13px;padding:4px 8px;border-radius:2px;transition:background .12s;cursor:pointer}
+.reduction .step:hover,.reduction .step.hl{background:var(--hi)}
+.reduction .step .expr{flex:1}
+.reduction .step .arrow{color:var(--ink-faint)}
+.reduction .step .result{color:var(--g2);font-weight:600}
+.reduction .step .reason{color:var(--ink-soft);font-size:11px;font-family:'Kalam'}
+
+/* call stack */
+.call-stack{display:flex;flex-direction:column;gap:0;font-family:'JetBrains Mono';font-size:12px}
+.call-frame{border:1.5px solid var(--ink);background:var(--paper);padding:8px 10px;position:relative;transition:background .15s}
+.call-frame:not(:last-child){border-bottom:1px dashed var(--ink-faint)}
+.call-frame .frame-name{font-family:'Caveat';font-size:18px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.call-frame .frame-vars{display:flex;gap:12px;flex-wrap:wrap}
+.call-frame .fv{display:flex;flex-direction:column;align-items:center;font-size:11.5px}
+.call-frame .fv .fv-val{border:1.2px solid var(--ink);background:var(--paper-2);padding:2px 8px;font-weight:600;min-width:36px;text-align:center}
+.call-frame .fv .fv-name{font-size:9.5px;color:var(--ink-soft);margin-top:2px}
+.call-frame.hl{background:var(--hi)}
+.call-frame.inactive{opacity:.45}
+
+/* ============================= LOOP TRACE ============================= */
+.trace-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono';font-size:12.5px}
+.trace-table th{background:var(--paper-2);border:1.5px solid var(--ink);padding:6px 10px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+.trace-table td{border:1.5px solid var(--ink);padding:7px 10px;background:var(--paper);transition:background .12s}
+.trace-table tr{cursor:pointer}
+.trace-table tr:hover td,.trace-table tr.hl td{background:var(--hi)}
+.trace-table td.val-changed{color:var(--accent);font-weight:600}
+.trace-table td.cond-t{color:var(--g2);font-weight:600}
+.trace-table td.cond-f{color:#b84747;font-weight:600}
+.trace-table td.stop{color:#b84747;font-style:italic}
+.trace-table .iter-n{color:var(--ink-faint)}
+
+.loop-body{margin-top:10px;border:1.5px dashed var(--ink);padding:8px 10px;background:var(--paper-2);font-family:'Kalam';font-size:13.5px;display:none}
+.loop-body.visible{display:block;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ============================= BRANCH ============================= */
+.branch-svg-wrap{position:relative;width:100%;overflow:visible}
+/* if/else inline HTML layout */
+.branch-layout{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:start;font-family:'JetBrains Mono';font-size:12px}
+.branch-cond{grid-column:1/span 3;display:flex;justify-content:center;margin-bottom:0}
+.branch-cond .diamond{width:110px;height:110px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.branch-cond .diamond::before{content:"";position:absolute;inset:0;background:var(--paper-2);border:1.5px solid var(--ink);transform:rotate(45deg);border-radius:3px;transition:background .15s}
+.branch-cond .diamond .d-text{position:relative;z-index:1;text-align:center;font-size:11.5px;line-height:1.3;padding:0 8px}
+.branch-cond .diamond:hover::before,.branch-cond .diamond.hl::before{background:var(--hi)}
+.branch-arms{grid-column:1/span 3;display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+.branch-arm{border:1.5px solid var(--ink);padding:10px;background:var(--paper);transition:background .15s;cursor:pointer}
+.branch-arm:hover,.branch-arm.hl{background:var(--hi)}
+.branch-arm .arm-label{font-family:'Caveat';font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.branch-arm .arm-label .pill{font-family:'JetBrains Mono';font-size:10px;padding:1px 8px;border:1.2px solid var(--ink);border-radius:20px}
+.branch-arm .arm-label .pill.t{background:var(--g2);color:#fff;border-color:var(--g2)}
+.branch-arm .arm-label .pill.f{background:#b84747;color:#fff;border-color:#b84747}
+.branch-merge{grid-column:1/span 3;display:flex;justify-content:center;margin-top:10px}
+.branch-merge .merge-box{border:1.5px solid var(--ink);padding:6px 18px;background:var(--paper-2);font-family:'Caveat';font-size:18px;font-weight:700}
+
+/* switch */
+.switch-layout{font-family:'JetBrains Mono';font-size:12.5px}
+.switch-expr{border:1.5px solid var(--ink);padding:8px 12px;background:var(--paper-2);display:inline-flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;transition:background .12s}
+.switch-expr:hover,.switch-expr.hl{background:var(--hi)}
+.switch-expr .arrow{color:var(--ink-faint)}
+.switch-arm{display:flex;align-items:center;gap:10px;padding:5px 8px;border-radius:2px;cursor:pointer;transition:background .12s;margin:3px 0}
+.switch-arm:hover,.switch-arm.hl{background:var(--hi)}
+.switch-arm .pat{color:var(--g3);font-weight:600;min-width:60px}
+.switch-arm .sep{color:var(--ink-faint)}
+.switch-arm .res{font-weight:600;color:var(--g2)}
+.switch-arm.active-match{background:#d8ecde}
+.switch-arm.faded{opacity:.3}
+
+/* ============================= REDUCTION (bottom-up layers, sketch-faithful) ============================= */
+.rd-paper{position:relative;padding:24px 28px 22px;background:var(--paper);background-image:radial-gradient(rgba(0,0,0,.06) 1px,transparent 1px);background-size:18px 18px;background-position:0 0;border:1.5px solid var(--ink);min-height:280px}
+
+/* The "tower" — flex column reverse so we add layers on top visually */
+.rd-tower{display:flex;flex-direction:column-reverse;align-items:flex-start;gap:0;font-family:'Kalam',cursive;color:#9c7a6c}
+.rd-layer{position:relative;padding:4px 0 0;display:flex;align-items:flex-end;gap:6px;cursor:pointer;transition:opacity .15s}
+.rd-layer.bottom{padding-top:6px}
+.rd-layer + .rd-layer{margin-top:0}
+/* drawn line above each non-bottom layer (the line the new step is written on) */
+.rd-layer:not(.bottom)::before{
+  content:"";position:absolute;left:var(--line-x,0);width:var(--line-w,100%);
+  top:-2px;height:2px;background:#b59686;border-radius:2px;
+  transform:rotate(-.4deg);
+}
+.rd-layer .rd-content{font-size:22px;font-weight:400;line-height:1.1;letter-spacing:.5px;padding:2px 4px 4px;white-space:nowrap}
+.rd-layer.bottom .rd-content{font-size:24px}
+/* small order tick to the LEFT of the line */
+.rd-layer .tick{position:absolute;font-family:'Caveat';font-size:22px;font-weight:700;color:#b08572;line-height:1;white-space:nowrap}
+.rd-layer .tick.left{left:-22px;top:-12px;transform:rotate(-8deg)}
+.rd-layer .tick.right{position:absolute;font-family:'Caveat';font-size:22px;font-weight:700;color:#b08572;left:calc(var(--line-x) + var(--line-w) + 4px);top:-14px;transform:rotate(6deg)}
+.rd-layer.bottom .tick.left{top:auto;bottom:6px;left:-22px;transform:rotate(-8deg)}
+
+/* arrow continuing to the final value, bottom row only */
+.rd-final-wrap{display:inline-flex;align-items:flex-end;gap:4px;margin-left:14px;position:relative}
+.rd-final-wrap .rd-arrow-label{position:absolute;left:0;right:0;top:-18px;font-family:'Kalam';font-size:11.5px;font-style:italic;color:var(--ink-faint);text-align:center;font-weight:400;white-space:nowrap;letter-spacing:.02em}
+.rd-layer .rd-final-arrow{font-family:'Caveat';font-size:30px;font-weight:700;color:#b08572;padding:0 6px 0 4px;align-self:flex-end;transform:translateY(2px) rotate(-2deg)}
+.rd-layer .rd-final-val{font-family:'Caveat';font-size:34px;font-weight:700;color:#7aa55c;align-self:flex-end;padding-bottom:2px;transform:rotate(-1deg)}
+
+/* default fade so the tower reads bottom-to-top: oldest (bottom) bright, top steps dim until hovered */
+.rd-tower .rd-layer{opacity:.45;transition:opacity .15s,filter .15s}
+.rd-tower .rd-layer.cur{opacity:1}
+.rd-tower:hover .rd-layer{opacity:.3}
+.rd-tower:hover .rd-layer:hover{opacity:1}
+.rd-tower .rd-layer:hover ~ .rd-layer{opacity:.3}
+
+/* "layer N of M" pop-up for the active layer */
+.rd-layer-cap{position:absolute;left:0;right:0;bottom:6px;font-family:'Kalam';font-size:13px;color:var(--ink-soft);font-style:italic;text-align:right;padding-right:10px;pointer-events:none}
+
+/* Linked-list nodes inline — drawn in the same brown "ink" */
+.rd-llnode{display:inline-flex;border:1.6px solid #7a3a26;background:transparent;font-size:14px;margin:0 1px;vertical-align:middle;height:24px;align-items:stretch;font-family:'Kalam'}
+.rd-llnode .lv{padding:0 6px;border-right:1.4px solid #7a3a26;font-weight:600;display:flex;align-items:center;color:#7a3a26}
+.rd-llnode .lp{padding:0 4px;color:#7a3a26;display:flex;align-items:center;font-size:12px}
+.rd-llnode.null{border-style:none;color:#7a3a26;padding:0 4px;display:inline-flex;align-items:center;font-size:18px}
+.rd-llnode.null::before{content:"⌧";font-size:20px}
+.rd-llarrow{color:#7a3a26;font-weight:700;padding:0 1px;font-size:16px;align-self:center}
+
+/* paper-hint label */
+.rd-paper-hint{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'Kalam';font-size:12px;color:var(--ink-faint);padding:6px 12px;border:1.5px solid var(--ink);border-bottom:none;background:var(--paper-2);font-style:italic}
+.rd-paper-hint .order-key{display:inline-flex;gap:6px;align-items:center;color:var(--ink-soft);font-style:normal;font-family:'Caveat';font-size:16px;font-weight:700}
+.rd-paper-hint .order-key b{color:var(--accent)}
+
+/* Linked-list node inline within reduction */
+.rd-llnode{display:inline-flex;border:1.4px solid var(--ink);background:var(--paper);font-size:11px;margin:0 1px;vertical-align:middle;height:22px;align-items:stretch}
+.rd-llnode .lv{padding:2px 6px;border-right:1.2px solid var(--ink);font-weight:600;display:flex;align-items:center}
+.rd-llnode .lp{padding:2px 4px;color:var(--accent);display:flex;align-items:center;font-size:10px}
+.rd-llnode.null{border-style:dashed;color:var(--ink-faint);padding:2px 6px;display:inline-flex;align-items:center}
+.rd-llarrow{color:var(--accent);font-weight:700;padding:0 1px;font-size:14px}
+
+/* Section header inside RD */
+.rd-section{margin:0 0 18px}
+.rd-section h3{font-family:'Caveat';font-size:26px;margin:0 0 4px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rd-section h3 .badge{font-family:'JetBrains Mono';font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.rd-section .desc{font-family:'Kalam';font-size:14px;color:var(--ink-soft);margin:0 0 10px;line-height:1.45;max-width:760px}
+.rd-block{border:1.5px solid var(--ink);background:var(--paper);padding:0}
+
+/* Rules card */
+.rd-rules{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:980px){.rd-rules{grid-template-columns:1fr}}
+.rd-rule{border:1.5px solid var(--ink);padding:12px;background:var(--paper)}
+.rd-rule.value{border-top:5px solid var(--g1)}
+.rd-rule.ref{border-top:5px solid var(--g3)}
+.rd-rule h4{font-family:'Caveat';font-size:22px;margin:0 0 4px;font-weight:700}
+.rd-rule .rule-tag{font-family:'JetBrains Mono';font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:0 0 8px}
+.rd-rule p{font-family:'Kalam';font-size:13.5px;color:var(--ink);margin:0 0 6px;line-height:1.5}
+.rd-rule p:last-child{margin-bottom:0}
+.rd-rule code{font-family:'JetBrains Mono';font-size:12px;background:var(--paper-2);padding:1px 4px;border:1px solid var(--ink-faint);border-radius:2px}
+
+
+.mem-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.mem-region{border:1.5px solid var(--ink);padding:10px}
+.mem-region h4{font-family:'Caveat';font-size:20px;font-weight:700;margin:0 0 8px;border-bottom:1px dashed var(--ink-faint);padding-bottom:4px}
+.heap-obj{border:1.5px solid var(--g3);padding:8px 10px;background:var(--paper);margin-bottom:8px;position:relative}
+.heap-obj .obj-type{font-family:'JetBrains Mono';font-size:10.5px;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.heap-obj .obj-field{display:flex;gap:8px;align-items:center;font-family:'JetBrains Mono';font-size:12px;padding:2px 0}
+.heap-obj .obj-field .fname{color:var(--ink-soft);min-width:60px}
+.heap-obj .obj-field .fval{font-weight:600}
+.heap-obj.hl{background:var(--hi);border-color:var(--accent)}
+.ptr-arrow{font-size:18px;color:var(--accent);font-family:'Caveat';font-weight:700;text-align:center;padding:4px 0}
+
+/* ============================= ARRAY ============================= */
+.array-wrap{overflow-x:auto;padding-bottom:4px}
+.array-strip{display:inline-flex;gap:0;margin:10px 0;position:relative}
+.array-cell{border:1.5px solid var(--ink);background:var(--paper);padding:10px 6px;text-align:center;font-family:'JetBrains Mono';font-size:12.5px;min-width:52px;position:relative;transition:background .15s,box-shadow .15s;cursor:pointer;flex-shrink:0}
+.array-cell:not(:first-child){border-left:none}
+.array-cell .a-idx{display:block;font-size:9px;color:var(--ink-soft);margin-bottom:3px}
+.array-cell .a-val{font-weight:600}
+.array-cell.hl{background:var(--hi);box-shadow:0 0 0 2px var(--accent);z-index:1}
+.array-cell.faded{opacity:.25}
+.array-cell.out-of-bounds{background:var(--paper-3);border-style:dashed;opacity:.5}
+.array-ptr{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono';font-size:12px;margin:6px 0 10px}
+.array-ptr .ptr-box{border:1.5px solid var(--ink);background:var(--paper);padding:4px 8px;font-family:'Caveat';font-size:16px;font-weight:700}
+.array-ptr .arr-label{color:var(--ink-soft);font-size:11px}
+
+/* ============================= LINKED LIST ============================= */
+.ll-wrap{overflow-x:auto;padding-bottom:8px}
+.ll-strip{display:inline-flex;align-items:center;gap:0;margin:10px 0;position:relative}
+.ll-node{display:flex;border:1.5px solid var(--ink);background:var(--paper);font-family:'JetBrains Mono';font-size:12px;transition:background .15s,box-shadow .15s;cursor:pointer;flex-shrink:0}
+.ll-node .n-val{padding:10px 12px;border-right:1.5px solid var(--ink);font-weight:600;min-width:46px;text-align:center}
+.ll-node .n-ptr{padding:10px 8px;font-size:10.5px;color:var(--ink-soft);min-width:46px;text-align:center}
+.ll-node.hl{background:var(--hi);box-shadow:0 0 0 2px var(--accent);z-index:1}
+.ll-node.faded{opacity:.25}
+.ll-arrow{font-size:20px;color:var(--accent);padding:0 4px;font-family:'Caveat';font-weight:700;flex-shrink:0;align-self:center}
+.ll-null{border:1.5px dashed var(--ink);background:var(--paper-2);padding:8px 12px;font-family:'JetBrains Mono';font-size:11px;color:var(--ink-faint);align-self:center;flex-shrink:0}
+.ll-head{display:flex;flex-direction:column;align-items:center;gap:2px;margin-right:4px;flex-shrink:0}
+.ll-head .h-box{border:1.5px solid var(--ink);background:var(--paper-2);padding:4px 8px;font-family:'JetBrains Mono';font-size:12px;cursor:pointer;transition:background .12s}
+.ll-head .h-box:hover,.ll-head .h-box.hl{background:var(--hi)}
+.ll-head .h-label{font-size:9px;color:var(--ink-soft);text-align:center}
+
+/* ============================= AUTHORING SKETCH ============================= */
+.author-pre{font-family:'JetBrains Mono';font-size:12px;background:#fbf9ef;border:1.2px solid var(--ink);padding:10px 12px;margin:0;white-space:pre-wrap;line-height:1.55}
+.author-pre .k{color:var(--accent);font-weight:600}
+.author-pre .c{color:var(--ink-faint);font-style:italic}
+.author-pre .g{background:var(--accent-wash);padding:0 3px;border-radius:2px}
+
+.info-list{margin:10px 0 0;padding:0;list-style:none;font-family:'Kalam';font-size:14px;color:var(--ink-soft);line-height:1.6}
+.info-list li{padding:4px 0;border-bottom:1px dashed var(--grid)}
+.info-list li:last-child{border:none}
+.info-list li b{color:var(--ink);font-family:'JetBrains Mono';font-size:12px;background:var(--paper-2);padding:1px 5px;border:1px solid var(--ink-faint);border-radius:2px}
+
+/* ============================= TAXONOMY ============================= */
+.tx-intro{font-family:'Kalam';font-size:15px;color:var(--ink-soft);line-height:1.55;max-width:920px;margin:0 0 16px}
+.tx-intro b{color:var(--ink)}
+
+.axis-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.axis-card{border:1.5px solid var(--ink);background:var(--paper);padding:14px;position:relative}
+.axis-card.comp{border-top:6px solid var(--g1)}
+.axis-card.exec{border-top:6px solid var(--g2)}
+.axis-card.state{border-top:6px solid var(--g3)}
+.axis-card h4{font-family:'Caveat';font-weight:700;font-size:28px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+.axis-card h4 .glyph{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1.5px solid var(--ink);font-family:'JetBrains Mono';font-size:14px;font-weight:700}
+.axis-card.comp h4 .glyph{background:var(--g1);color:#fff;border-color:var(--g1)}
+.axis-card.exec h4 .glyph{background:var(--g2);color:#fff;border-color:var(--g2)}
+.axis-card.state h4 .glyph{background:var(--g3);color:#fff;border-color:var(--g3)}
+.axis-card .axis-q{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
+.axis-card p{font-family:'Kalam';font-size:14px;color:var(--ink);margin:0 0 8px;line-height:1.45}
+.axis-card .axis-asks{font-family:'Kalam';font-size:13.5px;color:var(--ink-soft);font-style:italic;margin:0;border-top:1px dashed var(--grid);padding-top:6px}
+
+/* Diagram → axis matrix */
+.diag-matrix{border:1.5px solid var(--ink);background:var(--paper);padding:0;margin-bottom:22px}
+.diag-matrix table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono';font-size:12px}
+.diag-matrix th{background:var(--paper-2);border-bottom:1.5px solid var(--ink);padding:8px 10px;text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:600}
+.diag-matrix th.axis-h{text-align:center;width:90px}
+.diag-matrix th.axis-h.comp{color:var(--g1)}
+.diag-matrix th.axis-h.exec{color:var(--g2)}
+.diag-matrix th.axis-h.state{color:var(--g3)}
+.diag-matrix td{padding:8px 10px;border-bottom:1px dashed var(--grid);vertical-align:middle}
+.diag-matrix tr:last-child td{border-bottom:none}
+.diag-matrix tr:hover td{background:var(--hi-wash)}
+.diag-matrix .dname{font-family:'Caveat';font-size:18px;font-weight:700;color:var(--ink)}
+.diag-matrix .dnote{font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin-top:1px}
+.diag-matrix .dot{display:inline-block;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-faint);background:var(--paper-2);position:relative}
+.diag-matrix .dot.lvl-0{background:var(--paper-2)}
+.diag-matrix .dot.lvl-1{background:var(--paper-3);border-color:var(--ink-soft)}
+.diag-matrix .dot.lvl-2{border-color:var(--ink)}
+.diag-matrix .dot.lvl-3{border-color:var(--ink)}
+.diag-matrix .dot.comp.lvl-2{background:var(--accent-wash)}
+.diag-matrix .dot.comp.lvl-3{background:var(--g1)}
+.diag-matrix .dot.exec.lvl-2{background:#bcdacb}
+.diag-matrix .dot.exec.lvl-3{background:var(--g2)}
+.diag-matrix .dot.state.lvl-2{background:#cfd4ec}
+.diag-matrix .dot.state.lvl-3{background:var(--g3)}
+.diag-matrix td.axis-cell{text-align:center}
+.diag-matrix .blend{display:inline-flex;gap:3px;align-items:center;font-family:'JetBrains Mono';font-size:10px;color:var(--ink-soft)}
+.diag-matrix .blend .b{display:inline-block;width:9px;height:9px;border-radius:50%}
+.diag-matrix .blend .b.comp{background:var(--g1)}
+.diag-matrix .blend .b.exec{background:var(--g2)}
+.diag-matrix .blend .b.state{background:var(--g3)}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-soft);padding:8px 10px;border-top:1.5px solid var(--ink);background:var(--paper-2)}
+.legend .lg{display:flex;align-items:center;gap:5px}
+
+/* Topic table */
+.topic-section h3.section-h{font-family:'Caveat';font-size:30px;margin:0 0 4px;font-weight:700}
+.topic-section .section-sub{font-family:'Kalam';font-size:14px;color:var(--ink-soft);margin:0 0 12px}
+
+.topic-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono';font-size:11.5px;border:1.5px solid var(--ink);background:var(--paper)}
+.topic-table th{background:var(--paper-2);border-bottom:1.5px solid var(--ink);padding:7px 9px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600;white-space:nowrap}
+.topic-table th.axis-h.comp{color:var(--g1);text-align:center;width:60px}
+.topic-table th.axis-h.exec{color:var(--g2);text-align:center;width:60px}
+.topic-table th.axis-h.state{color:var(--g3);text-align:center;width:60px}
+.topic-table th.diag-h{font-size:9.5px;width:auto}
+.topic-table td{padding:7px 9px;border-bottom:1px dashed var(--grid);vertical-align:top}
+.topic-table tr:last-child td{border-bottom:none}
+.topic-table tr:hover td{background:var(--hi-wash)}
+.topic-table .topic-name{font-family:'Caveat';font-size:18px;font-weight:700;color:var(--ink);line-height:1.1}
+.topic-table .topic-ch{font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.topic-table td.axis-pct{text-align:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono'}
+.topic-table .bar-cell{padding:4px 8px;width:100px}
+.topic-table .stack{display:flex;height:14px;border:1px solid var(--ink-faint);background:var(--paper-2);overflow:hidden}
+.topic-table .stack span{display:block;height:100%}
+.topic-table .stack .sc{background:var(--g1)}
+.topic-table .stack .se{background:var(--g2)}
+.topic-table .stack .ss{background:var(--g3)}
+.topic-table .diags{font-family:'Kalam';font-size:13px;color:var(--ink-soft);line-height:1.35}
+.topic-table .diags .pri{color:var(--ink);font-weight:700;font-family:'JetBrains Mono';font-size:11px;background:var(--hi);padding:0 4px;border:1px solid var(--ink);border-radius:2px;margin-right:3px;display:inline-block;margin-bottom:2px}
+.topic-table .diags .sec{color:var(--ink-soft);font-family:'JetBrains Mono';font-size:10.5px;background:var(--paper-2);padding:0 4px;border:1px solid var(--ink-faint);border-radius:2px;margin-right:3px;display:inline-block;margin-bottom:2px}
+
+/* prevalence summary */
+.prev-row{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:22px;align-items:start}
+@media(max-width:1100px){.prev-row{grid-template-columns:1fr}}
+.prev-card{border:1.5px solid var(--ink);background:var(--paper);padding:14px}
+.prev-card h4{font-family:'Caveat';font-size:24px;margin:0 0 8px;font-weight:700}
+.prev-bar{display:flex;align-items:center;gap:10px;margin:5px 0;font-family:'JetBrains Mono';font-size:11.5px}
+.prev-bar .lbl{width:90px;color:var(--ink-soft)}
+.prev-bar .barwrap{flex:1;height:14px;background:var(--paper-2);border:1px solid var(--ink-faint);position:relative}
+.prev-bar .barfill{height:100%}
+.prev-bar.comp .barfill{background:var(--g1)}
+.prev-bar.exec .barfill{background:var(--g2)}
+.prev-bar.state .barfill{background:var(--g3)}
+.prev-bar .num{width:38px;text-align:right;font-weight:600;color:var(--ink)}
+
+.combo-card .combo{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--grid);font-family:'JetBrains Mono';font-size:11.5px}
+.combo-card .combo:last-child{border-bottom:none}
+.combo-card .blend-pill{display:inline-flex;gap:3px;border:1.2px solid var(--ink);padding:2px 5px;background:var(--paper-2);min-width:78px;justify-content:center}
+.combo-card .blend-pill .b{display:inline-block;width:9px;height:9px;border-radius:50%}
+.combo-card .blend-pill .b.comp{background:var(--g1)}
+.combo-card .blend-pill .b.exec{background:var(--g2)}
+.combo-card .blend-pill .b.state{background:var(--g3)}
+.combo-card .combo .ct{flex:1;color:var(--ink);font-family:'Kalam';font-size:14px}
+.combo-card .combo .pct{font-weight:700;color:var(--ink)}
+
+.takeaway{margin-top:22px;border:1.5px solid var(--ink);border-left:5px solid var(--accent);background:var(--hi-wash);padding:12px 16px}
+.takeaway h4{font-family:'Caveat';font-size:24px;margin:0 0 6px;font-weight:700}
+.takeaway p{font-family:'Kalam';font-size:14px;line-height:1.55;margin:0 0 6px;color:var(--ink)}
+.takeaway p:last-child{margin-bottom:0}
+.takeaway b{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="hdr">
+  <h1>Diagram Vocabulary
+    <span class="sub">8 diagram types · Fundamentals of CS · each specimen is interactive</span>
+  </h1>
+  <div class="meta">
+    <b>STATUS</b>&nbsp; exploration<br/>
+    <b>DATE</b>&nbsp;&nbsp;&nbsp; 2026-04-25<br/>
+    <b>FIDELITY</b> wireframe
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" data-tab="TX"><span class="n">0</span>Taxonomy</button>
+  <button class="tab" data-tab="VM"><span class="n">1</span>Value Memory</button>
+  <button class="tab" data-tab="RD"><span class="n">2</span>Reduction</button>
+  <button class="tab" data-tab="ET"><span class="n">3</span>Eval Tree</button>
+  <button class="tab" data-tab="CS"><span class="n">4</span>Call Stack</button>
+  <button class="tab" data-tab="LT"><span class="n">5</span>Loop Trace</button>
+  <button class="tab" data-tab="BR"><span class="n">6</span>if / else</button>
+  <button class="tab" data-tab="SW"><span class="n">7</span>Switch / Match</button>
+  <button class="tab" data-tab="RT"><span class="n">8</span>Ref Types</button>
+  <button class="tab" data-tab="AR"><span class="n">9</span>Arrays</button>
+  <button class="tab" data-tab="LL"><span class="n">10</span>Linked Lists</button>
+  <span class="tab-cap">keys <kbd>0</kbd>–<kbd>9</kbd></span>
+</div>
+
+<div class="frame" id="frame">
+
+<!-- ======================================================= -->
+<!-- 1. VALUE MEMORY                                          -->
+<!-- ======================================================= -->
+<!-- ======================================================= -->
+<!-- 0. TAXONOMY                                              -->
+<!-- ======================================================= -->
+<section class="vslot" data-tab="TX">
+  <p class="tx-intro">Goal: limit the total number of visualization tools to <b>precisely the number needed</b> — where removing one hurts the ability to express a unique concept, and adding more is only marginally helpful. Three categories, each with one tool.</p>
+
+  <!-- THE THREE CATEGORIES -->
+  <div class="axis-row">
+    <div class="axis-card comp">
+      <h4><span class="glyph">E</span>Evaluation</h4>
+      <p class="axis-q">how does an expression reduce to a value?</p>
+      <p>Any function that returns (including operators), switch conditions, recursive calls. The bar-stacking <b>Reduction</b> notation handles all of these in one shape.</p>
+      <p class="axis-asks">"What does this expression equal, and why?"</p>
+    </div>
+    <div class="axis-card exec">
+      <h4><span class="glyph">F</span>Flow</h4>
+      <p class="axis-q">in what order do statements run?</p>
+      <p>Branching, loops, function call sequences. The question is always <i>which line runs next</i> and <i>how many times</i>. One tool with two modes: <b>branch</b> (fork + merge) and <b>trace</b> (iteration table).</p>
+      <p class="axis-asks">"Which path did execution take?"</p>
+    </div>
+    <div class="axis-card state">
+      <h4><span class="glyph">M</span>Memory</h4>
+      <p class="axis-q">what does memory look like right now?</p>
+      <p>Variables, objects, arrays, linked-list nodes, call-stack frames. All one diagram: <b>stack + heap snapshot</b>. Different heap shapes (indexed strip, node chain, object fields) are rendering variations, not separate tools.</p>
+      <p class="axis-asks">"Where does this value live, and who else can see it?"</p>
+    </div>
+  </div>
+
+  <!-- CONSOLIDATION MAP -->
+  <div class="diag-matrix">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:140px">New tool</th>
+          <th>Absorbs</th>
+          <th>What it no longer needs</th>
+          <th style="width:160px">What would break if removed?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="dname" style="color:var(--g1)">Reduction</div><div class="dnote">bar-stacking</div></td>
+          <td>
+            <span class="tag" style="background:var(--accent-wash)">Eval Tree</span>
+            <span class="tag" style="background:var(--accent-wash)">Switch / Match</span>
+            <span class="tag" style="background:var(--accent-wash)">Reduction strip</span>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft);margin-top:4px">All are "how does X evaluate to Y?" — one notation with numbered ticks handles arithmetic, function calls, pattern matching, and recursion.</div>
+          </td>
+          <td>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft)">Eval Tree's static tree view (structure of sub-expressions). Covered by the order of the bars — the structure is implicit in which bar sits above which.</div>
+          </td>
+          <td><div style="font-family:Kalam;font-size:13.5px;color:var(--ink);font-weight:700">Can't show how expressions simplify step by step.</div></td>
+        </tr>
+        <tr>
+          <td><div class="dname" style="color:var(--g2)">Flow</div><div class="dnote">branch + trace</div></td>
+          <td>
+            <span class="tag" style="background:#bcdacb">if / else</span>
+            <span class="tag" style="background:#bcdacb">Loop Trace</span>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft);margin-top:4px">Both are "which line runs?" — branching is a one-shot fork; trace is repeated iteration. Two modes, one concept.</div>
+          </td>
+          <td>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft)">Nothing — the two modes cover every control-flow shape in the book.</div>
+          </td>
+          <td><div style="font-family:Kalam;font-size:13.5px;color:var(--ink);font-weight:700">Can't show which path code takes or how loops iterate.</div></td>
+        </tr>
+        <tr>
+          <td><div class="dname" style="color:var(--g3)">Memory</div><div class="dnote">stack + heap</div></td>
+          <td>
+            <span class="tag" style="background:#cfd4ec">Value Memory</span>
+            <span class="tag" style="background:#cfd4ec">Ref Types</span>
+            <span class="tag" style="background:#cfd4ec">Arrays</span>
+            <span class="tag" style="background:#cfd4ec">Linked Lists</span>
+            <span class="tag" style="background:#cfd4ec">Call Stack</span>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft);margin-top:4px">All are "what does memory look like right now?" — stack slots, heap objects, indexed strips, node chains, and call frames are all shapes drawn in the same stack+heap view.</div>
+          </td>
+          <td>
+            <div style="font-family:Kalam;font-size:13px;color:var(--ink-soft)">Separate "Array diagram" and "Linked List diagram" as standalone types. An array is just a heap object with an indexed strip; a linked list is heap objects with next pointers. Same memory view, different shapes.</div>
+          </td>
+          <td><div style="font-family:Kalam;font-size:13.5px;color:var(--ink);font-weight:700">Can't show where values live, aliasing, or heap structure.</div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      <span class="lg" style="font-size:12px;font-family:Kalam;color:var(--ink)"><b>10 old diagrams → 3 tools.</b> &nbsp;Each tool is irreplaceable — removing any one of the three loses the ability to express a concept no other tool can cover.</span>
+    </div>
+  </div>
+
+  <!-- Topic mapping updated -->
+  <div class="topic-section">
+    <h3 class="section-h">Every topic covered by 3 tools</h3>
+    <p class="section-sub">Each row is a topic. The columns show which tool(s) you reach for. Nearly every topic needs exactly 1 or 2 — no topic needs all 3.</p>
+    <table class="topic-table">
+      <thead>
+        <tr>
+          <th style="width:200px">Topic</th>
+          <th class="axis-h comp" style="color:var(--g1)">Reduction</th>
+          <th class="axis-h exec" style="color:var(--g2)">Flow</th>
+          <th class="axis-h state" style="color:var(--g3)">Memory</th>
+          <th class="diag-h">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="topic-name">Variables &amp; assignment</div><div class="topic-ch">ch. intro</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory only — stack slots, copy semantics</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Arithmetic &amp; operators</div><div class="topic-ch">expressions</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-3"></span></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-1"></span></td>
+          <td class="diags">Reduction — bar-stacking for operator precedence</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Boolean logic</div><div class="topic-ch">expressions</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-3"></span></td><td class="axis-cell"></td><td class="axis-cell"></td>
+          <td class="diags">Reduction — same notation, boolean operators</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">if / else</div><div class="topic-ch">control flow</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-1"></span></td><td class="axis-cell"><span class="dot exec lvl-3"></span></td><td class="axis-cell"></td>
+          <td class="diags">Flow (branch mode) — condition forks to arms</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">switch / match</div><div class="topic-ch">control flow</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-3"></span></td><td class="axis-cell"><span class="dot exec lvl-1"></span></td><td class="axis-cell"></td>
+          <td class="diags">Reduction — input reduces through arm matching</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">for / while loops</div><div class="topic-ch">iteration</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"><span class="dot exec lvl-3"></span></td><td class="axis-cell"><span class="dot state lvl-2"></span></td>
+          <td class="diags">Flow (trace mode) — iteration table + Memory for accumulators</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Functions &amp; params</div><div class="topic-ch">functions</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-2"></span></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory (call frames) + Reduction (return value)</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Recursion</div><div class="topic-ch">functions</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-3"></span></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Reduction (bar-stacking shows unwinding) + Memory (stacked frames)</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Classes &amp; objects</div><div class="topic-ch">OO</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory — stack refs → heap objects</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Aliasing &amp; mutation</div><div class="topic-ch">OO</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory — two refs pointing to same heap object</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Arrays — indexing</div><div class="topic-ch">collections</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory — heap object rendered as indexed strip</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Arrays — traversal</div><div class="topic-ch">collections</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"><span class="dot exec lvl-3"></span></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Flow (trace) + Memory (array strip with cursor)</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Linked lists</div><div class="topic-ch">collections</div></td>
+          <td class="axis-cell"><span class="dot comp lvl-2"></span></td><td class="axis-cell"></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Memory (node chain on heap) + Reduction for operations like len()</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Sorting / searching</div><div class="topic-ch">algorithms</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"><span class="dot exec lvl-3"></span></td><td class="axis-cell"><span class="dot state lvl-3"></span></td>
+          <td class="diags">Flow (trace) + Memory (array with swaps highlighted)</td>
+        </tr>
+        <tr>
+          <td><div class="topic-name">Exceptions / early return</div><div class="topic-ch">control flow</div></td>
+          <td class="axis-cell"></td><td class="axis-cell"><span class="dot exec lvl-3"></span></td><td class="axis-cell"><span class="dot state lvl-2"></span></td>
+          <td class="diags">Flow (branch — which path exits) + Memory (stack unwinding)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CONSOLIDATION SUMMARY -->
+  <div class="takeaway">
+    <h4>The rule</h4>
+    <p>If you're explaining <b>what something evaluates to</b> → draw a <b>Reduction</b>.</p>
+    <p>If you're explaining <b>which code runs and in what order</b> → draw a <b>Flow</b> (branch or trace).</p>
+    <p>If you're explaining <b>what memory looks like</b> → draw a <b>Memory</b> snapshot.</p>
+    <p>Most topics need 1 tool. Some need 2 side-by-side. None needs all 3.</p>
+  </div>
+
+  <div class="rd-rules" style="margin-top:16px">
+    <div class="rd-rule value" style="border-top-color:var(--ink)">
+      <p class="rule-tag">what we cut</p>
+      <h4>7 diagrams removed, 0 concepts lost</h4>
+      <p><b>Eval Tree</b> → absorbed by Reduction (bars show structure implicitly).<br/>
+      <b>Switch / Match</b> → absorbed by Reduction (arm matching is evaluation).<br/>
+      <b>Call Stack</b> → absorbed by Memory (frames are stack state).<br/>
+      <b>Value Memory</b> → absorbed by Memory (it's the simple case).<br/>
+      <b>Ref Types</b> → absorbed by Memory (add heap pane).<br/>
+      <b>Arrays</b> → absorbed by Memory (indexed-strip heap shape).<br/>
+      <b>Linked Lists</b> → absorbed by Memory (node-chain heap shape).</p>
+    </div>
+    <div class="rd-rule ref" style="border-top-color:var(--ink)">
+      <p class="rule-tag">what we keep</p>
+      <h4>3 tools, each irreplaceable</h4>
+      <p><b>Reduction</b> — the only tool that shows step-by-step evaluation. Remove it and you can't explain operator precedence, recursion unwinding, or pattern matching.<br/>
+      <b>Flow</b> — the only tool that shows execution order. Remove it and you can't explain which branch runs, how a loop iterates, or when code exits early.<br/>
+      <b>Memory</b> — the only tool that shows state. Remove it and you can't explain where values live, aliasing, or heap structure.</p>
+    </div>
+  </div>
+</section></section>
+
+<!-- ======================================================= -->
+<!-- 1. VALUE MEMORY                                          -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="VM">
+  <div class="vhint">Already prototyped in v3. Shown here as the reference baseline for the vocabulary.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Value-type memory <span class="badge">stack only</span></h3>
+      <p class="desc">Each variable is a named slot on the stack. Value types store their data directly in the slot — no indirection.</p>
+      <div class="code" id="vm-code">
+        <span class="ln" data-k="x"><span class="kw">int</span> <span class="tok" data-tok="xlhs">x</span> = <span class="tok" data-tok="xrhs">5</span>;</span>
+        <span class="ln" data-k="y"><span class="kw">int</span> <span class="tok" data-tok="ylhs">y</span> = <span class="tok" data-tok="yrhs">x</span>;</span>
+        <span class="ln" data-k="y">y = <span class="tok" data-tok="y2rhs">y + 1</span>;</span>
+      </div>
+      <div class="mem-grid cols4" id="vm-mem" style="margin-top:12px">
+        <div class="mem-cell" data-k="x"><span class="addr">0x100</span><span class="val">5</span><span class="name">x</span></div>
+        <div class="mem-cell" data-k="y"><span class="addr">0x104</span><span class="val">6</span><span class="name">y</span></div>
+        <div class="mem-cell"><span class="addr">0x108</span><span class="val">—</span></div>
+        <div class="mem-cell"><span class="addr">0x10c</span><span class="val">—</span></div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a code line ↔ cell highlights together.</p>
+    </div>
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=memory</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="vm" type="<span class="k">memory</span>"
+<span class="k">code:</span>
+  int x = 5;   <span class="c"># group-1, tok: xlhs=x, xrhs=5</span>
+  int y = x;   <span class="c"># group-2, tok: ylhs=y, yrhs=x</span>
+  y = y + 1;   <span class="c"># group-3</span>
+<span class="k">variables:</span>
+  x: { type: int, addr: 0x100, group: 1 }
+  y: { type: int, addr: 0x104, group: 2 }
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> introducing a new variable, assignment, or copy semantics</li>
+        <li><b>Hover link:</b> code line ↔ cell(s) in the same group</li>
+        <li><b>Quiz mode:</b> blank the val or name fields; student fills them</li>
+        <li><b>Extends to:</b> reference type memory (tab 7) with heap split</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 2. REDUCTION (unified evaluation notation)              -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="RD">
+  <div class="vhint"><b>Bar-stacking reduction</b> — the way you'd actually work it on paper. <b>Start at the bottom</b> with the original expression. Then <b>draw a bar above</b> any sub-expression you want to reduce, and write the reduced form on that bar. Bars stack upward as you simplify; once a bar resolves to a value, the layer below it can take that value and reduce further. Numbers <span style="font-family:Caveat;color:var(--accent);font-weight:700">¹ ² ³ …</span> trace the order in which each piece was written.</div>
+
+  <!-- =============== A. arithmetic =============== -->
+  <div class="rd-section">
+    <h3>Value-type evaluation <span class="badge">arithmetic, operators</span></h3>
+    <p class="desc">From the sketch: <code>(x + 3) * 5</code> with <code>x = 2</code>. Read it bottom-up — the original expression is at the bottom; each bar above shows the reduced form of the bit underneath. Numbers trace the order each piece was written.</p>
+
+    <div class="rd-paper-hint">
+      <span>read bottom → top &nbsp;·&nbsp; numbers = write-order</span>
+      <span class="order-key"><b>1</b> first &nbsp;·&nbsp; <b>7</b> last</span>
+    </div>
+    <div class="rd-paper" id="rd-a-paper">
+      <div class="rd-tower" id="rd-a-tower">
+
+        <!-- LAYER 3 — bar over the whole thing → 25, written 6-7 -->
+        <div class="rd-layer" data-layer="3" style="--line-x:30px;--line-w:172px;padding-left:96px">
+          <span class="rd-content">25</span>
+          <span class="tick" style="position:absolute;left:18px;top:-18px;transform:rotate(-6deg)">⁶<span style="font-family:Kalam;font-size:10px;font-style:italic;color:var(--ink-faint);display:block;font-weight:400">*</span></span>
+          <span class="tick" style="position:absolute;left:208px;top:-14px;transform:rotate(8deg)">⁷</span>
+        </div>
+
+        <!-- LAYER 2 — bar over (2+3) → 5, written 4-5 -->
+        <div class="rd-layer" data-layer="2" style="--line-x:60px;--line-w:78px;padding-left:88px">
+          <span class="rd-content">5</span>
+          <span class="tick" style="position:absolute;left:48px;top:-18px;transform:rotate(-6deg)">⁴<span style="font-family:Kalam;font-size:10px;font-style:italic;color:var(--ink-faint);display:block;font-weight:400">+</span></span>
+          <span class="tick" style="position:absolute;left:144px;top:-14px;transform:rotate(8deg)">⁵</span>
+        </div>
+
+        <!-- LAYER 1 — bar over x → 2, written 2-3 -->
+        <div class="rd-layer" data-layer="1" style="--line-x:60px;--line-w:18px;padding-left:62px">
+          <span class="rd-content">2</span>
+          <span class="tick" style="position:absolute;left:36px;top:-18px;transform:rotate(-8deg)">²<span style="font-family:Kalam;font-size:10px;font-style:italic;color:var(--ink-faint);display:block;font-weight:400">mem</span></span>
+          <span class="tick" style="position:absolute;left:84px;top:-14px;transform:rotate(8deg)">³</span>
+        </div>
+
+        <!-- LAYER 0 (bottom) — original expression, written 1st -->
+        <div class="rd-layer bottom" data-layer="0">
+          <span class="tick left">¹</span>
+          <span class="rd-content">( x + 3 ) * 5</span>
+          <span class="rd-final-wrap">
+            <span class="rd-arrow-label">simplifies to</span>
+            <span class="rd-final-arrow">→</span>
+            <span class="rd-final-val">25</span>
+          </span>
+        </div>
+
+      </div>
+    </div>
+    <p style="font-family:'Kalam';font-size:13.5px;color:var(--ink-soft);margin:8px 0 0;line-height:1.5">
+      Order: <b>1</b> write the bottom expression · <b>2</b> draw a bar over <code>x</code> labeled "mem" · <b>3</b> write <code>2</code> on it · <b>4</b> draw a bar over <code>(2+3)</code> labeled "+" · <b>5</b> write <code>5</code> on it · <b>6</b> draw a bar over the whole thing labeled "*" · <b>7</b> write <code>25</code> on it. The "→ simplifies to" at the bottom is the final value of the whole expression — <i>visually</i> the same as the topmost bar, just pulled out for emphasis.
+    </p>
+  </div>
+
+  <!-- =============== B. recursive / linked list =============== -->
+  <div class="rd-section">
+    <h3>Reference-type evaluation <span class="badge">len(list) · same notation</span></h3>
+    <p class="desc">Same bar-stacking, applied to <code>len(a→b→c→∅)</code>. Each bar above peels one node, leaving <code>1 + len(rest)</code>. Recursion bottoms out at <code>len(∅)=0</code>; then the <code>+</code>'s collapse upward.</p>
+
+    <div class="rd-paper-hint">
+      <span>each bar reduces the layer beneath it</span>
+      <span class="order-key">read bottom → top</span>
+    </div>
+    <div class="rd-paper" id="rd-b-paper" style="min-height:360px">
+      <div class="rd-tower" id="rd-b-tower">
+
+        <!-- collapse +: 3 -->
+        <div class="rd-layer" data-layer="5" style="--line-x:130px;--line-w:64px;padding-left:148px">
+          <span class="rd-content">3</span>
+          <span class="tick" style="position:absolute;left:118px;top:-18px;transform:rotate(-6deg)">⁶<span style="font-family:Kalam;font-size:10px;font-style:italic;color:var(--ink-faint);display:block;font-weight:400">+</span></span>
+        </div>
+
+        <!-- base case applied: 1+1+1+0 -->
+        <div class="rd-layer" data-layer="4" style="--line-x:200px;--line-w:50px;padding-left:96px">
+          <span class="rd-content">1 + 1 + 1 + 0</span>
+          <span class="tick" style="position:absolute;left:188px;top:-18px;transform:rotate(-6deg)">⁵<span style="font-family:Kalam;font-size:10px;font-style:italic;color:var(--ink-faint);display:block;font-weight:400">base</span></span>
+        </div>
+
+        <!-- 1+1+1+ len(∅) -->
+        <div class="rd-layer" data-layer="3" style="--line-x:96px;--line-w:142px;padding-left:96px">
+          <span class="rd-content">1 + 1 + 1 + len ( <span class="rd-llnode null"></span> )</span>
+          <span class="tick" style="position:absolute;left:84px;top:-18px;transform:rotate(-6deg)">⁴</span>
+        </div>
+
+        <!-- 1+1+ len(c→∅) -->
+        <div class="rd-layer" data-layer="2" style="--line-x:64px;--line-w:174px;padding-left:64px">
+          <span class="rd-content">1 + 1 + len (
+            <span class="rd-llnode"><span class="lv">c</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode null"></span>
+          )</span>
+          <span class="tick" style="position:absolute;left:52px;top:-18px;transform:rotate(-6deg)">³</span>
+        </div>
+
+        <!-- 1 + len(b→c→∅) -->
+        <div class="rd-layer" data-layer="1" style="--line-x:36px;--line-w:230px;padding-left:36px">
+          <span class="rd-content">1 + len (
+            <span class="rd-llnode"><span class="lv">b</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode"><span class="lv">c</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode null"></span>
+          )</span>
+          <span class="tick" style="position:absolute;left:24px;top:-18px;transform:rotate(-6deg)">²</span>
+        </div>
+
+        <!-- bottom: original call -->
+        <div class="rd-layer bottom" data-layer="0">
+          <span class="tick left">¹</span>
+          <span class="rd-content">len (
+            <span class="rd-llnode"><span class="lv">a</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode"><span class="lv">b</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode"><span class="lv">c</span><span class="lp">→</span></span><span class="rd-llarrow">→</span>
+            <span class="rd-llnode null"></span>
+          )</span>
+          <span class="rd-final-wrap">
+            <span class="rd-arrow-label">simplifies to</span>
+            <span class="rd-final-arrow">→</span>
+            <span class="rd-final-val">3</span>
+          </span>
+        </div>
+
+      </div>
+    </div>
+    <p style="font-family:'Kalam';font-size:13.5px;color:var(--ink-soft);margin:8px 0 0;line-height:1.5">
+      Same notation as the arithmetic. The bars are literally the working — drawn over what's being reduced, with the result written on top. Linked-list nodes inside the expression aren't a separate diagram; they're just structured tokens in the same line of work.
+    </p>
+  </div>
+
+  <!-- =============== Rules: value vs ref =============== -->
+  <div class="rd-section">
+    <h3>The two rules students need <span class="badge">value vs reference</span></h3>
+    <p class="desc">Within this notation, every "look up" or argument-pass step follows one of two rules. Naming them once means we don't re-explain at every chapter.</p>
+    <div class="rd-rules">
+      <div class="rd-rule value">
+        <p class="rule-tag">rule 1 · value types</p>
+        <h4>Look up = copy the value</h4>
+        <p>When the notation reduces a variable name like <code>x</code>, replace it with a <b>copy</b> of the bits stored at that slot. Two slots can hold equal values without being "the same."</p>
+        <p>Applies to: <code>int</code>, <code>double</code>, <code>bool</code>, <code>char</code>, structs.</p>
+      </div>
+      <div class="rd-rule ref">
+        <p class="rule-tag">rule 2 · reference types</p>
+        <h4>Look up = follow the arrow</h4>
+        <p>For a reference like <code>list</code>, the slot holds an <b>address</b>. Reducing the variable doesn't copy the object — it gives you a handle. Recursing into <code>rest</code> means stepping one node along the chain.</p>
+        <p>Applies to: classes, arrays, lists, strings (in C#), any <code>new</code>'d thing.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== Why this earns its slot =============== -->
+  <div class="takeaway" style="margin-top:18px">
+    <h4>Why add this and not extend Eval Tree?</h4>
+    <p>The Eval Tree shows <b>structure</b> (which sub-expression feeds which operator). The Reduction notation shows <b>order + state</b> — what's happening to memory at each step. They answer different questions, but Reduction subsumes the existing "reduction strip" already living inside Eval Tree.</p>
+    <p><b>Proposal:</b> promote Reduction to a first-class diagram, demote Eval Tree's reduction strip to just the static tree, and route every value/reference teaching moment through the same numbered-tick notation. That keeps the vocabulary at <b>9 diagrams</b> with no overlap.</p>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 3. EVAL TREE (was 2)                                    -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="ET">
+  <div class="vhint"><b>Evaluation tree</b> — shows how a compound expression reduces to a value. Each internal node is an operator or function; leaves are literals or variable lookups. <b>Hover a node</b> to see what it evaluates to and which sub-tree feeds it.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Expression tree <span class="badge">reduce bottom-up</span></h3>
+      <p class="desc">For <code>(3 + 4) * (x - 1)</code> where <code>x = 5</code>. Hover a node to see its value and highlight its sub-expression in the code.</p>
+      <div class="code" style="margin-bottom:14px">
+        <span class="ln"><span class="kw">int</span> x = 5;</span>
+        <span class="ln"><span class="kw">int</span> result = <span class="tok" data-etok="mul" id="et-code-mul">(3 + 4) * (x - 1)</span>;</span>
+      </div>
+
+      <!-- Tree rendered as nested flex -->
+      <div id="et-tree" style="text-align:center;padding:8px 0">
+        <!-- Level 0: root -->
+        <div class="tree-row">
+          <div class="tree-node" data-val="28" data-sub="(3+4)*(x-1)" id="etn-mul">
+            <div class="n-box op">*</div>
+            <div class="n-result">= 28</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;width:280px;margin:0 auto">
+          <div class="connector-v"></div><div class="connector-v"></div>
+        </div>
+        <!-- Level 1 -->
+        <div class="tree-row" style="gap:60px;display:flex;justify-content:center">
+          <div class="tree-node" data-val="7" data-sub="3+4" id="etn-add">
+            <div class="n-box op">+</div>
+            <div class="n-result">= 7</div>
+          </div>
+          <div class="tree-node" data-val="4" data-sub="x-1" id="etn-sub">
+            <div class="n-box op">−</div>
+            <div class="n-result">= 4</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;width:340px;margin:0 auto">
+          <div class="connector-v"></div><div class="connector-v"></div>
+          <div class="connector-v"></div><div class="connector-v"></div>
+        </div>
+        <!-- Level 2: leaves -->
+        <div class="tree-row" style="gap:24px;display:flex;justify-content:center">
+          <div class="tree-node" data-val="3" id="etn-3"><div class="n-box">3</div><div class="n-result">= 3</div></div>
+          <div class="tree-node" data-val="4" id="etn-4"><div class="n-box">4</div><div class="n-result">= 4</div></div>
+          <div class="tree-node" data-val="5" data-var="x" id="etn-x"><div class="n-box">x</div><div class="n-result">= 5</div></div>
+          <div class="tree-node" data-val="1" id="etn-1"><div class="n-box">1</div><div class="n-result">= 1</div></div>
+        </div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:10px 0 0"><span class="tag">hover</span> any node → see its value + highlight its span in the code above.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Reduction strip <span class="badge">step-by-step</span></h3>
+      <p class="desc">Same expression, shown as sequential reduction steps — closer to how a student reads it left to right.</p>
+      <div class="reduction" id="et-reduction">
+        <div class="step" data-step="0"><span class="expr">(3 + 4) * (x - 1)</span><span class="arrow">→</span><span class="reason">start</span></div>
+        <div class="step" data-step="1"><span class="expr">(3 + 4) * (5 - 1)</span><span class="arrow">→</span><span class="reason">evaluate x</span></div>
+        <div class="step" data-step="2"><span class="expr">7 * (5 - 1)</span><span class="arrow">→</span><span class="reason">evaluate 3+4</span></div>
+        <div class="step" data-step="3"><span class="expr">7 * 4</span><span class="arrow">→</span><span class="reason">evaluate 5−1</span></div>
+        <div class="step" data-step="4"><span class="expr result" style="color:var(--g2);font-weight:700">28</span><span class="arrow">→</span><span class="reason">evaluate 7*4</span></div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:10px 0 0"><span class="tag">hover</span> a step to highlight it. For nested method calls, each frame gets a step.</p>
+      <div class="scribble" style="margin-top:14px"></div>
+      <ul class="info-list">
+        <li><b>Use when:</b> operator precedence, nested calls, compound expressions</li>
+        <li><b>Tree vs strip:</b> tree shows structure; strip shows order of evaluation</li>
+        <li><b>Hover link:</b> node/step ↔ sub-expression span in code ↔ variable cell if a lookup</li>
+        <li><b>Quiz mode:</b> blank result fields; student fills in the value at each node</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 3. CALL STACK                                            -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="CS">
+  <div class="vhint"><b>Call stack</b> — when a method is called, a new frame is pushed. Each frame shows its local variables. <b>Hover a frame</b> to highlight the corresponding call site in the code.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Call stack <span class="badge">frames push/pop</span></h3>
+      <p class="desc">Active frame at top. Older frames below. Each frame shows its locals. Returning pops the top frame.</p>
+      <div class="code" id="cs-code">
+        <span class="ln" data-frame="main"><span class="kw">static int</span> <span class="tok">Main</span>() {</span>
+        <span class="ln" data-frame="main">  <span class="kw">int</span> a = 3;</span>
+        <span class="ln" data-frame="main">  <span class="kw">int</span> result = <span class="tok" data-ctok="square-call">Square(a)</span>;</span>
+        <span class="ln" data-frame="main">}</span>
+        <span class="ln"></span>
+        <span class="ln" data-frame="square"><span class="kw">static int</span> <span class="tok">Square</span>(<span class="kw">int</span> n) {</span>
+        <span class="ln" data-frame="square">  <span class="kw">return</span> <span class="tok" data-ctok="square-body">n * n</span>;</span>
+        <span class="ln" data-frame="square">}</span>
+      </div>
+
+      <div class="call-stack" id="cs-stack" style="margin-top:14px">
+        <div class="call-frame" data-frame="square">
+          <div class="frame-name">Square( ) <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--ink-soft)">← active</span></div>
+          <div class="frame-vars">
+            <div class="fv"><div class="fv-val">3</div><div class="fv-name">n</div></div>
+          </div>
+        </div>
+        <div class="call-frame" data-frame="main" style="opacity:.55">
+          <div class="frame-name">Main( )</div>
+          <div class="frame-vars">
+            <div class="fv"><div class="fv-val">3</div><div class="fv-name">a</div></div>
+            <div class="fv"><div class="fv-val">?</div><div class="fv-name">result</div></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a frame → its call site in the code highlights.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=callstack</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="cs1" type="<span class="k">callstack</span>"
+<span class="k">frames:</span>
+  - name: Square
+    params: { n: 3 }
+    active: true
+    code-lines: [6,7]
+  - name: Main
+    locals: { a: 3, result: "?" }
+    code-lines: [1,2,3]
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> introducing functions, recursion, parameter passing</li>
+        <li><b>Hover link:</b> frame ↔ function definition + call site in code</li>
+        <li><b>Animation:</b> push frame (call), pop frame (return) — can be stepped</li>
+        <li><b>Quiz mode:</b> blank a param or local value; student fills in what's passed</li>
+        <li><b>Extends to:</b> recursion (many frames of same function), closures</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 4. LOOP TRACE                                            -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="LT">
+  <div class="vhint"><b>Loop trace table</b> — each row is one iteration. Columns are the loop variable, condition, body effect, and any accumulator. <b>Hover a row</b> to highlight the corresponding loop body state.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Loop trace <span class="badge">state × iteration</span></h3>
+      <p class="desc">For a <code>for</code> loop accumulating a sum. Each row shows the state at the top of that iteration.</p>
+      <div class="code" id="lt-code">
+        <span class="ln"><span class="kw">int</span> sum = 0;</span>
+        <span class="ln" data-iter="all"><span class="kw">for</span> (<span class="kw">int</span> <span class="tok" data-ltok="i">i</span> = 0; <span class="tok" data-ltok="cond">i &lt; 4</span>; i++) {</span>
+        <span class="ln" data-iter="body">    sum = <span class="tok" data-ltok="body">sum + i</span>;</span>
+        <span class="ln">}</span>
+        <span class="ln"><span class="cm">// sum is now 6</span></span>
+      </div>
+
+      <table class="trace-table" id="lt-table" style="margin-top:12px">
+        <thead>
+          <tr>
+            <th>iter</th><th>i</th><th>i &lt; 4 ?</th><th>sum + i</th><th>sum after</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-iter="0">
+            <td class="iter-n">0</td><td>0</td><td class="cond-t">true</td><td>0 + 0 = 0</td><td>0</td>
+          </tr>
+          <tr data-iter="1">
+            <td class="iter-n">1</td><td class="val-changed">1</td><td class="cond-t">true</td><td>0 + 1 = 1</td><td class="val-changed">1</td>
+          </tr>
+          <tr data-iter="2">
+            <td class="iter-n">2</td><td class="val-changed">2</td><td class="cond-t">true</td><td>1 + 2 = 3</td><td class="val-changed">3</td>
+          </tr>
+          <tr data-iter="3">
+            <td class="iter-n">3</td><td class="val-changed">3</td><td class="cond-t">true</td><td>3 + 3 = 6</td><td class="val-changed">6</td>
+          </tr>
+          <tr data-iter="exit">
+            <td class="iter-n">—</td><td>4</td><td class="cond-f">false</td><td class="stop">loop exits</td><td>6</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="loop-body" id="lt-body">
+        <span class="cap" style="margin-bottom:4px;display:block">loop body at this iteration</span>
+        <span id="lt-body-text"></span>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a row → see what the loop body does that iteration.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=loop-trace</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="lt1" type="<span class="k">loop-trace</span>"
+<span class="k">loop-var:</span> i
+<span class="k">condition:</span> "i &lt; 4"
+<span class="k">columns:</span> [i, "i &lt; 4", "sum + i", "sum after"]
+<span class="k">rows:</span>
+  - [0, true,  "0+0=0", 0]
+  - [1, true,  "0+1=1", 1]
+  - [2, true,  "1+2=3", 3]
+  - [3, true,  "3+3=6", 6]
+  - [4, false, "exit",  6]
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> for/while loops, accumulation, array traversal</li>
+        <li><b>Hover link:</b> row ↔ loop body code lines for that iteration</li>
+        <li><b>Columns adapt:</b> array-traversal loop adds an index + element column</li>
+        <li><b>Quiz mode:</b> blank selected cells (e.g. the "sum after" column); student fills in</li>
+        <li><b>Extends to:</b> while loops, nested loops (two index columns)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 5. IF / ELSE                                             -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="BR">
+  <div class="vhint"><b>if / else branching</b> — shows the condition as a decision diamond, with two labelled paths. <b>Hover the condition</b> to see both arms; hover an arm to highlight its code block.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>if / else <span class="badge">fork + merge</span></h3>
+      <p class="desc">For a simple grade check. The diamond evaluates the condition; the arms show what each branch does; they merge back at the end.</p>
+      <div class="code" id="br-code">
+        <span class="ln"><span class="kw">int</span> score = 74;</span>
+        <span class="ln" data-arm="cond"><span class="kw">if</span> (<span class="tok" data-btok="cond">score >= 60</span>) {</span>
+        <span class="ln" data-arm="then">    Console.WriteLine(<span class="tok" data-btok="then">"Pass"</span>);</span>
+        <span class="ln" data-arm="then">} <span class="kw">else</span> {</span>
+        <span class="ln" data-arm="else">    Console.WriteLine(<span class="tok" data-btok="else">"Fail"</span>);</span>
+        <span class="ln">}</span>
+      </div>
+
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:center">
+          <div class="branch-cond">
+            <div class="diamond" id="br-diamond" data-arm="cond">
+              <div class="d-text">score<br/>&gt;= 60 ?</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:4px;margin-top:0">
+          <div style="text-align:right;padding-right:4px;font-family:'JetBrains Mono';font-size:10.5px;color:var(--g2);padding-top:6px">true</div>
+          <div></div>
+          <div style="text-align:left;padding-left:4px;font-family:'JetBrains Mono';font-size:10.5px;color:#b84747;padding-top:6px">false</div>
+        </div>
+        <div class="branch-arms">
+          <div class="branch-arm" id="br-then" data-arm="then">
+            <div class="arm-label"><span class="pill t">true</span> then</div>
+            <div class="code" style="border:none;padding:0;background:transparent"><span class="ln">WriteLine("Pass")</span></div>
+            <div style="margin-top:6px;font-family:'Kalam';font-size:12px;color:var(--g2)">score is 74 — this arm runs</div>
+          </div>
+          <div class="branch-arm" id="br-else" data-arm="else" style="opacity:.45">
+            <div class="arm-label"><span class="pill f">false</span> else</div>
+            <div class="code" style="border:none;padding:0;background:transparent"><span class="ln">WriteLine("Fail")</span></div>
+            <div style="margin-top:6px;font-family:'Kalam';font-size:12px;color:#b84747">skipped this time</div>
+          </div>
+        </div>
+        <div class="branch-merge">
+          <div class="merge-box">continue</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=branch</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="br1" type="<span class="k">branch</span>"
+<span class="k">condition:</span> "score >= 60"
+<span class="k">then:</span>
+  label: "Pass"
+  code-lines: [3]
+<span class="k">else:</span>
+  label: "Fail"
+  code-lines: [5]
+<span class="k">active-arm:</span> then  <span class="c"># optional: shade the live branch</span>
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> if/else, early returns, guard clauses</li>
+        <li><b>Hover link:</b> arm ↔ its code block; condition ↔ the boolean expression</li>
+        <li><b>Active arm:</b> shades the branch taken for a given example value</li>
+        <li><b>Quiz mode:</b> blank active-arm; student selects which branch runs</li>
+        <li><b>Note:</b> distinct from switch — no "result value," just control flow</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 6. SWITCH / MATCH                                        -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="SW">
+  <div class="vhint"><b>Switch expression</b> — more like evaluation than control flow. The expression produces a value by matching an arm. Layout mirrors the eval tree: input → matched arm → output value.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Switch expression <span class="badge">match → value</span></h3>
+      <p class="desc">C# switch expression: each arm is a pattern → result. The matched arm lights up; others fade.</p>
+      <div class="code" id="sw-code">
+        <span class="ln"><span class="kw">string</span> grade = score <span class="kw">switch</span> {</span>
+        <span class="ln" data-swarm="0">    <span class="tok" data-stok="0">&gt;= 90</span> =&gt; <span class="tok" data-stok="0r">"A"</span>,</span>
+        <span class="ln" data-swarm="1">    <span class="tok" data-stok="1">&gt;= 75</span> =&gt; <span class="tok" data-stok="1r">"B"</span>,</span>
+        <span class="ln" data-swarm="2">    <span class="tok" data-stok="2">&gt;= 60</span> =&gt; <span class="tok" data-stok="2r">"C"</span>,</span>
+        <span class="ln" data-swarm="3">    <span class="tok" data-stok="3">_</span>       =&gt; <span class="tok" data-stok="3r">"F"</span>,</span>
+        <span class="ln">};</span>
+      </div>
+
+      <div class="switch-layout" id="sw-diag" style="margin-top:14px">
+        <div class="switch-expr" id="sw-expr">
+          <span>score</span><span class="arrow">=</span><span style="font-weight:700">74</span>
+          <span class="arrow">→ match:</span>
+        </div>
+        <div class="switch-arm faded" data-swarm="0">
+          <span class="pat">&gt;= 90</span><span class="sep">→</span><span class="res">"A"</span>
+          <span style="font-family:'Kalam';font-size:11.5px;color:var(--ink-faint);margin-left:8px">74 &lt; 90, skip</span>
+        </div>
+        <div class="switch-arm faded" data-swarm="1">
+          <span class="pat">&gt;= 75</span><span class="sep">→</span><span class="res">"B"</span>
+          <span style="font-family:'Kalam';font-size:11.5px;color:var(--ink-faint);margin-left:8px">74 &lt; 75, skip</span>
+        </div>
+        <div class="switch-arm active-match" data-swarm="2">
+          <span class="pat">&gt;= 60</span><span class="sep">→</span><span class="res">"C"</span>
+          <span style="font-family:'Kalam';font-size:11.5px;color:var(--g2);margin-left:8px;font-weight:700">✓ match! grade = "C"</span>
+        </div>
+        <div class="switch-arm faded" data-swarm="3">
+          <span class="pat">_</span><span class="sep">→</span><span class="res">"F"</span>
+          <span style="font-family:'Kalam';font-size:11.5px;color:var(--ink-faint);margin-left:8px">default (unreached)</span>
+        </div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:10px 0 0"><span class="tag">hover</span> an arm → highlights its pattern + result in code.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=switch</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="sw1" type="<span class="k">switch</span>"
+<span class="k">input:</span> { name: score, value: 74 }
+<span class="k">arms:</span>
+  - pattern: ">= 90"  result: '"A"'  match: false
+  - pattern: ">= 75"  result: '"B"'  match: false
+  - pattern: ">= 60"  result: '"C"'  match: true
+  - pattern: "_"      result: '"F"'  match: false
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> switch expressions, pattern matching, any arms-to-value form</li>
+        <li><b>Hover link:</b> arm ↔ its pattern + result tokens in code</li>
+        <li><b>Differs from if/else:</b> produces a value — closer to the eval tree than the branch diagram</li>
+        <li><b>Quiz mode:</b> blank which arm matches, or blank the result; student selects</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 7. REFERENCE TYPES                                       -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="RT">
+  <div class="vhint"><b>Reference-type memory</b> — the stack holds a <i>reference</i> (address); the object lives on the heap. Two variables can reference the same object — mutation through one is visible through the other.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Heap + stack <span class="badge">ref on stack, object on heap</span></h3>
+      <p class="desc">A <code>Point</code> class. <code>p</code> holds a reference; the fields live on the heap. Assigning <code>q = p</code> copies the reference, not the object.</p>
+      <div class="code" id="rt-code">
+        <span class="ln" data-rtk="p"><span class="kw">Point</span> p = <span class="kw">new</span> Point(3, 4);</span>
+        <span class="ln" data-rtk="q"><span class="kw">Point</span> q = p;</span>
+        <span class="ln" data-rtk="mut">q.X = 99;</span>
+        <span class="ln"><span class="cm">// p.X is also 99 — same object!</span></span>
+      </div>
+
+      <div class="mem-split" style="margin-top:12px" id="rt-mem">
+        <div class="mem-region">
+          <h4>Stack</h4>
+          <div class="mem-grid cols2">
+            <div class="mem-cell ptr" data-rtk="p" style="border-color:var(--g3)">
+              <span class="addr">0x100</span>
+              <span class="val" style="color:var(--g3)">→ 0x500</span>
+              <span class="name">p</span>
+            </div>
+            <div class="mem-cell ptr" data-rtk="q" style="border-color:var(--g3)">
+              <span class="addr">0x108</span>
+              <span class="val" style="color:var(--g3)">→ 0x500</span>
+              <span class="name">q</span>
+            </div>
+          </div>
+        </div>
+        <div class="mem-region">
+          <h4>Heap</h4>
+          <div class="heap-obj" data-rtk="obj" id="rt-heap-obj" style="border-color:var(--g3)">
+            <div class="obj-type">Point @ 0x500</div>
+            <div class="obj-field"><span class="fname">X:</span><span class="fval" id="rt-x-val">99</span></div>
+            <div class="obj-field"><span class="fname">Y:</span><span class="fval">4</span></div>
+          </div>
+          <p style="font-family:'Kalam';font-size:12.5px;color:var(--g2);margin:4px 0 0">Both p and q point here → mutation visible through either reference.</p>
+        </div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a code line → the relevant stack cell + heap object highlight.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=refmemory</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="rt1" type="<span class="k">refmemory</span>"
+<span class="k">stack:</span>
+  p: { type: Point, ref: obj1, addr: 0x100 }
+  q: { type: Point, ref: obj1, addr: 0x108 }
+<span class="k">heap:</span>
+  obj1: { type: Point, addr: 0x500,
+    fields: { X: 99, Y: 4 } }
+<span class="k">groups:</span>
+  g1: { lines: [1], stack: [p], heap: [] }
+  g2: { lines: [2], stack: [q], heap: [] }
+  g3: { lines: [3], stack: [p,q], heap: [obj1] }
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> introducing classes, null, aliasing, mutation through refs</li>
+        <li><b>Key teaching moment:</b> assigning a reference copies the address, not the object</li>
+        <li><b>Hover link:</b> stack cell → heap object it points to; code line → involved cells/objects</li>
+        <li><b>Extends to:</b> arrays (tab 8) and linked lists (tab 9), both of which use heap objects</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 8. ARRAYS                                                -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="AR">
+  <div class="vhint"><b>Array diagram</b> — a reference type whose heap object is a contiguous indexed strip. The stack holds the reference; the heap holds the cells. Index-out-of-bounds shows grayed ghost cells beyond the end.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Array <span class="badge">ref → indexed strip</span></h3>
+      <p class="desc">An <code>int[]</code> of length 5. Stack holds a reference; heap holds the cells. Hover a cell to highlight the corresponding indexing expression in code.</p>
+      <div class="code" id="ar-code">
+        <span class="ln"><span class="kw">int</span>[] nums = { 10, 20, 30, 40, 50 };</span>
+        <span class="ln" data-ark="2">nums[<span class="tok" data-atok="2">2</span>] = 99;</span>
+        <span class="ln"><span class="cm">// nums[2] is now 99</span></span>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="array-ptr">
+          <div class="ptr-box" data-ark="ref">nums</div>
+          <span style="font-size:18px;color:var(--accent);font-weight:700;font-family:'Caveat'">→</span>
+          <span class="arr-label">heap array @ 0x200</span>
+        </div>
+        <div class="array-wrap">
+          <div class="array-strip" id="ar-strip">
+            <div class="array-cell" data-ark="0"><span class="a-idx">[0]</span><span class="a-val">10</span></div>
+            <div class="array-cell" data-ark="1"><span class="a-idx">[1]</span><span class="a-val">20</span></div>
+            <div class="array-cell hl" data-ark="2"><span class="a-idx">[2]</span><span class="a-val">99</span></div>
+            <div class="array-cell" data-ark="3"><span class="a-idx">[3]</span><span class="a-val">40</span></div>
+            <div class="array-cell" data-ark="4"><span class="a-idx">[4]</span><span class="a-val">50</span></div>
+            <div class="array-cell out-of-bounds"><span class="a-idx">[5]</span><span class="a-val">?</span></div>
+            <div class="array-cell out-of-bounds"><span class="a-idx">[6]</span><span class="a-val">?</span></div>
+          </div>
+        </div>
+        <p style="font-family:'Kalam';font-size:12px;color:var(--ink-soft);margin:4px 0 0">Ghost cells (dashed) show out-of-bounds territory.</p>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a cell → highlights the corresponding index expression in code.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=array</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="ar1" type="<span class="k">array</span>"
+<span class="k">name:</span> nums
+<span class="k">length:</span> 5
+<span class="k">elements:</span> [10, 20, 99, 40, 50]
+<span class="k">highlight:</span> [2]          <span class="c"># active cell</span>
+<span class="k">show-oob:</span> 2             <span class="c"># ghost cells past end</span>
+<span class="k">groups:</span>
+  g1: { lines: [1], cells: [0,1,2,3,4] }
+  g2: { lines: [2], cells: [2] }
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> array creation, indexing, traversal with loops</li>
+        <li><b>Hover link:</b> cell ↔ index expression in code; loop trace rows ↔ cells visited</li>
+        <li><b>Out-of-bounds ghost:</b> shows visually why accessing [5] throws</li>
+        <li><b>Quiz mode:</b> blank element values; student fills after tracing a loop</li>
+        <li><b>Combine with:</b> loop trace (tab 4) for traversal; ref memory (tab 7) for aliasing</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- 9. LINKED LISTS                                          -->
+<!-- ======================================================= -->
+<section class="vslot hidden" data-tab="LL">
+  <div class="vhint"><b>Linked list diagram</b> — each node is a heap object with a value field and a next pointer. The head variable on the stack points to the first node. Null terminates the chain.</div>
+  <div class="spec-wrap">
+    <div class="spec">
+      <h3>Linked list <span class="badge">node chain with pointers</span></h3>
+      <p class="desc">A singly-linked list of three nodes. Each box shows val | next. Hover a node to highlight the traversal step that visits it.</p>
+      <div class="code" id="ll-code">
+        <span class="ln"><span class="kw">Node</span> head = <span class="kw">new</span> Node(10);</span>
+        <span class="ln">head.Next = <span class="kw">new</span> Node(20);</span>
+        <span class="ln">head.Next.Next = <span class="kw">new</span> Node(30);</span>
+        <span class="ln"></span>
+        <span class="ln"><span class="kw">Node</span> curr = head;</span>
+        <span class="ln"><span class="kw">while</span> (curr != <span class="kw">null</span>) {</span>
+        <span class="ln">  <span class="tok" data-ltok="visit">print(curr.Value)</span>;</span>
+        <span class="ln">  curr = curr.Next;</span>
+        <span class="ln">}</span>
+      </div>
+
+      <!-- Stack ref -->
+      <div style="margin-top:12px;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono';font-size:12px">
+        <div class="mem-cell" style="min-height:auto;padding:6px 10px;border-color:var(--g3);width:auto">
+          <span class="addr" style="font-size:9px">stack</span>
+          <span class="val" style="color:var(--g3)">→ 0x300</span>
+          <span class="name">head</span>
+        </div>
+        <span style="font-size:20px;color:var(--accent);font-family:'Caveat';font-weight:700">→</span>
+      </div>
+      <!-- Nodes -->
+      <div class="ll-wrap" style="margin-top:6px">
+        <div class="ll-strip" id="ll-strip">
+          <div class="ll-node" data-llk="0">
+            <div class="n-val">10</div>
+            <div class="n-ptr">next→</div>
+          </div>
+          <div class="ll-arrow">→</div>
+          <div class="ll-node" data-llk="1">
+            <div class="n-val">20</div>
+            <div class="n-ptr">next→</div>
+          </div>
+          <div class="ll-arrow">→</div>
+          <div class="ll-node" data-llk="2">
+            <div class="n-val">30</div>
+            <div class="n-ptr">null</div>
+          </div>
+          <div class="ll-arrow" style="color:var(--ink-faint);font-size:14px">→</div>
+          <div class="ll-null">null</div>
+        </div>
+      </div>
+
+      <!-- Traversal state -->
+      <div style="margin-top:10px;border:1.5px solid var(--ink);padding:8px 10px;background:var(--paper-2)">
+        <span class="cap" style="margin-bottom:6px;display:block">traversal state (curr pointer)</span>
+        <div id="ll-traversal" style="display:flex;gap:8px;flex-wrap:wrap;font-family:'JetBrains Mono';font-size:12px">
+          <div class="ll-node hl" style="opacity:1"><div class="n-val">10</div><div class="n-ptr">curr</div></div>
+          <div class="ll-node faded"><div class="n-val">20</div><div class="n-ptr">next</div></div>
+          <div class="ll-node faded"><div class="n-val">30</div><div class="n-ptr">next</div></div>
+        </div>
+        <div style="margin-top:8px;font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink-soft)">print(<span style="font-weight:700;color:var(--ink)">10</span>) &nbsp;· curr = curr.Next</div>
+      </div>
+      <p style="font-family:'Kalam';font-size:13px;color:var(--ink-soft);margin:8px 0 0"><span class="tag">hover</span> a node → shows what the traversal body does at that node.</p>
+    </div>
+
+    <div class="spec">
+      <h3>Authoring <span class="badge">::: diagram type=linkedlist</span></h3>
+<pre class="author-pre">
+<span class="k">::: diagram</span> id="ll1" type="<span class="k">linkedlist</span>"
+<span class="k">head:</span> n1
+<span class="k">nodes:</span>
+  n1: { value: 10, next: n2, addr: 0x300 }
+  n2: { value: 20, next: n3, addr: 0x310 }
+  n3: { value: 30, next: null, addr: 0x320 }
+<span class="k">traversal:</span>
+  variable: curr
+  steps: [n1, n2, n3, null]
+<span class="k">:::</span>
+</pre>
+      <ul class="info-list">
+        <li><b>Use when:</b> linked list construction, traversal, insert/delete</li>
+        <li><b>Hover link:</b> node ↔ construction line in code; traversal step ↔ while-body line</li>
+        <li><b>Traversal state:</b> shows curr pointer position; compatible with loop trace (tab 4)</li>
+        <li><b>Quiz mode:</b> blank a next pointer; student draws where it should point</li>
+        <li><b>Extends to:</b> doubly-linked (prev + next fields), sentinel nodes, circular lists</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div><!-- /frame -->
+</div><!-- /page -->
+
+<script>
+// Tab switching
+const tabs=document.querySelectorAll('.tab'),slots=document.querySelectorAll('.vslot');
+function show(t){tabs.forEach(x=>x.classList.toggle('active',x.dataset.tab===t));slots.forEach(s=>s.classList.toggle('hidden',s.dataset.tab!==t));try{localStorage.setItem('dv_tab',t)}catch(e){}}
+tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.tab)));
+try{const s=localStorage.getItem('dv_tab');if(s)show(s)}catch(e){}
+const tabKeys=['TX','VM','RD','ET','CS','LT','BR','SW','RT','AR','LL'];
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea,[contenteditable]'))return;if(e.key==='0')show('TX');const n=parseInt(e.key);if(n>=1&&n<=9)show(tabKeys[n])});
+
+// ---- 1. VALUE MEMORY ----
+const vmCode=document.getElementById('vm-code'),vmMem=document.getElementById('vm-mem');
+vmCode.querySelectorAll('.ln[data-k]').forEach(ln=>{
+  ln.addEventListener('mouseenter',()=>{
+    vmMem.querySelectorAll(`.mem-cell[data-k="${ln.dataset.k}"]`).forEach(c=>c.classList.add('hl'));
+    ln.classList.add('hl');
+  });
+  ln.addEventListener('mouseleave',()=>{
+    vmMem.querySelectorAll('.mem-cell').forEach(c=>c.classList.remove('hl'));
+    ln.classList.remove('hl');
+  });
+});
+vmMem.querySelectorAll('.mem-cell[data-k]').forEach(c=>{
+  c.addEventListener('mouseenter',()=>{
+    vmCode.querySelectorAll(`.ln[data-k="${c.dataset.k}"]`).forEach(l=>l.classList.add('hl'));
+    c.classList.add('hl');
+  });
+  c.addEventListener('mouseleave',()=>{
+    vmCode.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));
+    c.classList.remove('hl');
+  });
+});
+
+// ---- 2. REDUCTION (bar-stacking tower) ----
+['rd-a-tower','rd-b-tower'].forEach(id=>{
+  const tower=document.getElementById(id);if(!tower)return;
+  const layers=[...tower.querySelectorAll('.rd-layer')];
+  layers.forEach(L=>L.style.opacity='1');
+  layers.forEach(L=>{
+    L.addEventListener('mouseenter',()=>{
+      layers.forEach(x=>x.style.opacity='.35');
+      L.style.opacity='1';
+    });
+    L.addEventListener('mouseleave',()=>{
+      layers.forEach(x=>x.style.opacity='1');
+    });
+  });
+});
+
+// ---- 3. EVAL TREE ----
+const etTree=document.getElementById('et-tree');
+etTree.querySelectorAll('.tree-node').forEach(n=>{
+  n.addEventListener('mouseenter',()=>{
+    etTree.querySelectorAll('.tree-node').forEach(x=>x.classList.remove('hl'));
+    n.classList.add('hl');
+  });
+  n.addEventListener('mouseleave',()=>n.classList.remove('hl'));
+});
+document.querySelectorAll('#et-reduction .step').forEach(s=>{
+  s.addEventListener('mouseenter',()=>s.classList.add('hl'));
+  s.addEventListener('mouseleave',()=>s.classList.remove('hl'));
+});
+
+// ---- 3. CALL STACK ----
+const csCode=document.getElementById('cs-code'),csStack=document.getElementById('cs-stack');
+csStack.querySelectorAll('.call-frame[data-frame]').forEach(f=>{
+  f.addEventListener('mouseenter',()=>{
+    csCode.querySelectorAll(`.ln[data-frame="${f.dataset.frame}"]`).forEach(l=>l.classList.add('hl'));
+    f.classList.add('hl');
+  });
+  f.addEventListener('mouseleave',()=>{
+    csCode.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));
+    f.classList.remove('hl');
+  });
+});
+
+// ---- 4. LOOP TRACE ----
+const ltTable=document.getElementById('lt-table'),ltBody=document.getElementById('lt-body'),ltBodyText=document.getElementById('lt-body-text');
+const ltBodyMsgs={
+  '0':'sum = 0 + 0 = 0  (no change yet)',
+  '1':'sum = 0 + 1 = 1',
+  '2':'sum = 1 + 2 = 3',
+  '3':'sum = 3 + 3 = 6',
+  'exit':'condition i < 4 is false — loop exits with sum = 6'
+};
+ltTable.querySelectorAll('tbody tr').forEach(row=>{
+  row.addEventListener('mouseenter',()=>{
+    row.classList.add('hl');
+    ltBodyText.textContent=ltBodyMsgs[row.dataset.iter]||'';
+    ltBody.classList.add('visible');
+  });
+  row.addEventListener('mouseleave',()=>{
+    row.classList.remove('hl');
+    ltBody.classList.remove('visible');
+  });
+});
+
+// ---- 5. IF/ELSE ----
+const brCode=document.getElementById('br-code'),brDiamond=document.getElementById('br-diamond');
+const brThen=document.getElementById('br-then'),brElse=document.getElementById('br-else');
+function hlBrArm(arm){
+  brCode.querySelectorAll(`.ln[data-arm="${arm}"]`).forEach(l=>l.classList.add('hl'));
+}
+function clearBr(){brCode.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));}
+brDiamond.addEventListener('mouseenter',()=>{hlBrArm('cond');brDiamond.classList.add('hl')});
+brDiamond.addEventListener('mouseleave',()=>{clearBr();brDiamond.classList.remove('hl')});
+brThen.addEventListener('mouseenter',()=>{hlBrArm('then');brThen.classList.add('hl')});
+brThen.addEventListener('mouseleave',()=>{clearBr();brThen.classList.remove('hl')});
+brElse.addEventListener('mouseenter',()=>{hlBrArm('else');brElse.classList.add('hl')});
+brElse.addEventListener('mouseleave',()=>{clearBr();brElse.classList.remove('hl')});
+
+// ---- 6. SWITCH ----
+const swCode=document.getElementById('sw-code'),swDiag=document.getElementById('sw-diag');
+swDiag.querySelectorAll('.switch-arm[data-swarm]').forEach(arm=>{
+  arm.addEventListener('mouseenter',()=>{
+    const i=arm.dataset.swarm;
+    swCode.querySelectorAll(`.ln[data-swarm="${i}"]`).forEach(l=>l.classList.add('hl'));
+    arm.style.outline='2px solid var(--accent)';
+  });
+  arm.addEventListener('mouseleave',()=>{
+    swCode.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));
+    arm.style.outline='';
+  });
+});
+
+// ---- 7. REF TYPES ----
+const rtCode=document.getElementById('rt-code'),rtMem=document.getElementById('rt-mem'),rtHeap=document.getElementById('rt-heap-obj');
+rtCode.querySelectorAll('.ln[data-rtk]').forEach(ln=>{
+  ln.addEventListener('mouseenter',()=>{
+    rtMem.querySelectorAll(`.mem-cell[data-rtk="${ln.dataset.rtk}"]`).forEach(c=>c.classList.add('hl'));
+    if(ln.dataset.rtk==='mut'||ln.dataset.rtk==='p'||ln.dataset.rtk==='q') rtHeap.classList.add('hl');
+    ln.classList.add('hl');
+  });
+  ln.addEventListener('mouseleave',()=>{
+    rtMem.querySelectorAll('.mem-cell').forEach(c=>c.classList.remove('hl'));
+    rtHeap.classList.remove('hl');
+    ln.classList.remove('hl');
+  });
+});
+
+// ---- 8. ARRAYS ----
+const arCode=document.getElementById('ar-code'),arStrip=document.getElementById('ar-strip');
+arStrip.querySelectorAll('.array-cell[data-ark]').forEach(cell=>{
+  cell.addEventListener('mouseenter',()=>{
+    const k=cell.dataset.ark;
+    arCode.querySelectorAll(`.ln[data-ark="${k}"]`).forEach(l=>l.classList.add('hl'));
+    cell.classList.add('hl');
+  });
+  cell.addEventListener('mouseleave',()=>{
+    arCode.querySelectorAll('.ln').forEach(l=>l.classList.remove('hl'));
+    cell.classList.remove('hl');
+  });
+});
+
+// ---- 9. LINKED LIST ----
+const llCode=document.getElementById('ll-code'),llStrip=document.getElementById('ll-strip');
+const llMsgs={
+  '0':'curr = node(10) → print 10 → curr = curr.Next',
+  '1':'curr = node(20) → print 20 → curr = curr.Next',
+  '2':'curr = node(30) → print 30 → curr = null (exit)'
+};
+llStrip.querySelectorAll('.ll-node[data-llk]').forEach(node=>{
+  node.addEventListener('mouseenter',()=>{
+    llStrip.querySelectorAll('.ll-node').forEach(n=>n.classList.add('faded'));
+    node.classList.remove('faded'); node.classList.add('hl');
+  });
+  node.addEventListener('mouseleave',()=>{
+    llStrip.querySelectorAll('.ll-node').forEach(n=>{n.classList.remove('faded','hl')});
+  });
+});
+</script>
+</body>
+</html>

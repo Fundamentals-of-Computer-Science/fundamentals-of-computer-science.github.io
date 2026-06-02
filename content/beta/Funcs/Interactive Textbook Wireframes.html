@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Interactive Textbook — Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --ink-soft:#4a4a4a;
+    --ink-faint:#9a9a9a;
+    --paper:#fafaf6;
+    --paper-2:#f2efe4;
+    --rule:#2a2a2a;
+    --accent:#c65d3a;        /* warm terracotta accent */
+    --accent-wash:#f3d8c9;
+    --highlight:#ffe9a8;
+    --grid: #e8e3d2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Kalam',cursive;}
+  body{
+    background-image:
+      radial-gradient(var(--grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: -1px -1px;
+    min-height:100vh;
+  }
+  .page{max-width:1480px;margin:0 auto;padding:36px 40px 120px;}
+
+  /* Header */
+  .hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px;border-bottom:2px solid var(--ink);padding-bottom:14px;position:relative}
+  .hdr::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--ink);opacity:.35}
+  .hdr h1{font-family:'Caveat',cursive;font-weight:700;font-size:54px;line-height:.95;margin:0}
+  .hdr h1 .sub{display:block;font-family:'Kalam';font-weight:300;font-size:16px;color:var(--ink-soft);margin-top:4px;letter-spacing:.02em}
+  .hdr .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.7}
+  .hdr .meta b{color:var(--ink)}
+
+  /* Design notes strip */
+  .notes{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;margin:18px 0 26px;font-size:15px;color:var(--ink-soft)}
+  .notes .card{border:1.5px solid var(--ink);background:var(--paper);padding:12px 14px;position:relative;transform:rotate(-.25deg)}
+  .notes .card:nth-child(2){transform:rotate(.3deg)}
+  .notes .card:nth-child(3){transform:rotate(-.15deg)}
+  .notes .card h4{font-family:'Caveat';font-size:24px;margin:0 0 4px;font-weight:700;color:var(--ink)}
+  .notes .card p{margin:0;line-height:1.35}
+  .notes .card .pin{position:absolute;top:-9px;left:14px;width:18px;height:18px;border-radius:50%;background:var(--accent);border:1.5px solid var(--ink);box-shadow:0 1px 0 #00000022}
+
+  /* Tabs */
+  .tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:0;align-items:flex-end}
+  .tab{
+    font-family:'Caveat',cursive;font-weight:700;font-size:22px;
+    background:var(--paper-2);border:2px solid var(--ink);border-bottom:none;
+    padding:10px 18px 8px;margin-right:6px;cursor:pointer;position:relative;top:2px;
+    transform:rotate(-.4deg);color:var(--ink-soft);
+  }
+  .tab:nth-child(2){transform:rotate(.3deg)}
+  .tab:nth-child(3){transform:rotate(-.2deg)}
+  .tab:nth-child(4){transform:rotate(.15deg)}
+  .tab.active{background:var(--paper);color:var(--ink);top:2px;box-shadow:0 -2px 0 var(--paper);z-index:2}
+  .tab .n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);margin-right:6px;font-weight:600}
+  .tab-cap{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);padding-bottom:10px}
+
+  .frame{
+    border:2px solid var(--ink);border-top:none;background:var(--paper);
+    padding:22px 26px 28px;position:relative;min-height:820px;
+  }
+  .frame .corner{position:absolute;font-family:'Caveat';font-size:20px;color:var(--accent);font-weight:700}
+  .frame .corner.tl{top:8px;left:14px}
+  .frame .corner.tr{top:8px;right:14px}
+
+  .hidden{display:none !important}
+
+  /* ---- Shared wireframe bits ---- */
+  .browser-chrome{
+    border:1.5px solid var(--ink);background:var(--paper-2);
+    display:flex;align-items:center;gap:10px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);
+  }
+  .browser-chrome .dots{display:flex;gap:5px}
+  .browser-chrome .dots i{width:10px;height:10px;border:1.2px solid var(--ink);border-radius:50%;display:block;background:var(--paper)}
+  .browser-chrome .url{flex:1;background:var(--paper);border:1.2px solid var(--ink);padding:3px 8px;border-radius:3px}
+
+  .ch-crumb{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+  .ch-title{font-family:'Caveat';font-weight:700;font-size:38px;line-height:1;margin:4px 0 14px;display:flex;align-items:baseline;gap:14px}
+  .ch-title .num{color:var(--accent);font-size:28px}
+
+  /* Fake prose lines */
+  .prose{font-family:'Kalam';font-size:17px;line-height:1.55;color:var(--ink)}
+  .prose p{margin:0 0 14px}
+  .prose .line{display:block;height:10px;background:var(--ink);opacity:.75;border-radius:2px;margin:0 0 8px}
+  .prose .line.s80{width:80%}
+  .prose .line.s90{width:92%}
+  .prose .line.s70{width:72%}
+  .prose .line.s60{width:60%}
+  .prose .line.s40{width:40%}
+  .prose .line.s30{width:30%}
+  .prose .line.soft{opacity:.45}
+  .prose .line.faint{opacity:.25}
+
+  /* paragraph block styling */
+  .pblock{margin:0 0 18px;padding:0}
+  .pblock.interactive{
+    cursor:pointer;position:relative;padding:10px 14px 10px 18px;
+    border-left:3px solid var(--accent);background:#fff6ef;
+    transition:background .2s, transform .2s;
+  }
+  .pblock.interactive:hover{background:#ffe9d5}
+  .pblock.interactive.active{background:var(--accent-wash);transform:translateX(-2px)}
+  .pblock.interactive .marker{
+    position:absolute;left:-34px;top:12px;width:26px;height:26px;border:1.5px solid var(--ink);
+    background:var(--paper);border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;
+    transform:rotate(-3deg);
+  }
+  .pblock.interactive.active .marker{background:var(--accent);color:#fff}
+
+  /* Inline caption */
+  .cap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+
+  /* Visual panel content */
+  .diagram{
+    border:1.5px solid var(--ink);background:var(--paper-2);padding:12px 14px;position:relative;
+  }
+  .diagram .label{font-family:'Caveat';font-size:20px;font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+  .diagram .label .x{font-family:'JetBrains Mono';font-size:11px;cursor:pointer;color:var(--ink-soft);border:1.2px solid var(--ink);padding:1px 6px;background:var(--paper)}
+  .memboxes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .memboxes .cell{border:1.5px solid var(--ink);background:var(--paper);padding:10px 8px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;position:relative;min-height:58px;transition:background .2s,box-shadow .2s}
+  .memboxes .cell .addr{display:block;font-size:9.5px;color:var(--ink-soft);margin-bottom:4px}
+  .memboxes .cell .val{font-weight:600;color:var(--ink)}
+  .memboxes .cell .name{display:block;font-family:'Caveat';font-size:17px;color:var(--accent);font-weight:700;margin-top:2px}
+  .memboxes .cell.hl{background:var(--highlight);box-shadow:0 0 0 3px var(--accent), 0 0 0 5px var(--paper);animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 2px var(--accent),0 0 0 4px var(--paper)}50%{box-shadow:0 0 0 5px var(--accent),0 0 0 7px var(--paper)}}
+
+  /* Code block */
+  .code{
+    border:1.5px solid var(--ink);background:#fbf9ef;padding:10px 12px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;color:var(--ink);
+    position:relative;
+  }
+  .code .ln{display:block;white-space:pre;padding:1px 4px;border-radius:2px;transition:background .2s,box-shadow .2s}
+  .code .ln .kw{color:var(--accent);font-weight:600}
+  .code .ln .cm{color:var(--ink-faint);font-style:italic}
+  .code .ln[data-link]:hover,.code .ln.hl{background:var(--highlight);cursor:pointer;box-shadow:inset 3px 0 0 var(--accent)}
+
+  .tag{display:inline-block;border:1.2px solid var(--ink);background:var(--paper);font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;margin-right:4px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase}
+
+  /* Progress bar — shared */
+  .progress{
+    margin-top:16px;border-top:1.5px dashed var(--ink);padding-top:12px;
+    display:flex;gap:10px;align-items:center;
+  }
+  .progress .pbar{
+    flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(16px,1fr);gap:4px;
+  }
+  .progress .pbar .tick{
+    height:14px;border:1.2px solid var(--ink);background:var(--paper-2);position:relative;cursor:pointer;
+  }
+  .progress .pbar .tick.done{background:var(--ink)}
+  .progress .pbar .tick.cur{background:var(--accent);border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--paper)}
+  .progress .pbar .tick .t{
+    position:absolute;bottom:-18px;left:0;right:0;text-align:center;
+    font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .progress .nav{display:flex;gap:6px}
+  .progress .nav button{
+    font-family:'Caveat';font-weight:700;font-size:18px;border:1.5px solid var(--ink);background:var(--paper);
+    padding:2px 12px;cursor:pointer;color:var(--ink);
+  }
+  .progress .nav button:hover{background:var(--paper-2)}
+  .progress .stamp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);min-width:120px;text-align:right}
+
+  /* Sketch arrow */
+  .arrow-hand{position:absolute;font-family:'Caveat';font-weight:700;font-size:20px;color:var(--accent);pointer-events:none;z-index:5}
+  .arrow-hand svg{display:block}
+
+  /* Tweaks panel */
+  .tweaks{
+    position:fixed;right:18px;bottom:18px;width:290px;background:var(--paper);border:2px solid var(--ink);
+    padding:12px 14px 14px;z-index:30;box-shadow:6px 6px 0 var(--ink);transform:rotate(-.4deg);
+    font-family:'Kalam',cursive;font-size:14px;display:none;
+  }
+  .tweaks.open{display:block}
+  .tweaks h5{font-family:'Caveat';font-weight:700;font-size:22px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+  .tweaks h5 button{font-family:'JetBrains Mono';font-size:11px;border:1.2px solid var(--ink);background:var(--paper-2);cursor:pointer;padding:1px 6px}
+  .tweaks .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;font-size:13px;color:var(--ink-soft)}
+  .tweaks .row label{color:var(--ink)}
+  .tweaks input[type=range]{width:120px}
+  .tweaks .swatches{display:flex;gap:5px}
+  .tweaks .sw{width:20px;height:20px;border:1.2px solid var(--ink);cursor:pointer}
+  .tweaks .sw.active{box-shadow:0 0 0 2px var(--accent),0 0 0 4px var(--paper)}
+  .tweaks-toggle{
+    position:fixed;right:18px;bottom:18px;z-index:29;font-family:'Caveat';font-weight:700;font-size:22px;
+    border:2px solid var(--ink);background:var(--paper);padding:4px 14px;cursor:pointer;transform:rotate(-1deg);
+    box-shadow:4px 4px 0 var(--ink);
+  }
+
+  /* Scratch marginalia */
+  .margin-note{
+    position:absolute;font-family:'Caveat';font-weight:700;color:var(--accent);font-size:18px;pointer-events:none;
+  }
+
+  /* ---- Variation A: Side Panel slide-out ---- */
+  .vA{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--ink)}
+  .vA .col{padding:18px 20px;position:relative}
+  .vA .col.left{border-right:1.5px dashed var(--ink)}
+  .vA .col.right{background:var(--paper-2);min-height:620px}
+  .vA .col.right.empty .emptywrap{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+    font-family:'Caveat';color:var(--ink-faint);font-size:26px;text-align:center;padding:0 20px;
+  }
+  .vA .col.right .emptywrap .hint{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
+
+  /* ---- Variation B: Inline expand below paragraph ---- */
+  .vB .expand{
+    margin:6px 0 16px;border:1.5px dashed var(--ink);background:var(--paper-2);padding:14px;
+    animation:slideDown .3s ease-out;transform-origin:top;
+  }
+  @keyframes slideDown{from{opacity:0;transform:scaleY(.6)}to{opacity:1;transform:scaleY(1)}}
+  .vB .expand-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* ---- Variation C: Margin gutter with thumbnails ---- */
+  .vC{display:grid;grid-template-columns:1fr 220px;gap:20px}
+  .vC .gutter{position:relative}
+  .vC .thumb{
+    border:1.5px solid var(--ink);background:var(--paper-2);padding:6px 8px;margin-bottom:10px;
+    font-family:'Caveat';font-size:14px;cursor:pointer;transform:rotate(-.5deg);
+  }
+  .vC .thumb:nth-child(even){transform:rotate(.4deg)}
+  .vC .thumb:hover{background:var(--accent-wash)}
+  .vC .thumb .mini{height:64px;border:1.2px dashed var(--ink);background:var(--paper);margin-top:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-size:10px;color:var(--ink-soft)}
+  .vC .thumb .tag2{font-family:'JetBrains Mono';font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+  .vC .overlay{
+    position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(250,250,246,.96);
+    border:2px solid var(--ink);padding:18px;z-index:10;display:none;box-shadow:8px 8px 0 var(--ink);
+  }
+  .vC .overlay.open{display:block;animation:overlayIn .25s ease-out}
+  @keyframes overlayIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ---- Variation D: Full-canvas mode (linked diagram always visible, prose zooms) ---- */
+  .vD{display:grid;grid-template-columns:minmax(200px,260px) 1fr minmax(200px,260px);gap:18px}
+  @media (max-width: 1100px){
+    .vD{grid-template-columns:1fr 1fr;gap:14px}
+    .vD .side-code{grid-column:1 / span 2}
+  }
+  .vD .mini-prose .pblock{font-size:14px}
+  .vD .center{border:1.5px solid var(--ink);background:var(--paper-2);padding:16px;min-height:560px;position:relative}
+  .vD .side-code{}
+  .vD .conn{position:absolute;pointer-events:none}
+
+  /* Small helpers */
+  .legend{display:flex;gap:10px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);margin-bottom:6px}
+  .legend .dot{width:10px;height:10px;border:1.2px solid var(--ink);display:inline-block}
+  .legend .dot.acc{background:var(--accent)}
+  .legend .dot.hi{background:var(--highlight)}
+  .legend .dot.ink{background:var(--ink)}
+
+  /* Reusable two-line scribble divider */
+  .scribble{display:block;height:6px;width:100%;background-image:
+    repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 14px);
+    opacity:.4;margin:10px 0;
+  }
+
+  .callout{
+    font-family:'Caveat';color:var(--accent);font-weight:700;font-size:19px;display:inline-flex;align-items:center;gap:6px;
+  }
+  .callout::before{content:"↳";font-family:serif;font-weight:400;color:var(--ink)}
+
+  /* Variation hint strip */
+  .vhint{
+    display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;
+    font-family:'Kalam';font-size:14px;color:var(--ink-soft);
+  }
+  .vhint b{color:var(--ink);font-weight:700}
+  .vhint .sep{color:var(--ink-faint)}
+
+  /* Keyboard shortcut chip */
+  kbd{
+    font-family:'JetBrains Mono';font-size:10px;border:1.2px solid var(--ink);padding:0 5px;
+    background:var(--paper-2);border-radius:3px;color:var(--ink)
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <h1>Interactive Textbook — Wireframes
+      <span class="sub">Fundamentals of CS · paragraph → visual · 4 structural approaches</span>
+    </h1>
+    <div class="meta">
+      <b>STATUS</b> &nbsp;lo-fi exploration<br/>
+      <b>DATE</b> &nbsp;&nbsp;&nbsp;2026-04-18<br/>
+      <b>FIDELITY</b> wireframe
+    </div>
+  </header>
+
+  <!-- ============ DESIGN NOTES ============ -->
+  <section class="notes">
+    <div class="card"><span class="pin"></span>
+      <h4>What you asked for</h4>
+      <p>Pure prose by default. Paragraphs with visuals get a margin indicator. Click → a visual "slides out." Hovering code or diagram parts pulses the linked piece. One visual open at a time. One concept per page.</p>
+    </div>
+    <div class="card"><span class="pin"></span>
+      <h4>What I'm exploring</h4>
+      <p>Four distinct layouts for the slide-out moment — side panel, inline-expand, margin gutter, and a persistent canvas. All share the same textual progress bar at the foot so context is never lost.</p>
+    </div>
+    <div class="card"><span class="pin"></span>
+      <h4>What's consistent</h4>
+      <p>Serif-adjacent literate-programming vibe (hand-drawn placeholder). Warm terracotta accent. Yellow highlighter for hover links. JetBrains Mono for code & metadata only.</p>
+    </div>
+  </section>
+
+  <!-- ============ TABS ============ -->
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="A"><span class="n">A</span>Side Panel</button>
+    <button class="tab" data-tab="B"><span class="n">B</span>Inline Expand</button>
+    <button class="tab" data-tab="C"><span class="n">C</span>Margin Gutter</button>
+    <button class="tab" data-tab="D"><span class="n">D</span>Persistent Canvas</button>
+    <span class="tab-cap">↑ click to compare approaches · <kbd>1</kbd>–<kbd>4</kbd> keys also work</span>
+  </div>
+
+  <div class="frame" id="frame">
+    <span class="corner tl">v0.1</span>
+    <span class="corner tr" id="variation-label">A · SIDE PANEL</span>
+
+    <!-- ============================================= -->
+    <!--  VARIATION A · SIDE PANEL SLIDE-OUT           -->
+    <!-- ============================================= -->
+    <section class="vslot" data-tab="A">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / data-and-memory</div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div style="padding:18px 0 4px">
+        <div class="ch-crumb">Chapter 2 · Data and Memory</div>
+        <div class="ch-title"><span class="num">2.1</span>Values live in boxes</div>
+      </div>
+
+      <div class="vhint">
+        <b>Idea:</b> prose stays on the left. Click an interactive paragraph → the visual slides in from the right.
+        <span class="sep">·</span><b>Persistence:</b> clicking another paragraph replaces the panel.
+        <span class="sep">·</span><b>Best when:</b> reader wants to skim prose uninterrupted.
+      </div>
+
+      <div class="vA">
+        <div class="col left">
+          <div class="prose">
+            <div class="pblock">
+              <p>Before we can talk about variables, we need a word for the things that variables <i>hold</i>. A <b>value</b> is a piece of data your program can compute with — a truth, a number, a piece of text. Each value has a <b>type</b>, and the type decides what you're allowed to do with it.</p>
+              <span class="line s90"></span><span class="line s80"></span><span class="line s60 soft"></span>
+            </div>
+
+            <div class="pblock interactive active" data-vis="A1">
+              <span class="marker">◆</span>
+              <p><b>Value types</b> like <code>int</code> and <code>bool</code> are stored <i>directly</i> in the variable's slot of memory. When you write <code>int x = 5;</code>, the number five is literally written into the box labelled <code>x</code>.</p>
+              <span class="callout">tap to open the memory diagram</span>
+            </div>
+
+            <div class="pblock">
+              <p>This is different from how reference types work — we'll meet those in Chapter 4 when we talk about classes and linked lists. For now, every value you create is its own little island.</p>
+              <span class="line s90"></span><span class="line s70 soft"></span>
+            </div>
+
+            <div class="pblock interactive" data-vis="A2">
+              <span class="marker">◆</span>
+              <p>Assigning one value type to another <b>copies</b> the value. The two variables are now independent — changing one does not change the other. This surprises a lot of beginners.</p>
+              <span class="callout">tap to see copy behaviour</span>
+            </div>
+
+            <div class="pblock">
+              <p>We'll come back to this idea in every chapter of the book. Each time we meet a new type, the very first question will always be: <i>where does this live in memory?</i></p>
+              <span class="line s80"></span><span class="line s40 soft"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col right" id="vA-right">
+          <!-- Starts open since paragraph A1 is active -->
+          <div class="diagram" id="vA-diagram">
+            <div class="label">Memory after <code>int x = 5;</code>
+              <span class="x" data-act="closeA">close ✕</span>
+            </div>
+
+            <div class="legend">
+              <span><span class="dot ink"></span> stack slot</span>
+              <span><span class="dot hi"></span> hovered</span>
+              <span><span class="dot acc"></span> linked</span>
+            </div>
+
+            <div class="memboxes" id="vA-mem">
+              <div class="cell" data-k="x"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x</span></div>
+              <div class="cell" data-k="y"><span class="addr">0x7ffc04</span><span class="val">—</span><span class="name">y</span></div>
+              <div class="cell" data-k="z"><span class="addr">0x7ffc08</span><span class="val">—</span></div>
+              <div class="cell" data-k="free"><span class="addr">0x7ffc0c</span><span class="val">—</span></div>
+            </div>
+
+            <div class="scribble"></div>
+
+            <div class="code" id="vA-code">
+              <span class="ln" data-link="x"><span class="kw">int</span> x = 5;          <span class="cm">// box 'x' ← 5</span></span>
+              <span class="ln" data-link="y"><span class="kw">int</span> y = x;          <span class="cm">// copy the value, not the box</span></span>
+              <span class="ln" data-link="y">y = y + 1;           <span class="cm">// only 'y' changes</span></span>
+              <span class="ln"><span class="cm">// x is still 5 — value types are independent</span></span>
+            </div>
+
+            <p style="margin:10px 0 0;font-size:13px;color:var(--ink-soft)">
+              <span class="tag">hover</span> a code line to pulse the corresponding box.
+              <span class="tag">hover</span> a box to pulse its line.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress">
+        <div class="nav"><button>← prev</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1 Booleans</span></div>
+          <div class="tick done"><span class="t">1.2 Numbers</span></div>
+          <div class="tick done"><span class="t">1.3 Strings</span></div>
+          <div class="tick done"><span class="t">2.0 Intro</span></div>
+          <div class="tick cur"><span class="t">2.1 Values</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5 Practice</span></div>
+          <div class="tick"><span class="t">3.1 Arrays</span></div>
+          <div class="tick"><span class="t">3.2 Idx</span></div>
+          <div class="tick"><span class="t">3.3 Loop</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">concept 5 / 12</div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!--  VARIATION B · INLINE EXPAND                  -->
+    <!-- ============================================= -->
+    <section class="vslot hidden" data-tab="B">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / data-and-memory</div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div style="padding:18px 0 4px">
+        <div class="ch-crumb">Chapter 2 · Data and Memory</div>
+        <div class="ch-title"><span class="num">2.1</span>Values live in boxes</div>
+      </div>
+
+      <div class="vhint">
+        <b>Idea:</b> the visual expands <i>inline between paragraphs</i>, pushing content down.
+        <span class="sep">·</span><b>Best when:</b> reading linearly and you want the visual to feel <i>part of</i> the sentence rather than beside it.
+      </div>
+
+      <div class="vB" style="max-width:880px;margin:0 auto">
+        <div class="prose">
+          <div class="pblock">
+            <p>Before we can talk about variables, we need a word for the things that variables <i>hold</i>. A <b>value</b> is a piece of data your program can compute with.</p>
+            <span class="line s90"></span><span class="line s60 soft"></span>
+          </div>
+
+          <div class="pblock interactive active" data-vis="B1">
+            <span class="marker">◆</span>
+            <p><b>Value types</b> like <code>int</code> and <code>bool</code> are stored <i>directly</i> in the variable's slot of memory. When you write <code>int x = 5;</code>, the number five is literally written into the box labelled <code>x</code>.</p>
+            <span class="callout">diagram below — click marker to collapse</span>
+          </div>
+
+          <!-- Inline expanded visual -->
+          <div class="expand" id="vB-expand">
+            <div class="expand-grid">
+              <div class="diagram" style="margin:0">
+                <div class="label">Memory after <code>int x = 5;</code></div>
+                <div class="memboxes" id="vB-mem">
+                  <div class="cell" data-k="x"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x</span></div>
+                  <div class="cell" data-k="y"><span class="addr">0x7ffc04</span><span class="val">6</span><span class="name">y</span></div>
+                  <div class="cell" data-k="z"><span class="addr">0x7ffc08</span><span class="val">—</span></div>
+                  <div class="cell" data-k="free"><span class="addr">0x7ffc0c</span><span class="val">—</span></div>
+                </div>
+              </div>
+
+              <div class="code" id="vB-code" style="margin:0">
+                <span class="ln" data-link="x"><span class="kw">int</span> x = 5;</span>
+                <span class="ln" data-link="y"><span class="kw">int</span> y = x;</span>
+                <span class="ln" data-link="y">y = y + 1;</span>
+                <span class="ln"><span class="cm">// x still 5, y is 6 — copies, not aliases</span></span>
+              </div>
+            </div>
+            <p style="margin:8px 0 0;font-size:13px;color:var(--ink-soft)">Hover any box ↔ code line — they pulse together. <span class="tag">esc</span> collapses.</p>
+          </div>
+
+          <div class="pblock">
+            <p>This is different from how reference types work — we'll meet those in Chapter 4. For now, every value you create is its own little island.</p>
+            <span class="line s90"></span><span class="line s70 soft"></span>
+          </div>
+
+          <div class="pblock interactive" data-vis="B2">
+            <span class="marker">◆</span>
+            <p>Assigning one value type to another <b>copies</b> the value. The two variables are now independent.</p>
+          </div>
+
+          <div class="pblock">
+            <p>We'll come back to this idea in every chapter. Each time we meet a new type, we'll ask: <i>where does it live in memory?</i></p>
+            <span class="line s80"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="nav"><button>← prev</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1 Booleans</span></div>
+          <div class="tick done"><span class="t">1.2 Numbers</span></div>
+          <div class="tick done"><span class="t">1.3 Strings</span></div>
+          <div class="tick done"><span class="t">2.0 Intro</span></div>
+          <div class="tick cur"><span class="t">2.1 Values</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5 Practice</span></div>
+          <div class="tick"><span class="t">3.1 Arrays</span></div>
+          <div class="tick"><span class="t">3.2 Idx</span></div>
+          <div class="tick"><span class="t">3.3 Loop</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">concept 5 / 12</div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!--  VARIATION C · MARGIN GUTTER THUMBNAILS       -->
+    <!-- ============================================= -->
+    <section class="vslot hidden" data-tab="C">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / data-and-memory</div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div style="padding:18px 0 4px">
+        <div class="ch-crumb">Chapter 2 · Data and Memory</div>
+        <div class="ch-title"><span class="num">2.1</span>Values live in boxes</div>
+      </div>
+
+      <div class="vhint">
+        <b>Idea:</b> each interactive paragraph has a <b>mini-preview in the right gutter</b>. Click to enlarge into a floating overlay over the page.
+        <span class="sep">·</span><b>Best when:</b> reader wants to see <i>what's coming</i> without committing.
+      </div>
+
+      <div class="vC" style="position:relative">
+        <div class="prose" id="vC-prose">
+          <div class="pblock">
+            <p>Before we can talk about variables, we need a word for the things that variables <i>hold</i>. A <b>value</b> is a piece of data your program can compute with — a truth, a number, a piece of text.</p>
+            <span class="line s90"></span><span class="line s80"></span><span class="line s40 soft"></span>
+          </div>
+
+          <div class="pblock interactive" data-vis="C1" id="C1">
+            <span class="marker">◆</span>
+            <p><b>Value types</b> like <code>int</code> and <code>bool</code> are stored <i>directly</i> in the variable's slot of memory. When you write <code>int x = 5;</code>, the number five is literally written into the box labelled <code>x</code>.</p>
+          </div>
+
+          <div class="pblock">
+            <p>Every value you create is its own little island. Reference types — classes, linked lists — behave differently, and we'll meet them in Chapter 4. Hold that thought.</p>
+            <span class="line s90"></span><span class="line s70 soft"></span><span class="line s60 faint"></span>
+          </div>
+
+          <div class="pblock interactive" data-vis="C2" id="C2">
+            <span class="marker">◆</span>
+            <p>Assigning one value type to another <b>copies</b> the value. The two variables are now independent — changing one does not change the other. This surprises a lot of beginners.</p>
+          </div>
+
+          <div class="pblock">
+            <p>We'll come back to this idea in every chapter of the book. Each time we meet a new type, the very first question will always be: <i>where does this live in memory?</i></p>
+            <span class="line s80"></span><span class="line s60 soft"></span>
+          </div>
+
+          <div class="pblock interactive" data-vis="C3" id="C3">
+            <span class="marker">◆</span>
+            <p>Try it yourself: this next block is a <b>live code playground</b>. Edit the values and watch the memory diagram update.</p>
+          </div>
+        </div>
+
+        <!-- Gutter with thumbnails -->
+        <div class="gutter" id="vC-gutter">
+          <div class="thumb" data-for="C1">
+            <span class="tag2">◆ memory</span>
+            <div>Single value box</div>
+            <div class="mini">[ 5 ] [ — ] [ — ] [ — ]</div>
+          </div>
+          <div class="thumb" data-for="C2">
+            <span class="tag2">◆ memory + code</span>
+            <div>Copy semantics</div>
+            <div class="mini">[ 5 ] [ 6 ] ← int y = x;</div>
+          </div>
+          <div class="thumb" data-for="C3">
+            <span class="tag2">◆ live widget</span>
+            <div>Tweak + re-run</div>
+            <div class="mini">&lt;/&gt;  interactive</div>
+          </div>
+
+          <!-- floating overlay -->
+          <div class="overlay" id="vC-overlay">
+            <div class="diagram" style="border:none;padding:0">
+              <div class="label">Memory after <code>int x = 5;</code>
+                <span class="x" data-act="closeC">close ✕</span>
+              </div>
+              <div class="memboxes">
+                <div class="cell"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x</span></div>
+                <div class="cell"><span class="addr">0x7ffc04</span><span class="val">—</span><span class="name">y</span></div>
+                <div class="cell"><span class="addr">0x7ffc08</span><span class="val">—</span></div>
+                <div class="cell"><span class="addr">0x7ffc0c</span><span class="val">—</span></div>
+              </div>
+              <div class="scribble"></div>
+              <div class="code" style="margin:0">
+                <span class="ln"><span class="kw">int</span> x = 5;</span>
+                <span class="ln"><span class="cm">// box 'x' holds the value 5 directly</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="nav"><button>← prev</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1 Booleans</span></div>
+          <div class="tick done"><span class="t">1.2 Numbers</span></div>
+          <div class="tick done"><span class="t">1.3 Strings</span></div>
+          <div class="tick done"><span class="t">2.0 Intro</span></div>
+          <div class="tick cur"><span class="t">2.1 Values</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5 Practice</span></div>
+          <div class="tick"><span class="t">3.1 Arrays</span></div>
+          <div class="tick"><span class="t">3.2 Idx</span></div>
+          <div class="tick"><span class="t">3.3 Loop</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">concept 5 / 12</div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!--  VARIATION D · PERSISTENT CANVAS              -->
+    <!-- ============================================= -->
+    <section class="vslot hidden" data-tab="D">
+      <div class="browser-chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">fundamentals-of-computer-science.github.io / ch-2 / data-and-memory</div>
+        <span>⌘K  search</span>
+      </div>
+
+      <div style="padding:18px 0 4px">
+        <div class="ch-crumb">Chapter 2 · Data and Memory</div>
+        <div class="ch-title"><span class="num">2.1</span>Values live in boxes</div>
+      </div>
+
+      <div class="vhint">
+        <b>Idea:</b> prose collapses into a <b>reading rail</b> on the left. The <b>canvas</b> in the center shows the diagram for the <i>active paragraph</i>. Code lives on the right. All three stay linked.
+        <span class="sep">·</span><b>Best when:</b> re-reading / studying rather than first-pass reading.
+      </div>
+
+      <div class="vD">
+        <!-- Reading rail -->
+        <div class="mini-prose">
+          <div class="cap" style="margin-bottom:8px">READING RAIL</div>
+          <div class="prose">
+            <div class="pblock">
+              <p style="font-size:13px;color:var(--ink-soft)">A <b>value</b> is a piece of data; each has a <b>type</b>.</p>
+              <span class="line s90 soft"></span><span class="line s70 soft"></span>
+            </div>
+            <div class="pblock interactive active" data-vis="D1">
+              <span class="marker">◆</span>
+              <p style="font-size:13px"><b>Value types</b> are stored directly in the variable's slot. <code>int x = 5;</code> writes 5 into the box labelled x.</p>
+            </div>
+            <div class="pblock">
+              <p style="font-size:13px;color:var(--ink-soft)">Every value is its own little island. Reference types come later.</p>
+              <span class="line s90 soft"></span><span class="line s40 soft"></span>
+            </div>
+            <div class="pblock interactive" data-vis="D2">
+              <span class="marker">◆</span>
+              <p style="font-size:13px">Assigning one value to another <b>copies</b> it. Changing one doesn't change the other.</p>
+            </div>
+            <div class="pblock">
+              <p style="font-size:13px;color:var(--ink-soft)">We'll ask the same question every chapter: <i>where does it live in memory?</i></p>
+              <span class="line s80 soft"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="center">
+          <div class="label" style="display:flex;justify-content:space-between;align-items:center;font-family:Caveat;font-size:22px;font-weight:700">
+            Canvas — live diagram
+            <span class="cap">linked to ◆ active paragraph</span>
+          </div>
+          <div class="scribble"></div>
+
+          <div class="memboxes" id="vD-mem" style="margin-top:6px">
+            <div class="cell" data-k="x"><span class="addr">0x7ffc00</span><span class="val">5</span><span class="name">x</span></div>
+            <div class="cell" data-k="y"><span class="addr">0x7ffc04</span><span class="val">—</span><span class="name">y</span></div>
+            <div class="cell" data-k="z"><span class="addr">0x7ffc08</span><span class="val">—</span></div>
+            <div class="cell" data-k="free"><span class="addr">0x7ffc0c</span><span class="val">—</span></div>
+          </div>
+
+          <p class="callout" style="margin-top:14px">the box named <code>x</code> holds 5 directly — no indirection, no pointer, no shared reference.</p>
+
+          <div style="margin-top:18px;border:1.2px dashed var(--ink);padding:10px 12px;background:var(--paper)">
+            <div class="cap" style="margin-bottom:6px">TWEAK (live widget placeholder)</div>
+            <div style="display:flex;gap:14px;align-items:center;font-family:'JetBrains Mono';font-size:12px">
+              <label>x = <input type="number" value="5" style="width:60px;font-family:inherit"/></label>
+              <span style="color:var(--ink-soft)">→ box x updates in the canvas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code side -->
+        <div class="side-code">
+          <div class="cap" style="margin-bottom:8px">LINKED CODE</div>
+          <div class="code" id="vD-code">
+            <span class="ln" data-link="x"><span class="kw">int</span> x = 5;</span>
+            <span class="ln" data-link="y"><span class="kw">int</span> y = x;</span>
+            <span class="ln" data-link="y">y = y + 1;</span>
+            <span class="ln"><span class="cm">// x is still 5</span></span>
+          </div>
+          <p style="margin:10px 2px 0;font-size:12.5px;color:var(--ink-soft)">
+            Hover a code line → the matching box in the canvas <b>pulses</b>. Hover a box → its line pulses back.
+          </p>
+
+          <div style="margin-top:18px">
+            <div class="cap" style="margin-bottom:6px">NOTES</div>
+            <p style="font-size:13px;color:var(--ink-soft);margin:0">
+              <span class="tag">J/K</span> jump between ◆ paragraphs.<br/>
+              <span class="tag">SPC</span> hides the rail for focus mode.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="nav"><button>← prev</button></div>
+        <div class="pbar">
+          <div class="tick done"><span class="t">1.1 Booleans</span></div>
+          <div class="tick done"><span class="t">1.2 Numbers</span></div>
+          <div class="tick done"><span class="t">1.3 Strings</span></div>
+          <div class="tick done"><span class="t">2.0 Intro</span></div>
+          <div class="tick cur"><span class="t">2.1 Values</span></div>
+          <div class="tick"><span class="t">2.2 Bind</span></div>
+          <div class="tick"><span class="t">2.3 Scope</span></div>
+          <div class="tick"><span class="t">2.4 Copy</span></div>
+          <div class="tick"><span class="t">2.5 Practice</span></div>
+          <div class="tick"><span class="t">3.1 Arrays</span></div>
+          <div class="tick"><span class="t">3.2 Idx</span></div>
+          <div class="tick"><span class="t">3.3 Loop</span></div>
+        </div>
+        <div class="nav"><button>next →</button></div>
+        <div class="stamp">concept 5 / 12</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ NEXT STEPS ============ -->
+  <section style="margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="notes" style="margin:0;grid-template-columns:1fr">
+      <div class="card"><span class="pin"></span>
+        <h4>Open questions for you</h4>
+        <p>
+          1 · Should diagrams stay <b>linked to a specific paragraph</b>, or can a single diagram span several?<br/>
+          2 · Do you want a <b>"diagrams-only"</b> mode — revealing every ◆ marker at once for review?<br/>
+          3 · Should the progress bar also show <i>how many ◆ paragraphs in this concept the reader has opened</i>?<br/>
+          4 · Mobile: stack everything vertically, or hide visuals behind a bottom-sheet?
+        </p>
+      </div>
+    </div>
+    <div class="notes" style="margin:0;grid-template-columns:1fr">
+      <div class="card"><span class="pin"></span>
+        <h4>Likely next moves</h4>
+        <p>
+          → Pick 1–2 directions and push to mid-fi (real type, real C# sample, real memory diagram).<br/>
+          → Prototype the hover-link behaviour with a real code block + diagram on a working page.<br/>
+          → Decide the <b>◆ marker affordance</b>: margin dot, sidebar rail, or in-text underline.<br/>
+          → Decide the authoring format so instructors can add ◆ paragraphs without hand-writing JS.
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TWEAKS PANEL ============ -->
+<button class="tweaks-toggle" id="tweaks-toggle">◆ Tweaks</button>
+<div class="tweaks" id="tweaks">
+  <h5>Tweaks <button id="tweaks-close">close</button></h5>
+  <div class="row">
+    <label>Accent color</label>
+    <div class="swatches" id="sw-accent">
+      <div class="sw active" data-c="#c65d3a" style="background:#c65d3a"></div>
+      <div class="sw" data-c="#2f6b55" style="background:#2f6b55"></div>
+      <div class="sw" data-c="#4a5aa8" style="background:#4a5aa8"></div>
+      <div class="sw" data-c="#8a2f6b" style="background:#8a2f6b"></div>
+      <div class="sw" data-c="#1a1a1a" style="background:#1a1a1a"></div>
+    </div>
+  </div>
+  <div class="row">
+    <label>Highlight color</label>
+    <div class="swatches" id="sw-hl">
+      <div class="sw active" data-c="#ffe9a8" style="background:#ffe9a8"></div>
+      <div class="sw" data-c="#cbe9c3" style="background:#cbe9c3"></div>
+      <div class="sw" data-c="#c3d8ef" style="background:#c3d8ef"></div>
+      <div class="sw" data-c="#f4c9c9" style="background:#f4c9c9"></div>
+    </div>
+  </div>
+  <div class="row">
+    <label>Prose font</label>
+    <select id="font-select" style="font-family:inherit">
+      <option value="'Kalam',cursive">Kalam (sketchy)</option>
+      <option value="Georgia, serif">Georgia (textbook)</option>
+      <option value="'Caveat',cursive">Caveat (casual)</option>
+      <option value="'JetBrains Mono',monospace">JetBrains Mono</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>Text size</label>
+    <input type="range" id="size-slider" min="13" max="20" step="1" value="17"/>
+  </div>
+  <div class="row">
+    <label>Density</label>
+    <select id="density-select" style="font-family:inherit">
+      <option value="cozy">Cozy</option>
+      <option value="compact">Compact</option>
+      <option value="airy">Airy</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>Grid paper bg</label>
+    <input type="checkbox" id="grid-toggle" checked/>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll('.tab');
+  const slots = document.querySelectorAll('.vslot');
+  const label = document.getElementById('variation-label');
+  const labelMap = {A:'A · SIDE PANEL',B:'B · INLINE EXPAND',C:'C · MARGIN GUTTER',D:'D · PERSISTENT CANVAS'};
+  function show(tab){
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+    slots.forEach(s=>s.classList.toggle('hidden', s.dataset.tab!==tab));
+    label.textContent = labelMap[tab];
+    try{ localStorage.setItem('tb_tab', tab) }catch(e){}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.tab)));
+  const saved = (()=>{try{return localStorage.getItem('tb_tab')}catch(e){return null}})();
+  if(saved) show(saved);
+  document.addEventListener('keydown',e=>{
+    if(e.target.matches('input,select,textarea')) return;
+    const map={'1':'A','2':'B','3':'C','4':'D'};
+    if(map[e.key]) show(map[e.key]);
+  });
+
+  // ---- Link highlighting behaviour (shared across variations) ----
+  function wireLinks(memSelector, codeSelector){
+    const mem = document.querySelector(memSelector);
+    const code = document.querySelector(codeSelector);
+    if(!mem || !code) return;
+    const cells = mem.querySelectorAll('.cell');
+    const lines = code.querySelectorAll('.ln[data-link]');
+    function clear(){
+      cells.forEach(c=>c.classList.remove('hl'));
+      lines.forEach(l=>l.classList.remove('hl'));
+    }
+    lines.forEach(l=>{
+      l.addEventListener('mouseenter',()=>{
+        clear();
+        const k=l.dataset.link;
+        l.classList.add('hl');
+        mem.querySelectorAll(`.cell[data-k="${k}"]`).forEach(c=>c.classList.add('hl'));
+      });
+      l.addEventListener('mouseleave',clear);
+    });
+    cells.forEach(c=>{
+      c.addEventListener('mouseenter',()=>{
+        clear();
+        const k=c.dataset.k;
+        c.classList.add('hl');
+        code.querySelectorAll(`.ln[data-link="${k}"]`).forEach(l=>l.classList.add('hl'));
+      });
+      c.addEventListener('mouseleave',clear);
+    });
+  }
+  wireLinks('#vA-mem','#vA-code');
+  wireLinks('#vB-mem','#vB-code');
+  wireLinks('#vD-mem','#vD-code');
+
+  // Variation A: clicking paragraph switches diagram (fake — same diagram, just visual feedback)
+  document.querySelectorAll('[data-tab="A"] .pblock.interactive').forEach(p=>{
+    p.addEventListener('click',()=>{
+      document.querySelectorAll('[data-tab="A"] .pblock.interactive').forEach(x=>x.classList.remove('active'));
+      p.classList.add('active');
+    });
+  });
+  document.querySelector('[data-act="closeA"]')?.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    document.getElementById('vA-diagram').classList.add('hidden');
+    const r = document.getElementById('vA-right');
+    r.classList.add('empty');
+    r.innerHTML = '<div class="emptywrap"><div>◆</div><div>click any ◆ paragraph<br/>to open its visual</div><div class="hint">panel closes automatically on switch</div></div>';
+  });
+
+  // Variation B: click marker to collapse/expand
+  const vbExpand = document.getElementById('vB-expand');
+  document.querySelectorAll('[data-tab="B"] .pblock.interactive').forEach(p=>{
+    p.addEventListener('click',()=>{
+      const wasActive = p.classList.contains('active');
+      document.querySelectorAll('[data-tab="B"] .pblock.interactive').forEach(x=>x.classList.remove('active'));
+      if(!wasActive){
+        p.classList.add('active');
+        vbExpand.style.display='block';
+        // move expand element after the active paragraph
+        p.parentNode.insertBefore(vbExpand, p.nextSibling);
+      } else {
+        vbExpand.style.display='none';
+      }
+    });
+  });
+
+  // Variation C: clicking thumb (or paragraph) opens overlay centered over the prose
+  const vcOverlay = document.getElementById('vC-overlay');
+  const vcProse = document.getElementById('vC-prose');
+  function openC(forId){
+    // position overlay next to paragraph
+    const target = document.getElementById(forId);
+    if(!target) return;
+    const parent = document.querySelector('.vC');
+    const r = target.getBoundingClientRect();
+    const pr = parent.getBoundingClientRect();
+    vcOverlay.style.top = (r.top - pr.top - 10) + 'px';
+    vcOverlay.style.left = (pr.width * 0.15) + 'px';
+    vcOverlay.style.width = (pr.width * 0.7) + 'px';
+    vcOverlay.classList.add('open');
+    document.querySelectorAll('[data-tab="C"] .pblock.interactive').forEach(x=>x.classList.remove('active'));
+    target.classList.add('active');
+  }
+  document.querySelectorAll('[data-tab="C"] .thumb').forEach(t=>{
+    t.addEventListener('click',()=>openC(t.dataset.for));
+  });
+  document.querySelectorAll('[data-tab="C"] .pblock.interactive').forEach(p=>{
+    p.addEventListener('click',()=>openC(p.id));
+  });
+  document.querySelector('[data-act="closeC"]')?.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    vcOverlay.classList.remove('open');
+    document.querySelectorAll('[data-tab="C"] .pblock.interactive').forEach(x=>x.classList.remove('active'));
+  });
+
+  // Variation D: clicking a paragraph marks active
+  document.querySelectorAll('[data-tab="D"] .pblock.interactive').forEach(p=>{
+    p.addEventListener('click',()=>{
+      document.querySelectorAll('[data-tab="D"] .pblock.interactive').forEach(x=>x.classList.remove('active'));
+      p.classList.add('active');
+    });
+  });
+
+  // ---- Tweaks ----
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "accent": "#c65d3a",
+    "highlight": "#ffe9a8",
+    "prose_font": "Georgia, serif",
+    "text_size": 17,
+    "density": "cozy",
+    "grid_bg": true
+  }/*EDITMODE-END*/;
+
+  const panel = document.getElementById('tweaks');
+  const togBtn = document.getElementById('tweaks-toggle');
+  const closeBtn = document.getElementById('tweaks-close');
+  function openPanel(){ panel.classList.add('open'); togBtn.style.display='none'; }
+  function closePanel(){ panel.classList.remove('open'); togBtn.style.display=''; }
+  togBtn.addEventListener('click',openPanel);
+  closeBtn.addEventListener('click',closePanel);
+
+  function applyTweaks(t){
+    document.documentElement.style.setProperty('--accent', t.accent);
+    // regenerate soft accent wash
+    document.documentElement.style.setProperty('--accent-wash', t.accent + '33');
+    document.documentElement.style.setProperty('--highlight', t.highlight);
+    document.querySelectorAll('.prose').forEach(el=>el.style.fontFamily=t.prose_font);
+    document.querySelectorAll('.prose').forEach(el=>el.style.fontSize=t.text_size+'px');
+    document.body.style.backgroundImage = t.grid_bg ? '' : 'none';
+    // density
+    const map = {cozy:1.55, compact:1.3, airy:1.8};
+    document.querySelectorAll('.prose').forEach(el=>el.style.lineHeight = map[t.density]);
+  }
+
+  let current = {...TWEAK_DEFAULTS};
+  applyTweaks(current);
+
+  function setKey(k,v){
+    current[k]=v;
+    applyTweaks(current);
+    try{ window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[k]:v}}, '*'); }catch(e){}
+  }
+  document.querySelectorAll('#sw-accent .sw').forEach(s=>{
+    s.addEventListener('click',()=>{
+      document.querySelectorAll('#sw-accent .sw').forEach(x=>x.classList.remove('active'));
+      s.classList.add('active');
+      setKey('accent', s.dataset.c);
+    });
+  });
+  document.querySelectorAll('#sw-hl .sw').forEach(s=>{
+    s.addEventListener('click',()=>{
+      document.querySelectorAll('#sw-hl .sw').forEach(x=>x.classList.remove('active'));
+      s.classList.add('active');
+      setKey('highlight', s.dataset.c);
+    });
+  });
+  document.getElementById('font-select').addEventListener('change',e=>setKey('prose_font', e.target.value));
+  document.getElementById('size-slider').addEventListener('input',e=>setKey('text_size', +e.target.value));
+  document.getElementById('density-select').addEventListener('change',e=>setKey('density', e.target.value));
+  document.getElementById('grid-toggle').addEventListener('change',e=>setKey('grid_bg', e.target.checked));
+
+  // Edit-mode protocol
+  window.addEventListener('message', (e)=>{
+    const d=e.data||{};
+    if(d.type==='__activate_edit_mode') openPanel();
+    if(d.type==='__deactivate_edit_mode') closePanel();
+  });
+  try{ window.parent.postMessage({type:'__edit_mode_available'}, '*'); }catch(e){}
+</script>
+</body>
+</html>
