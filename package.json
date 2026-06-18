@@ -14,6 +14,10 @@
   "scripts": {
     "quartz": "./quartz/bootstrap-cli.mjs",
     "docs": "npx quartz build --serve -d docs",
+    "build:live": "node ./quartz/bootstrap-cli.mjs build",
+    "build:beta": "node ./quartz/bootstrap-cli.mjs build -d content-next -o public-next",
+    "preview:live": "node ./quartz/bootstrap-cli.mjs build --serve",
+    "preview:beta": "node ./quartz/bootstrap-cli.mjs build -d content-next -o public-next --serve --port 8081 --wsPort 3002",
     "check": "tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx ./quartz/util/path.test.ts && tsx ./quartz/depgraph.test.ts",

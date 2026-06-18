@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Boolean Data And Memory - Lesson Sequence</title>
+<title>Numeric Data And Memory - Lesson Sequence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
@@ -24,15 +24,15 @@ body {
   2. tb-quiz.jsx: drag/drop primitives and quiz footer styles.
   3. tb-cycle-components.jsx: page sequence shell and lesson primitives.
   4. lesson-kit/concept-lesson-kit.jsx: generic concept lesson adapter.
-  5. tb-ch1-sequence.jsx: Boolean Data And Memory lesson sequence.
+  5. tb-ch2-sequence.jsx: Numeric Data And Memory lesson sequence.
 -->
 <script type="text/babel" src="tb-core.jsx"></script>
 <script type="text/babel" src="tb-quiz.jsx"></script>
 <script type="text/babel" src="tb-cycle-components.jsx?v=scoped-substeps-2"></script>
 <script type="text/babel" src="lesson-kit/concept-lesson-kit.jsx?v=scoped-substeps-2"></script>
-<script type="text/babel" src="tb-ch1-sequence.jsx?v=scoped-substeps-2"></script>
+<script type="text/babel" src="tb-ch2-sequence.jsx?v=scoped-substeps-2"></script>
 <script type="text/babel">
-const { Ch1BooleanDataMemorySequence } = window;
+const { Ch2NumericDataMemorySequence } = window;
 
 function App() {
   return (
@@ -50,7 +50,7 @@ function App() {
         background: '#fff',
         overflow: 'hidden',
       }}>
-        <Ch1BooleanDataMemorySequence />
+        <Ch2NumericDataMemorySequence />
       </div>
     </div>
   );

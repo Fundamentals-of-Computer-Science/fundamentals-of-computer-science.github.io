@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Boolean Data And Memory - Lesson Sequence</title>
+<title>Chapter 1 Roadmap - Boolean Prototype Path</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
@@ -19,20 +19,15 @@ body {
 }
 </style>
 
-<!-- Required beta components for this isolated page:
-  1. tb-core.jsx: shared data, syntax helpers, and shared labels.
-  2. tb-quiz.jsx: drag/drop primitives and quiz footer styles.
-  3. tb-cycle-components.jsx: page sequence shell and lesson primitives.
-  4. lesson-kit/concept-lesson-kit.jsx: generic concept lesson adapter.
-  5. tb-ch1-sequence.jsx: Boolean Data And Memory lesson sequence.
--->
 <script type="text/babel" src="tb-core.jsx"></script>
 <script type="text/babel" src="tb-quiz.jsx"></script>
 <script type="text/babel" src="tb-cycle-components.jsx?v=scoped-substeps-2"></script>
 <script type="text/babel" src="lesson-kit/concept-lesson-kit.jsx?v=scoped-substeps-2"></script>
 <script type="text/babel" src="tb-ch1-sequence.jsx?v=scoped-substeps-2"></script>
+<script type="text/babel" src="tb-ch1-2-sequence.jsx?v=scoped-substeps-2"></script>
+<script type="text/babel" src="tb-ch1-v1-sequence.jsx?v=scoped-substeps-2"></script>
 <script type="text/babel">
-const { Ch1BooleanDataMemorySequence } = window;
+const { Ch1RoadmapPrototype } = window;
 
 function App() {
   return (
@@ -50,7 +45,7 @@ function App() {
         background: '#fff',
         overflow: 'hidden',
       }}>
-        <Ch1BooleanDataMemorySequence />
+        <Ch1RoadmapPrototype />
       </div>
     </div>
   );

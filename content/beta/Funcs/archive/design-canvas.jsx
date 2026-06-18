@@ -186,7 +186,7 @@ function DesignCanvas({ children, minScale, maxScale, style }) {
       const aid = ab.props.id ?? ab.props.label;
       if (aid) abs.push([aid, ab]);
     });
-    // hidden is scoped to one source revision — when the agent regenerates
+    // hidden is scoped to one source revision so a refresh can restore
     // (artboard-ID set changes), prior deletes don't apply to new content.
     const srcKey = abs.map(([k]) => k).join('\x1f');
     const hidden = persisted.srcKey === srcKey ? (persisted.hidden || []) : [];
@@ -257,7 +257,7 @@ function DCViewport({ children, minScale = 0.1, maxScale = 8, style = {} }) {
   const worldRef = React.useRef(null);
   const tf = React.useRef({ x: 0, y: 0, scale: 1 });
   // Persist viewport across reloads so the user lands back where they were
-  // after an agent edit or browser refresh. The sandbox origin is already
+  // after a local edit or browser refresh. The page origin is already
   // per-project; pathname keeps multiple canvas files in one project apart.
   const tfKey = 'dc-viewport:' + location.pathname;
   const saveT = React.useRef(0);
@@ -980,4 +980,3 @@ function DCPostIt({ children, top, left, right, bottom, rotate = -2, width = 180
 }
 
 Object.assign(window, { DesignCanvas, DCSection, DCArtboard, DCPostIt });
-

@@ -2,9 +2,11 @@
 .gitignore
 node_modules
 public
+public-next
 prof
 tsconfig.tsbuildinfo
 .obsidian
+.vscode
 .quartz-cache
 private/
 .replit
