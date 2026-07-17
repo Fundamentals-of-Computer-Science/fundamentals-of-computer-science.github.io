@@ -646,7 +646,6 @@ function TBPageSequence({ title, kicker, chapterNav, pages, learningTarget, avai
   const [pageControlsState, setPageControlsState] = React.useState({ active: 0, controls: {} });
   const [pageSteps, setPageSteps] = React.useState({});
   const [footerStacked, setFooterStacked] = React.useState(false);
-  const [syntaxOpen, setSyntaxOpen] = React.useState(false);
   const [lessonSelectorOpen, setLessonSelectorOpen] = React.useState(false);
   const footerRef = React.useRef(null);
   const tabsRef = React.useRef(null);
@@ -654,10 +653,6 @@ function TBPageSequence({ title, kicker, chapterNav, pages, learningTarget, avai
   const contentRef = React.useRef(null);
   const page = pages[active];
   const PageComponent = page.component;
-  const SyntaxDrawer = window.FuncsSyntaxDrawer;
-  const hasSyntax = Boolean(SyntaxDrawer && availableSyntax && (
-    Array.isArray(availableSyntax) ? availableSyntax.length : Object.keys(availableSyntax).length
-  ));
   const stepCount = page.stepCount || 1;
   const currentStep = Math.min(pageSteps[page.id] || 0, stepCount - 1);
   const hasInternalSteps = stepCount > 1;
@@ -777,7 +772,6 @@ function TBPageSequence({ title, kicker, chapterNav, pages, learningTarget, avai
       contentRef.current.scrollTop = 0;
       contentRef.current.scrollLeft = 0;
     }
-    setSyntaxOpen(false);
     setLessonSelectorOpen(false);
   }, [active]);
 
@@ -798,27 +792,6 @@ function TBPageSequence({ title, kicker, chapterNav, pages, learningTarget, avai
           background: #fafbfc;
           min-height: 0;
           position: relative;
-        }
-
-        .tb-page-syntax-bar {
-          min-height: 38px;
-          border-bottom: 1px solid #e2e6ee;
-          background: #fbfdff;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 10px;
-          padding: 5px 12px;
-        }
-
-        .tb-page-syntax-target {
-          min-width: 0;
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: 12px;
-          color: #64748b;
         }
 
         .tb-page-sequence-content {
@@ -1032,30 +1005,8 @@ function TBPageSequence({ title, kicker, chapterNav, pages, learningTarget, avai
           }
         }
       `}</style>
-      <div className={`tb-page-sequence-frame${hasSyntax ? ' tb-page-sequence-frame-has-syntax' : ''}`}>
+      <div className="tb-page-sequence-frame">
         <div ref={contentRef} className="tb-page-sequence-content">
-          {hasSyntax && (
-            <div className="tb-page-syntax-bar">
-              {learningTarget && (
-                <span className="tb-page-syntax-target">{learningTarget}</span>
-              )}
-              <button
-                type="button"
-                className="tb-page-syntax-trigger"
-                aria-expanded={syntaxOpen}
-                onClick={() => setSyntaxOpen(prev => !prev)}
-              >
-                Syntax so far
-              </button>
-              {syntaxOpen && (
-                <SyntaxDrawer
-                  syntax={availableSyntax}
-                  learningTarget={learningTarget}
-                  onClose={() => setSyntaxOpen(false)}
-                />
-              )}
-            </div>
-          )}
           <div className="tb-page-sequence-page">
             {PageComponent ? <PageComponent sequence={sequence} /> : page.element}
           </div>

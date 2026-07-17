@@ -20,12 +20,14 @@ const GRAMMAR_TOKEN_SPEC = {
   'Console.WriteLine': { tone: 'call', description: 'Evaluates its argument and prints the result.' },
   double: { tone: 'type', description: 'A numeric type for decimal values.' },
   int: { tone: 'type', description: 'A whole-number numeric type.' },
+  struct: { tone: 'type', description: 'Defines a value type whose variables store their field data directly.' },
   class: { tone: 'type', description: 'Defines a reference type whose objects live on the heap.' },
   public: { tone: 'type', description: 'Makes a field accessible from outside the class.' },
-  new: { tone: 'op', description: 'Creates a new heap object and returns a reference to it.' },
+  new: { tone: 'op', description: 'Creates a new value or object; the declared type determines whether its data stays inline or lives on the heap.' },
   while: { tone: 'op', description: 'Repeats a body while its condition evaluates to true.' },
   null: { tone: 'value', description: 'A reference value that points to no object.' },
   LinkedListNode: { tone: 'type', description: 'A class whose objects store a Value and a Next reference.' },
+  Rectangle: { tone: 'type', description: 'A provided two-field type used to compare value and reference assignment semantics.' },
   temperatures: { tone: 'name', description: 'A stack variable that stores a reference to a heap array.' },
   scores: { tone: 'name', description: 'A stack variable that stores a reference to a heap array.' },
   today: { tone: 'name', description: 'A local double that receives one array element value.' },
@@ -35,6 +37,10 @@ const GRAMMAR_TOKEN_SPEC = {
   b: { tone: 'name', description: 'A stack reference to the second node.' },
   c: { tone: 'name', description: 'A stack reference to the third node.' },
   newFront: { tone: 'name', description: 'A stack reference to the new node added at the front.' },
+  original: { tone: 'name', description: 'The first Rectangle variable whose storage is inspected after the copy changes.' },
+  copy: { tone: 'name', description: 'The second Rectangle variable created by assignment from original.' },
+  Width: { tone: 'name', description: 'A Rectangle field changed through copy to test the storage relationship.' },
+  Height: { tone: 'name', description: 'A Rectangle field that remains unchanged during the comparison.' },
   Next: { tone: 'name', description: 'A field that stores a reference to the next node, or null.' },
   Value: { tone: 'name', description: 'A field that stores the node value.' },
   '=': { tone: 'op', description: 'Assignment. Evaluate the right side first, then bind or write the result.' },
@@ -70,6 +76,22 @@ const CH3_ARRAY_EXAMPLES = [
 ];
 
 const CH4_LINKED_EXAMPLES = [
+  {
+    label: 'Value copy',
+    source: 'ch4-1',
+    title: 'Struct Copy Semantics',
+    href: 'Value Type Copy Proof.html',
+    summary: 'Copy a structured value, mutate one copy, and verify that the original keeps independent fields.',
+    tags: ['struct', 'stack', 'independent copy'],
+  },
+  {
+    label: 'Reference copy',
+    source: 'ch4-1',
+    title: 'Class Reference Semantics',
+    href: 'Reference Type Copy Proof.html',
+    summary: 'Copy a class reference, mutate through the second name, and verify that both names reach one object.',
+    tags: ['class', 'heap', 'shared object'],
+  },
   {
     label: 'Memory',
     source: 'ch4-1',
@@ -114,6 +136,462 @@ const CH4_LINKED_SYNTAX = [
     ],
   },
 ];
+
+const VALUE_SEMANTICS_GOALS = {
+  establish: {
+    id: 'establish',
+    n: 'A',
+    label: 'Build independent values',
+    gloss: 'Keep the Rectangle fields inside each struct variable, then copy those fields into another value.',
+  },
+  test: {
+    id: 'test',
+    n: 'B',
+    label: 'Verify value independence',
+    gloss: 'Change one struct value, then confirm the other value keeps its own field data.',
+  },
+};
+
+const VALUE_SEMANTICS_SUBGOALS = {
+  original: {
+    id: 'original',
+    n: 'A.a',
+    goal: 'establish',
+    label: 'Store fields inside the value',
+    gloss: 'The struct variable directly owns its Width and Height fields in stack storage.',
+  },
+  duplicate: {
+    id: 'duplicate',
+    n: 'A.b',
+    goal: 'establish',
+    label: 'Copy the complete value',
+    gloss: 'Struct assignment duplicates every field into a separate value with independent storage.',
+  },
+  update: {
+    id: 'update',
+    n: 'B.a',
+    goal: 'test',
+    label: 'Change one value',
+    gloss: 'Writing copy.Width changes the Width field owned by copy and nothing else.',
+  },
+  verify: {
+    id: 'verify',
+    n: 'B.b',
+    goal: 'test',
+    label: 'Confirm the other value stays unchanged',
+    gloss: 'Reading original.Width shows that the original struct still owns the earlier field value.',
+  },
+};
+
+const REFERENCE_SEMANTICS_GOALS = {
+  establish: {
+    id: 'establish',
+    n: 'A',
+    label: 'Build a shared-object relationship',
+    gloss: 'Allocate one Rectangle object, then give two variables references to that same object.',
+  },
+  test: {
+    id: 'test',
+    n: 'B',
+    label: 'Verify reference sharing',
+    gloss: 'Change the shared object through one reference, then observe the change through the other.',
+  },
+};
+
+const REFERENCE_SEMANTICS_SUBGOALS = {
+  original: {
+    id: 'original',
+    n: 'A.a',
+    goal: 'establish',
+    label: 'Allocate one heap object',
+    gloss: 'new creates one Rectangle object on the heap and stores its address in original.',
+  },
+  duplicate: {
+    id: 'duplicate',
+    n: 'A.b',
+    goal: 'establish',
+    label: 'Copy the object reference',
+    gloss: 'Class assignment copies the address, so copy and original both reach the same object.',
+  },
+  update: {
+    id: 'update',
+    n: 'B.a',
+    goal: 'test',
+    label: 'Change the shared object',
+    gloss: 'Writing copy.Width follows copy to the shared heap object and changes its Width field.',
+  },
+  verify: {
+    id: 'verify',
+    n: 'B.b',
+    goal: 'test',
+    label: 'Observe the change through either reference',
+    gloss: 'Reading original.Width reaches the same object and therefore sees the new field value.',
+  },
+};
+
+const COPY_SEMANTICS_CODE = {
+  layout: 'frame',
+  frame: [
+    { kind: 'seg', subgoal: 'original' },
+    { kind: 'seg', subgoal: 'duplicate' },
+    { kind: 'seg', subgoal: 'update' },
+    { kind: 'seg', subgoal: 'verify' },
+  ],
+  lines: [
+    {
+      id: 'copy-line-original',
+      num: '1',
+      text: 'Rectangle original = new Rectangle(10, 5);',
+      subgoal: 'original',
+      translation: 'Create the original Rectangle using the storage rules of its declared type.',
+    },
+    {
+      id: 'copy-line-duplicate',
+      num: '2',
+      text: 'Rectangle copy = original;',
+      subgoal: 'duplicate',
+      translation: 'Evaluate original, then duplicate its stored field data or its stored reference according to the type.',
+    },
+    {
+      id: 'copy-line-update',
+      num: '3',
+      text: 'copy.Width = 99;',
+      subgoal: 'update',
+      translation: 'Follow copy to the Width field it reaches, then store 99 there.',
+    },
+    {
+      id: 'copy-line-verify',
+      num: '4',
+      text: 'Console.WriteLine(original.Width);',
+      subgoal: 'verify',
+      translation: 'Follow original to its current Width field and print that value.',
+    },
+  ],
+  tokens: GRAMMAR_TOKEN_SPEC,
+};
+
+const COPY_SEMANTICS_TRACE = [
+  { id: 'copy-step-original', label: '1', sourceLabel: 'line 1', rowKey: 'copy-line-original', goal: 'establish', subgoal: 'original', stateIndex: 1 },
+  { id: 'copy-step-duplicate', label: '2', sourceLabel: 'line 2', rowKey: 'copy-line-duplicate', goal: 'establish', subgoal: 'duplicate', stateIndex: 2 },
+  { id: 'copy-step-update', label: '3', sourceLabel: 'line 3', rowKey: 'copy-line-update', goal: 'test', subgoal: 'update', stateIndex: 3 },
+  { id: 'copy-step-verify', label: '4', sourceLabel: 'line 4', rowKey: 'copy-line-verify', goal: 'test', subgoal: 'verify', stateIndex: 4 },
+];
+
+const COPY_SEMANTICS_SYNTAX = [
+  {
+    group: 'Copy semantics',
+    items: [
+      { term: 'Rectangle copy = original;', note: 'Assignment duplicates what the variable stores: field data for a value type or an address for a reference type.', source: 'ch4-1' },
+      { term: 'copy.Width = 99;', note: 'A field write changes the storage reached through copy.', source: 'ch4-1' },
+      { term: 'Console.WriteLine(original.Width);', note: 'Reading through original reveals whether the storage was independent or shared.', source: 'ch4-1' },
+    ],
+  },
+];
+
+const VALUE_COPY_STATES = [
+  { label: 'Before execution', desc: 'Rectangle is a struct value type. No local values exist yet.', stack: [], heap: [], memory: [], console: [] },
+  {
+    label: 'After line 1',
+    desc: 'original stores the Rectangle field data directly in its stack binding. The heap remains empty.',
+    goal: 'establish',
+    subgoal: 'original',
+    stack: [{ name: 'original', type: 'Rectangle struct', fields: { Width: '10', Height: '5' }, isNew: true, highlight: ['Width', 'Height'] }],
+    heap: [],
+    console: [],
+  },
+  {
+    label: 'After line 2',
+    desc: 'Assignment duplicates both field values into a separate stack binding named copy.',
+    goal: 'establish',
+    subgoal: 'duplicate',
+    stack: [
+      { name: 'original', type: 'Rectangle struct', fields: { Width: '10', Height: '5' } },
+      { name: 'copy', type: 'Rectangle struct', fields: { Width: '10', Height: '5' }, isNew: true, highlight: ['Width', 'Height'] },
+    ],
+    heap: [],
+    console: [],
+  },
+  {
+    label: 'After line 3',
+    desc: 'copy.Width changes in copy\'s own stack storage. original.Width remains 10.',
+    goal: 'test',
+    subgoal: 'update',
+    stack: [
+      { name: 'original', type: 'Rectangle struct', fields: { Width: '10', Height: '5' } },
+      { name: 'copy', type: 'Rectangle struct', fields: { Width: '99', Height: '5' }, active: true, highlight: ['Width'] },
+    ],
+    heap: [],
+    console: [],
+  },
+  {
+    label: 'After line 4',
+    desc: 'Reading original.Width still produces 10 because the struct values are independent.',
+    goal: 'test',
+    subgoal: 'verify',
+    stack: [
+      { name: 'original', type: 'Rectangle struct', fields: { Width: '10', Height: '5' }, active: true, highlight: ['Width'] },
+      { name: 'copy', type: 'Rectangle struct', fields: { Width: '99', Height: '5' } },
+    ],
+    heap: [],
+    console: ['10'],
+  },
+];
+
+const REFERENCE_COPY_STATES = [
+  { label: 'Before execution', desc: 'Rectangle is a class reference type. No local references or heap objects exist yet.', stack: [], heap: [], memory: [], console: [] },
+  {
+    label: 'After line 1',
+    desc: 'new creates one Rectangle object on the heap. original stores its address.',
+    goal: 'establish',
+    subgoal: 'original',
+    stack: [{ name: 'original', type: 'Rectangle class', ref: 'rect-1', addr: '0x700', isNew: true }],
+    heap: [{ id: 'rect-1', addr: '0x700', type: 'Rectangle', shape: 'object', fields: { Width: '10', Height: '5' }, active: true, highlight: ['Width', 'Height'] }],
+    console: [],
+  },
+  {
+    label: 'After line 2',
+    desc: 'Assignment duplicates the address. original and copy both reach the same heap object; no second object is allocated.',
+    goal: 'establish',
+    subgoal: 'duplicate',
+    stack: [
+      { name: 'original', type: 'Rectangle class', ref: 'rect-1', addr: '0x700', active: true },
+      { name: 'copy', type: 'Rectangle class', ref: 'rect-1', addr: '0x700', active: true },
+    ],
+    heap: [{ id: 'rect-1', addr: '0x700', type: 'Rectangle', shape: 'object', fields: { Width: '10', Height: '5' }, active: true }],
+    console: [],
+  },
+  {
+    label: 'After line 3',
+    desc: 'copy reaches the shared object at 0x700, so the object\'s Width field changes to 99.',
+    goal: 'test',
+    subgoal: 'update',
+    stack: [
+      { name: 'original', type: 'Rectangle class', ref: 'rect-1', addr: '0x700' },
+      { name: 'copy', type: 'Rectangle class', ref: 'rect-1', addr: '0x700', active: true },
+    ],
+    heap: [{ id: 'rect-1', addr: '0x700', type: 'Rectangle', shape: 'object', fields: { Width: '99', Height: '5' }, active: true, highlight: ['Width'] }],
+    console: [],
+  },
+  {
+    label: 'After line 4',
+    desc: 'original reaches that same object, so reading original.Width produces 99.',
+    goal: 'test',
+    subgoal: 'verify',
+    stack: [
+      { name: 'original', type: 'Rectangle class', ref: 'rect-1', addr: '0x700', active: true },
+      { name: 'copy', type: 'Rectangle class', ref: 'rect-1', addr: '0x700' },
+    ],
+    heap: [{ id: 'rect-1', addr: '0x700', type: 'Rectangle', shape: 'object', fields: { Width: '99', Height: '5' }, active: true, highlight: ['Width'] }],
+    console: ['99'],
+  },
+];
+
+function makeCopySemanticsLesson({
+  id,
+  title,
+  href,
+  typeKind,
+  goals,
+  subgoals,
+  learningTarget,
+  walkthroughInstructions,
+  conceptIntro,
+  states,
+  expectedOutput,
+  duplicateAnswer,
+  locationAnswer,
+  transferOriginalAfter,
+  transferWhy,
+}) {
+  const valueType = typeKind === 'value';
+  const typeLabel = valueType ? 'struct value type' : 'class reference type';
+  const relationship = valueType ? 'independent field storage' : 'one shared heap object';
+  const code = {
+    ...COPY_SEMANTICS_CODE,
+    goals,
+    subgoals,
+    lines: COPY_SEMANTICS_CODE.lines.map((line) => ({
+      ...line,
+      translation: subgoals[line.subgoal].gloss,
+    })),
+  };
+
+  return {
+    id,
+    chapterId: 'ch4',
+    source: 'ch4/ch4-1.md',
+    stableUrl: `ch4/${id}`,
+    order: valueType ? 0 : 1,
+    title,
+    kicker: 'Chapter 4 component proof',
+    learningTarget,
+    roadmap: {
+      order: valueType ? 0 : 1,
+      sourceAnchors: ['ch3/ch3-1.md:312', 'ch3/ch3-1.md:408', 'ch4/ch4-1.md:230'],
+      reviewConcepts: ['assignment', 'stack and heap', 'field mutation'],
+    },
+    availableSyntax: COPY_SEMANTICS_SYNTAX,
+    chapterNav: { chapters: GRAMMAR_CHAPTERS_CH4 },
+    chapterExamples: grammarExamples(CH4_LINKED_EXAMPLES, href),
+    fullExample: {
+      header: {
+        chapterLabel: 'Chapter 4',
+        exampleTitle: `Component proof: ${title}`,
+        modeLabel: 'Full Walkthrough',
+        instructions: walkthroughInstructions,
+        programLabel: 'Program.cs',
+        programNote: `For this proof, Rectangle is provided as a ${typeLabel}. The four executable lines are otherwise the same.`,
+      },
+      code,
+      goals,
+      subgoals,
+      executionTrace: COPY_SEMANTICS_TRACE,
+      states,
+    },
+    preQuiz: {
+      title: 'Classify Before Tracing',
+      prompt: 'Use the type classification before deciding what line 2 duplicates.',
+      answers: { location: locationAnswer, duplicate: duplicateAnswer },
+      bank: ['inline field data', 'heap object', 'field values', 'object address'],
+      prompts: [
+        { slot: 'location', label: 'Original data', prompt: 'Where does the Rectangle data live after line 1?', hint: `Rectangle is a ${typeLabel}.` },
+        { slot: 'duplicate', label: 'Assignment result', prompt: 'What does Rectangle copy = original duplicate?', hint: 'Assignment duplicates what the variable stores.' },
+      ],
+    },
+    mainLesson: {
+      title: valueType ? 'Struct Assignment Copies Values' : 'Class Assignment Shares Objects',
+      label: 'Main Lesson',
+      intro: conceptIntro,
+      acts: [
+        {
+          n: 'A',
+          title: goals.establish.label,
+          body: [
+            `A.a ${subgoals.original.label}: ${subgoals.original.gloss}`,
+            `A.b ${subgoals.duplicate.label}: ${subgoals.duplicate.gloss}`,
+            `Together, these subgoals establish ${relationship}.`,
+          ],
+          code: code.lines.slice(0, 2),
+          memory: [{ name: 'relationship', type: typeKind, value: relationship }],
+          translations: [subgoals.original.label, subgoals.duplicate.label],
+        },
+        {
+          n: 'B',
+          title: goals.test.label,
+          body: [
+            `B.a ${subgoals.update.label}: ${subgoals.update.gloss}`,
+            `B.b ${subgoals.verify.label}: ${subgoals.verify.gloss}`,
+            `The observed output ${expectedOutput} follows from the ${relationship}.`,
+          ],
+          code: code.lines.slice(2),
+          memory: [{ name: 'original.Width', type: 'int', value: expectedOutput }],
+          translations: [subgoals.update.label, subgoals.verify.label],
+        },
+      ],
+    },
+    rigorousQuiz: {
+      title: 'Transfer The Concept Model',
+      prompt: `Assume Point is a ${typeLabel}. Apply the four concept labels to predict the output.`,
+      transferCode: [
+        'Point original = new Point(3, 7);',
+        'Point copy = original;',
+        'copy.Y = 100;',
+        'Console.WriteLine(original.Y);',
+      ],
+      stateRows: [
+        { after: `A.a ${subgoals.original.label}`, 'original.Y': '7', 'copy.Y': '-' },
+        { after: `A.b ${subgoals.duplicate.label}`, 'original.Y': '7', 'copy.Y': '7' },
+        { after: `B.a ${subgoals.update.label}`, 'original.Y': transferOriginalAfter, 'copy.Y': '100' },
+        { after: `B.b ${subgoals.verify.label}`, 'original.Y': transferOriginalAfter, 'copy.Y': '100' },
+      ],
+      columns: ['original.Y', 'copy.Y'],
+      translations: [
+        { id: 'A.a', text: `${subgoals.original.label}.` },
+        { id: 'A.b', text: `${subgoals.duplicate.label}.` },
+        { id: 'B.a', text: `${subgoals.update.label}.` },
+        { id: 'B.b', text: `${subgoals.verify.label}.` },
+      ],
+      outputAnswers: { output: transferOriginalAfter, why: transferWhy },
+      valueChoices: ['3', '7', '100', '-'],
+      outputChoices: ['7', '100', '(no output)'],
+      reasonPrompt: 'Which subgoal explains the output?',
+      reasonChoices: [
+        transferWhy,
+        'B.a always changes every variable with the same field name',
+        'A.b allocates a new heap object for every assignment',
+      ],
+    },
+    exercises: {
+      title: 'Copy-Semantics Practice',
+      label: 'Exercises',
+      intro: valueType
+        ? 'Practice recognizing independent values across new struct types, then fade the printed labels.'
+        : 'Practice recognizing shared objects across new class types, then fade the printed labels.',
+      items: [
+        {
+          number: '1',
+          title: 'Guided A/B Trace',
+          summary: 'Use all four labels on a nearby example.',
+          sample: 'Reading original; Reading copy = original; copy.Value = 8;',
+          prompt: `Assume Reading is a ${typeLabel}. Draw the state after A.a, A.b, B.a, and B.b.`,
+          constraints: ['Label all four concept subgoals.', `Apply ${subgoals.duplicate.label.toLowerCase()}.`, 'Predict a read through original.'],
+        },
+        {
+          number: '2',
+          title: 'Faded Transfer',
+          summary: 'Trace without printed subgoal labels.',
+          sample: valueType ? 'int y = x;' : 'int[] alias = values;',
+          prompt: `Trace a new ${valueType ? 'value-type' : 'reference-type'} assignment and later mutation without the A/B labels shown.`,
+          constraints: ['Draw storage before predicting output.', 'Explain whether storage is independent or shared.'],
+        },
+        {
+          number: '3',
+          title: 'Diagnose The Failed Subgoal',
+          summary: 'Name the reasoning step behind a wrong diagram.',
+          sample: valueType ? 'A learner draws both struct variables pointing to one box.' : 'A learner draws a second heap object after copy = original.',
+          prompt: 'Identify the failed subgoal and repair the memory diagram.',
+          constraints: ['Name A.a, A.b, B.a, or B.b.', 'State the assignment rule that was missed.'],
+        },
+      ],
+    },
+  };
+}
+
+const VALUE_TYPE_COPY_LESSON = makeCopySemanticsLesson({
+  id: 'value-type-copy-proof',
+  title: 'Struct Copy Semantics',
+  href: 'Value Type Copy Proof.html',
+  typeKind: 'value',
+  goals: VALUE_SEMANTICS_GOALS,
+  subgoals: VALUE_SEMANTICS_SUBGOALS,
+  learningTarget: 'Explain why struct assignment creates independent field storage and why changing the copied value leaves the original unchanged.',
+  walkthroughInstructions: 'Watch each struct variable own its fields as assignment creates an independent value copy.',
+  conceptIntro: 'A struct variable owns its field data. Assignment copies that complete value, so later mutations stay local to the value being changed.',
+  states: VALUE_COPY_STATES,
+  expectedOutput: '10',
+  duplicateAnswer: 'field values',
+  locationAnswer: 'inline field data',
+  transferOriginalAfter: '7',
+  transferWhy: 'Copy the complete value creates independent fields, so Change one value affects only copy',
+});
+
+const REFERENCE_TYPE_COPY_LESSON = makeCopySemanticsLesson({
+  id: 'reference-type-copy-proof',
+  title: 'Class Reference Semantics',
+  href: 'Reference Type Copy Proof.html',
+  typeKind: 'reference',
+  goals: REFERENCE_SEMANTICS_GOALS,
+  subgoals: REFERENCE_SEMANTICS_SUBGOALS,
+  learningTarget: 'Explain why class assignment creates two references to one object and why mutation through either reference changes shared data.',
+  walkthroughInstructions: 'Watch assignment copy an address so two variables reach and mutate one heap object.',
+  conceptIntro: 'A class variable stores a reference to an object. Assignment copies that reference, so both variables reach the same object and observe the same mutations.',
+  states: REFERENCE_COPY_STATES,
+  expectedOutput: '99',
+  duplicateAnswer: 'object address',
+  locationAnswer: 'heap object',
+  transferOriginalAfter: '100',
+  transferWhy: 'Copy the object reference creates an alias, so Change the shared object is visible through both references',
+});
 
 const CH3_ARRAY_CODE = {
   lines: [
@@ -870,11 +1348,25 @@ function Ch4LinkedTraversalSequence() {
   return <ConceptLessonSequence lesson={CH4_LINKED_TRAVERSAL_LESSON} />;
 }
 
+function ValueTypeCopyProofSequence() {
+  const { ConceptLessonSequence } = window;
+  return <ConceptLessonSequence lesson={VALUE_TYPE_COPY_LESSON} />;
+}
+
+function ReferenceTypeCopyProofSequence() {
+  const { ConceptLessonSequence } = window;
+  return <ConceptLessonSequence lesson={REFERENCE_TYPE_COPY_LESSON} />;
+}
+
 Object.assign(window, {
   CH3_ARRAY_MEMORY_LESSON,
   CH4_LINKED_NODE_LESSON,
   CH4_LINKED_TRAVERSAL_LESSON,
+  VALUE_TYPE_COPY_LESSON,
+  REFERENCE_TYPE_COPY_LESSON,
   Ch3ArrayMemorySequence,
   Ch4LinkedNodeSequence,
   Ch4LinkedTraversalSequence,
+  ValueTypeCopyProofSequence,
+  ReferenceTypeCopyProofSequence,
 });

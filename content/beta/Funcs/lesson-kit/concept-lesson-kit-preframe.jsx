@@ -139,7 +139,6 @@ const FUNCS_VISUALIZER_GRAMMAR = {
       component: 'FuncsCodeBlock',
       rules: [
         'Author labels in fixture data, not chapter-specific renderers.',
-        'Use code.layout = "frame" plus code.frame when subgoal labels should become the uploaded frame-on-focus code window.',
         'Use annotations to classify syntax; use controlFlow, reduction, or memory when the student must step behavior.',
       ],
     },
@@ -195,15 +194,14 @@ const FUNCS_LOOP_STEPPER_INTERACTION = {
   grammarKind: 'controlFlow',
   visualizerGrammar: FUNCS_VISUALIZER_GRAMMAR.controlFlow,
   component: 'FuncsLoopStepperDetail',
-  triggerLabel: 'Show code steps',
+  triggerLabel: 'Show loop steps',
   returnLabel: 'Show memory state',
   panelRole: 'source-row loop stepper',
   sequenceField: 'steps',
-  note: 'Use loopTrace.steps to model repeated control flow such as check condition, execute body, update progress, recursive case, base case, and transitions between subgoals without duplicating source rows.',
+  note: 'Use loopTrace.steps to model repeated control flow such as check condition, execute body, and check condition again without duplicating source rows.',
   requiredDetailFields: ['title', 'sourceLine', 'steps'],
   stepShape: {
     rowKey: 'source row id to highlight for this phase',
-    subgoal: 'optional subgoal id for the source-row group currently being exercised',
     phase: 'short phase label such as Check condition or Execute body',
     note: 'student-facing explanation for this loop phase',
     iteration: 'optional iteration label',
@@ -213,253 +211,13 @@ const FUNCS_LOOP_STEPPER_INTERACTION = {
   },
 };
 
-function funcsSubgoalId(value) {
-  if (!value) return null;
-  return typeof value === 'string' ? value : value.id;
-}
-
-function funcsSubgoalForRow(row) {
-  return funcsSubgoalId(row?.subgoal || row?.sg);
-}
-
-function funcsNormalizeSubgoals(...sources) {
-  const normalized = {};
-
-  sources.forEach((source) => {
-    if (!source) return;
-    if (Array.isArray(source)) {
-      source.forEach((subgoal) => {
-        const id = funcsSubgoalId(subgoal);
-        if (!id) return;
-        normalized[id] = {
-          id,
-          label: subgoal.label || subgoal.title || id,
-          n: subgoal.n || subgoal.number || subgoal.shortLabel,
-          gloss: subgoal.gloss || subgoal.description || subgoal.note,
-          goal: subgoal.goal,
-        };
-      });
-      return;
-    }
-
-    Object.entries(source).forEach(([key, subgoal]) => {
-      if (typeof subgoal === 'string') {
-        normalized[key] = { id: key, label: subgoal };
-        return;
-      }
-      const id = funcsSubgoalId(subgoal) || key;
-      normalized[id] = {
-        ...subgoal,
-        id,
-        label: subgoal?.label || subgoal?.title || key,
-        n: subgoal?.n || subgoal?.number || subgoal?.shortLabel,
-        gloss: subgoal?.gloss || subgoal?.description || subgoal?.note,
-      };
-    });
-  });
-
-  return normalized;
-}
-
-function funcsNormalizeGoals(...sources) {
-  const normalized = {};
-
-  sources.forEach((source) => {
-    if (!source) return;
-    if (Array.isArray(source)) {
-      source.forEach((goal, index) => {
-        const id = funcsSubgoalId(goal) || `goal-${index + 1}`;
-        normalized[id] = {
-          ...goal,
-          id,
-          n: goal.n || goal.letter || goal.shortLabel || String.fromCharCode(65 + index),
-          label: goal.label || goal.title || id,
-          gloss: goal.gloss || goal.description || goal.note,
-        };
-      });
-      return;
-    }
-
-    Object.entries(source).forEach(([key, goal], index) => {
-      if (typeof goal === 'string') {
-        normalized[key] = {
-          id: key,
-          n: String.fromCharCode(65 + index),
-          label: goal,
-        };
-        return;
-      }
-
-      const id = funcsSubgoalId(goal) || key;
-      normalized[id] = {
-        ...goal,
-        id,
-        n: goal?.n || goal?.letter || goal?.shortLabel || String.fromCharCode(65 + index),
-        label: goal?.label || goal?.title || key,
-        gloss: goal?.gloss || goal?.description || goal?.note,
-      };
-    });
-  });
-
-  return normalized;
-}
-
-function funcsResolveGoalId(goal, goals = {}) {
-  const raw = funcsSubgoalId(goal) || goal;
-  if (!raw) return null;
-  if (goals[raw]) return raw;
-  const match = Object.values(goals).find((candidate) => (
-    candidate?.id === raw
-    || candidate?.label === raw
-    || candidate?.title === raw
-    || candidate?.n === raw
-  ));
-  return match?.id || raw;
-}
-
-function funcsGoalIdForSubgoal(subgoal, goals = {}) {
-  return funcsResolveGoalId(subgoal?.goal, goals);
-}
-
-function funcsNormalizeGoalSubgoalModel(fullExample, state) {
-  const subgoals = funcsNormalizeSubgoals(fullExample?.subgoals, fullExample?.code?.subgoals, state?.loopTrace?.subgoals);
-  const goals = funcsNormalizeGoals(fullExample?.goals, fullExample?.code?.goals, state?.loopTrace?.goals);
-
-  return { goals, subgoals };
-}
-
-function FuncsCodeGoalHeader({ goals, activeGoal = null }) {
-  const goalList = Object.values(goals || {});
-  if (!goalList.length) return null;
-  const activeGoalId = funcsSubgoalId(activeGoal);
-
-  return (
-    <div style={{
-      padding: '9px 18px',
-      borderBottom: '1px solid #edf1f7',
-      background: '#fbfcfe',
-      display: 'grid',
-      gap: 6,
-    }}>
-      {goalList.map((goal) => {
-        const active = Boolean(activeGoalId && activeGoalId === goal.id);
-        return (
-          <div key={goal.id} style={funcsFrameStyle(active, false)}>
-            <div style={{ padding: '0 8px 3px', opacity: active ? 1 : 0.72 }}>
-              <FuncsFrameQuietLabel subgoal={goal} active={active} size={active ? 10.5 : 9.5} />
-            </div>
-            {goal.gloss && (
-              <div style={{
-                margin: '2px 8px 0 37px',
-                fontSize: 12.5,
-                lineHeight: 1.35,
-                color: '#64748b',
-              }}>{goal.gloss}</div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function FuncsSubgoalTag({ subgoal, active = false, compact = false }) {
-  if (!subgoal) return null;
-
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 5,
-      minWidth: 0,
-      border: `1px solid ${active ? '#64748b' : '#dbe1ea'}`,
-      borderRadius: 999,
-      background: active ? '#e7ecf3' : '#f8fafc',
-      color: active ? '#1e293b' : '#64748b',
-      padding: compact ? '1px 6px 1px 2px' : '2px 8px 2px 3px',
-      fontFamily: "'Source Sans 3', sans-serif",
-      fontSize: compact ? 9 : 10,
-      lineHeight: compact ? '13px' : '15px',
-      fontWeight: 900,
-      textTransform: 'uppercase',
-      letterSpacing: '0.03em',
-      whiteSpace: 'nowrap',
-      flexShrink: 1,
-    }}>
-      {subgoal.n && (
-        <span style={{
-          width: compact ? 14 : 16,
-          height: compact ? 14 : 16,
-          borderRadius: 5,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: active ? '#334155' : '#fff',
-          border: `1px solid ${active ? '#334155' : '#cbd5e1'}`,
-          color: active ? '#fff' : '#64748b',
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: compact ? 8 : 9,
-          flexShrink: 0,
-        }}>{subgoal.n}</span>
-      )}
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{subgoal.label}</span>
-    </span>
-  );
-}
-
-function FuncsSubgoalNowPanel({ subgoal, goal }) {
-  return (
-    <div style={{
-      border: '1px solid #dbe1ea',
-      borderRadius: 8,
-      background: '#fff',
-      padding: '9px 12px',
-      display: 'grid',
-      gap: 5,
-    }}>
-      <div style={{
-        fontSize: 9.5,
-        fontWeight: 800,
-        color: '#64748b',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-      }}>Now working on</div>
-      {subgoal ? (
-        <React.Fragment>
-          {goal && (
-            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#475569' }}>{goal}</div>
-          )}
-          <FuncsSubgoalTag subgoal={subgoal} active />
-          {subgoal.gloss && (
-            <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.4 }}>{subgoal.gloss}</div>
-          )}
-        </React.Fragment>
-      ) : (
-        <div style={{ fontSize: 12.5, color: '#94a3b8', fontStyle: 'italic' }}>No subgoal active yet.</div>
-      )}
-    </div>
-  );
-}
-
 function funcsNormalizeCodeLines(code, translations = []) {
   if (Array.isArray(code)) {
-    return code.map((line, index) => {
-      if (typeof line === 'string') {
-        return {
-          id: `line-${index + 1}`,
-          text: line,
-          translation: translations[index],
-        };
-      }
-
-      const id = line?.id || `line-${index + 1}`;
-      return {
-        ...line,
-        id,
-        text: line?.text,
-        translation: line?.translation ?? translations[index],
-      };
-    });
+    return code.map((text, index) => ({
+      id: `line-${index + 1}`,
+      text,
+      translation: translations[index],
+    }));
   }
 
   if (Array.isArray(code?.lines)) {
@@ -552,17 +310,6 @@ function funcsScopeLineKey(parentKey, scopeLine, index) {
 function funcsBuildFullExampleSteps(fullExample) {
   const states = Array.isArray(fullExample?.states) ? fullExample.states : [];
   const codeLines = funcsNormalizeCodeLines(fullExample?.code, fullExample?.translations);
-  const goals = funcsNormalizeGoals(fullExample?.goals, fullExample?.code?.goals);
-  const goalIntroSteps = Object.values(goals).map((goal, index) => ({
-    id: `goal-intro-${goal.id || index + 1}`,
-    label: goal.n || `${index + 1}`,
-    sourceLabel: `${goal.n ? `goal ${goal.n}` : `goal ${index + 1}`}: ${goal.label}`,
-    stateIndex: 0,
-    lineIndex: null,
-    rowKey: null,
-    goal: goal.id,
-    goalFocus: goal.id,
-  }));
 
   if (!codeLines.length) {
     return states.length ? states.map((state, index) => ({ id: `state-${index}`, state, stateIndex: index })) : [];
@@ -587,7 +334,6 @@ function funcsBuildFullExampleSteps(fullExample) {
     lineIndex: null,
     rowKey: null,
   }];
-  steps.push(...goalIntroSteps);
 
   if (Array.isArray(fullExample?.executionTrace) && fullExample.executionTrace.length) {
     fullExample.executionTrace.forEach((traceStep, traceIndex) => {
@@ -599,8 +345,6 @@ function funcsBuildFullExampleSteps(fullExample) {
         id: traceStep.id || `trace-${traceIndex + 1}`,
         label: traceStep.label || `${traceIndex + 1}`,
         sourceLabel: traceStep.sourceLabel || traceStep.label || `step ${traceIndex + 1}`,
-        goal: traceStep.goal,
-        subgoal: traceStep.subgoal || traceStep.sg,
         stateIndex,
         lineIndex: mapped.lineIndex ?? null,
         parentKey: traceStep.parentKey || mapped.parentKey,
@@ -729,309 +473,6 @@ function funcsTokenPieces(line, tokenSpec) {
   return pieces;
 }
 
-const FUNCS_FRAME_CODE_STYLE = {
-  hair: '#e7e9ee',
-  hairSoft: '#eef0f4',
-  label: '#8a93a3',
-  labelOn: '#3f4654',
-  rule: '#d6dae2',
-  ruleOn: '#64748b',
-  accentBg: '#f1f3f7',
-};
-
-function funcsFrameCodeHighlight(code) {
-  const subs = [];
-  const placeholder = (html) => {
-    subs.push(html);
-    return `\x00X${subs.length - 1}\x00`;
-  };
-  let highlighted = String(code || '').replace(/"[^"]*"/g, match => placeholder(`<span style="color:#047857">${match}</span>`));
-  highlighted = highlighted.replace(
-    /\b(int|double|string|bool|void|static|return|if|else|for|while|new|class|Console|WriteLine)\b/g,
-    match => placeholder(`<span style="color:#6d28d9;font-weight:500">${match}</span>`),
-  );
-  highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, match => placeholder(`<span style="color:#1d4ed8">${match}</span>`));
-  return highlighted.replace(/\x00X(\d+)\x00/g, (_, i) => subs[+i]);
-}
-
-function funcsFrameLineIdentity(line, index) {
-  return line?.id || line?.key || funcsCodeLineKey(line, index);
-}
-
-function funcsFrameLineIsActive(line, index, activeKey, activeLine) {
-  const identity = funcsFrameLineIdentity(line, index);
-  return activeKey ? identity === activeKey : index === activeLine;
-}
-
-function FuncsFrameCodeLine({ line, index, active }) {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '2px 10px 2px 6px',
-      background: active ? '#f8fbff' : 'transparent',
-      borderLeft: `3px solid ${active ? '#2563eb' : 'transparent'}`,
-    }}>
-      <span style={{
-        width: 30,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        gap: 3,
-        flexShrink: 0,
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 11,
-        fontWeight: active ? 700 : 400,
-        color: active ? '#2563eb' : '#c1c8d4',
-      }}>
-        {active && <span style={{ fontSize: 7, lineHeight: 1, color: '#2563eb' }}>▶</span>}
-        <span>{line.num || index + 1}</span>
-      </span>
-      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12.5, whiteSpace: 'nowrap' }}>
-        <span style={{ display: 'inline-block', width: (line.indent || 0) * 16 }} />
-        <span dangerouslySetInnerHTML={{ __html: funcsFrameCodeHighlight(funcsCodeLineText(line)) }} />
-      </span>
-    </div>
-  );
-}
-
-function FuncsFrameQuietLabel({ subgoal, active, hint, size = 10.5 }) {
-  if (!subgoal) return null;
-  const F = FUNCS_FRAME_CODE_STYLE;
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-      <span style={{
-        minWidth: 20,
-        height: 16,
-        borderRadius: 4,
-        flexShrink: 0,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0 4px',
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 9,
-        fontWeight: 700,
-        letterSpacing: '0.01em',
-        background: active ? F.ruleOn : '#fff',
-        color: active ? '#fff' : F.label,
-        border: `1px solid ${active ? F.ruleOn : F.rule}`,
-        transition: 'all .2s',
-      }}>{subgoal.n}</span>
-      <span style={{
-        fontFamily: "'Source Sans 3', sans-serif",
-        fontSize: size,
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        letterSpacing: '0.04em',
-        lineHeight: 1.15,
-        color: active ? F.labelOn : F.label,
-        transition: 'color .2s',
-      }}>{subgoal.label}</span>
-      {hint && (
-        <span style={{
-          marginLeft: 'auto',
-          fontFamily: "'Source Sans 3', sans-serif",
-          fontSize: 9.5,
-          fontWeight: 600,
-          color: F.label,
-          whiteSpace: 'nowrap',
-          fontStyle: 'italic',
-        }}>{hint}</span>
-      )}
-    </div>
-  );
-}
-
-function funcsFrameStyle(active, inset) {
-  const F = FUNCS_FRAME_CODE_STYLE;
-  return {
-    marginLeft: inset ? 16 : 0,
-    borderRadius: 7,
-    padding: active ? '5px 4px 6px' : '2px 4px',
-    border: `1px solid ${active ? F.ruleOn : 'transparent'}`,
-    background: active ? '#fff' : 'transparent',
-    boxShadow: active ? '0 3px 14px rgba(51,65,85,0.10)' : 'none',
-    transition: 'all .2s',
-  };
-}
-
-function funcsFrameFindLine(lines, id) {
-  if (!id) return null;
-  return lines.find((line, index) => funcsFrameLineIdentity(line, index) === id || line?.id === id) || null;
-}
-
-function funcsFrameLinesBySubgoal(lines) {
-  const grouped = {};
-  lines.forEach((line) => {
-    const subgoalId = funcsSubgoalForRow(line);
-    if (!subgoalId) return;
-    if (!grouped[subgoalId]) grouped[subgoalId] = [];
-    grouped[subgoalId].push(line);
-  });
-  return grouped;
-}
-
-function FuncsFrameCodeNode({
-  node,
-  lines,
-  grouped,
-  subgoals,
-  activeSubgoal,
-  activeKey,
-  activeLine,
-}) {
-  const F = FUNCS_FRAME_CODE_STYLE;
-  const activeSubgoalId = funcsSubgoalId(activeSubgoal);
-  const subgoalFor = (id) => subgoals[id];
-
-  if (node.kind === 'seg') {
-    const subgoal = subgoalFor(node.subgoal || node.sg);
-    const subgoalId = funcsSubgoalId(subgoal);
-    const segmentLines = grouped[subgoalId] || [];
-    const active = activeSubgoalId === subgoalId;
-
-    return (
-      <div style={funcsFrameStyle(active, node.inset)}>
-        <div style={{ padding: '0 8px 3px', opacity: active ? 1 : 0.72 }}>
-          <FuncsFrameQuietLabel subgoal={subgoal} active={active} hint={active ? node.hint : null} size={active ? 10.5 : 9.5} />
-        </div>
-        {segmentLines.map((line, index) => (
-          <FuncsFrameCodeLine
-            key={funcsFrameLineIdentity(line, index)}
-            line={line}
-            index={lines.indexOf(line)}
-            active={funcsFrameLineIsActive(line, lines.indexOf(line), activeKey, activeLine)}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  if (node.kind === 'wrap') {
-    const subgoal = node.subgoal || node.sg ? subgoalFor(node.subgoal || node.sg) : null;
-    const subgoalId = funcsSubgoalId(subgoal);
-    const active = subgoalId ? activeSubgoalId === subgoalId : false;
-    const headerIds = Array.isArray(node.header) ? node.header : [node.header].filter(Boolean);
-    const headerLines = headerIds.map(id => funcsFrameFindLine(lines, id)).filter(Boolean);
-    const footerLine = funcsFrameFindLine(lines, node.footer);
-
-    return (
-      <div style={subgoal ? funcsFrameStyle(active, false) : { padding: '2px 4px' }}>
-        {subgoal && (
-          <div style={{ padding: '0 8px 3px', opacity: active ? 1 : 0.72 }}>
-            <FuncsFrameQuietLabel subgoal={subgoal} active={active} hint={active ? node.hint : null} size={active ? 10.5 : 9.5} />
-          </div>
-        )}
-        {headerLines.map(line => {
-          const index = lines.indexOf(line);
-          return (
-            <FuncsFrameCodeLine
-              key={funcsFrameLineIdentity(line, index)}
-              line={line}
-              index={index}
-              active={funcsFrameLineIsActive(line, index, activeKey, activeLine)}
-            />
-          );
-        })}
-        <div style={{
-          marginTop: 4,
-          paddingLeft: 8,
-          borderLeft: `2px solid ${F.hairSoft}`,
-          marginLeft: 6,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-        }}>
-          {(node.body || []).map((child, index) => (
-            <FuncsFrameCodeNode
-              key={index}
-              node={child}
-              lines={lines}
-              grouped={grouped}
-              subgoals={subgoals}
-              activeSubgoal={activeSubgoal}
-              activeKey={activeKey}
-              activeLine={activeLine}
-            />
-          ))}
-        </div>
-        {footerLine && (() => {
-          const index = lines.indexOf(footerLine);
-          return (
-            <FuncsFrameCodeLine
-              key={funcsFrameLineIdentity(footerLine, index)}
-              line={footerLine}
-              index={index}
-              active={funcsFrameLineIsActive(footerLine, index, activeKey, activeLine)}
-            />
-          );
-        })()}
-      </div>
-    );
-  }
-
-  return null;
-}
-
-function FuncsFrameCodeWindow({
-  code,
-  lines: explicitLines,
-  subgoals,
-  frame,
-  activeSubgoal = null,
-  activeKey = null,
-  activeLine = null,
-}) {
-  const lines = funcsNormalizeCodeLines(explicitLines || code);
-  const normalizedSubgoals = funcsNormalizeSubgoals(code?.subgoals, subgoals);
-  const frameNodes = frame || code?.frame || [];
-  const grouped = funcsFrameLinesBySubgoal(lines);
-
-  if (!Array.isArray(frameNodes) || frameNodes.length === 0) {
-    return (
-      <div style={{
-        border: '1px dashed #cbd5e1',
-        borderRadius: 7,
-        padding: 14,
-        color: '#94a3b8',
-        fontSize: 13,
-        fontStyle: 'italic',
-      }}>
-        Frame code window is missing code.frame data.
-      </div>
-    );
-  }
-
-  return (
-    <div style={{
-      background: '#fff',
-      border: `1px solid ${FUNCS_FRAME_CODE_STYLE.hair}`,
-      borderRadius: 9,
-      padding: '10px 8px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 7,
-      overflowX: 'auto',
-    }}>
-      {frameNodes.map((node, index) => (
-        <FuncsFrameCodeNode
-          key={index}
-          node={node}
-          lines={lines}
-          grouped={grouped}
-          subgoals={normalizedSubgoals}
-          activeSubgoal={activeSubgoal}
-          activeKey={activeKey}
-          activeLine={activeLine}
-        />
-      ))}
-    </div>
-  );
-}
-
 function FuncsTokenizedLine({
   line,
   index,
@@ -1040,8 +481,6 @@ function FuncsTokenizedLine({
   run,
   activeKey = null,
   runKeys = null,
-  subgoals = {},
-  activeSubgoal = null,
   expanded,
   onToggle,
   onDef,
@@ -1057,10 +496,6 @@ function FuncsTokenizedLine({
   const childActive = activeKey ? scopedKeys.includes(activeKey) : false;
   const lineActive = active || activeKey === lineKey || childActive;
   const lineRun = run || Boolean(runKeySet && (runKeySet.has(lineKey) || scopedKeys.some(key => runKeySet.has(key))));
-  const activeSubgoalId = funcsSubgoalId(activeSubgoal);
-  const lineSubgoalId = funcsSubgoalForRow(line);
-  const childSubgoalActive = activeSubgoalId && scopedRows.some(row => funcsSubgoalForRow(row) === activeSubgoalId);
-  const lineOwnsActiveSubgoal = activeSubgoalId && (lineSubgoalId === activeSubgoalId || childSubgoalActive);
   const rowActive = lineActive || (hasScope && lineRun);
   const rowBackground = lineActive ? '#f8fbff' : lineRun ? '#fbfdff' : 'transparent';
 
@@ -1089,13 +524,9 @@ function FuncsTokenizedLine({
   }) => {
     const rowExpanded = expanded === key;
     const rowTranslation = row.translation;
-    const rowSubgoalId = funcsSubgoalForRow(row);
-    const rowSubgoal = rowSubgoalId ? subgoals[rowSubgoalId] : null;
     const toggle = onToggle ? () => onToggle(key) : null;
     const effectiveActive = activeKey ? activeKey === key : active;
     const effectiveRun = runKeySet ? runKeySet.has(key) : run;
-    const subgoalActive = activeSubgoalId && rowSubgoalId === activeSubgoalId;
-    const subgoalDimmed = activeSubgoalId && rowSubgoalId && rowSubgoalId !== activeSubgoalId;
 
     return (
       <React.Fragment key={key}>
@@ -1120,7 +551,7 @@ function FuncsTokenizedLine({
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13.5,
             lineHeight: '24px',
-            opacity: close || subgoalActive || effectiveRun || effectiveActive || !runKeySet ? 1 : subgoalDimmed ? 0.34 : 0.48,
+            opacity: close || effectiveRun || effectiveActive || !runKeySet ? 1 : 0.48,
             background: child
               ? close ? 'rgba(248, 250, 252, 0.86)' : effectiveActive ? 'rgba(191, 219, 254, 0.56)' : 'rgba(219, 234, 254, 0.30)'
               : 'transparent',
@@ -1215,11 +646,6 @@ function FuncsTokenizedLine({
             }}>▶</span>
           )}
           <FuncsCodeLineSource text={funcsCodeLineText(row)} tokenSpec={tokenSpec} onDef={onDef} />
-          {rowSubgoal && !close && (
-            <span style={{ marginLeft: 10, maxWidth: child ? 128 : 148, minWidth: 0, overflow: 'hidden', flexShrink: 1 }}>
-              <FuncsSubgoalTag subgoal={rowSubgoal} active={Boolean(subgoalActive)} compact />
-            </span>
-          )}
         </div>
         {rowExpanded && renderTranslation(rowTranslation, effectiveActive)}
       </React.Fragment>
@@ -1230,7 +656,7 @@ function FuncsTokenizedLine({
     <div style={{
       borderLeft: lineActive ? '3px solid #2563eb' : hasScope ? '3px solid #dbeafe' : '3px solid transparent',
       background: rowBackground,
-      opacity: lineRun || lineActive || lineOwnsActiveSubgoal ? 1 : activeSubgoalId && (lineSubgoalId || hasScope) ? 0.44 : 0.48,
+      opacity: lineRun || lineActive ? 1 : 0.48,
     }}>
       {renderRow({ row: { ...line, text, translation }, label: index + 1, key: lineKey })}
       {hasScope && (
@@ -1264,8 +690,6 @@ function FuncsCodeBlock({
   translations,
   tokens,
   definitions,
-  subgoals,
-  activeSubgoal = null,
   activeLine = null,
   runThroughLine = null,
   activeKey = null,
@@ -1277,27 +701,7 @@ function FuncsCodeBlock({
 }) {
   const lines = funcsNormalizeCodeLines(code, translations);
   const tokenSpec = funcsNormalizeTokenSpec(code, tokens, definitions);
-  const normalizedSubgoals = funcsNormalizeSubgoals(code?.subgoals, subgoals);
   const runKeySet = runKeys ? (runKeys instanceof Set ? runKeys : new Set(runKeys)) : null;
-  const frameMode = code?.layout === 'frame'
-    || code?.variant === 'frame'
-    || code?.treatment === 'frame'
-    || code?.codeWindow === 'frame'
-    || Array.isArray(code?.frame);
-
-  if (frameMode) {
-    return (
-      <FuncsFrameCodeWindow
-        code={code}
-        lines={lines}
-        subgoals={normalizedSubgoals}
-        frame={code?.frame}
-        activeSubgoal={activeSubgoal}
-        activeKey={activeKey}
-        activeLine={activeLine}
-      />
-    );
-  }
 
   return (
     <React.Fragment>
@@ -1318,8 +722,6 @@ function FuncsCodeBlock({
             run={runKeySet ? Boolean(keyedRun) : runThroughLine == null || i <= runThroughLine}
             activeKey={activeKey}
             runKeys={runKeySet}
-            subgoals={normalizedSubgoals}
-            activeSubgoal={activeSubgoal}
             expanded={expandable ? expandedLine : null}
             onToggle={expandable ? (key) => onToggleLine?.(key) : null}
             onDef={onDefinition}
@@ -1580,8 +982,6 @@ function FuncsMemoryStatePanel({ state }) {
               <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, color: '#94a3b8', fontWeight: 600 }}>{item.type}</span>
               {item.ref ? (
                 <FuncsMemoryRefChip refId={item.ref} addr={item.addr} label={item.label} active={item.active || item.isNew} />
-              ) : item.fields ? (
-                <FuncsMemoryFieldsInline fields={item.fields} highlight={item.highlight || []} />
               ) : (
                 <span style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -1780,12 +1180,6 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
   }
 
   const current = detail.steps[sub];
-  const subgoals = funcsNormalizeSubgoals(detail.subgoals);
-  const goals = funcsNormalizeGoals(detail.goals);
-  const currentSubgoalId = funcsSubgoalId(current.subgoal || current.sg);
-  const currentSubgoal = currentSubgoalId ? subgoals[currentSubgoalId] : null;
-  const currentGoalId = funcsResolveGoalId(current.goal, goals) || funcsGoalIdForSubgoal(currentSubgoal, goals);
-  const currentGoal = goals[currentGoalId]?.label || currentGoalId;
   const hasStructuredTraceState = Array.isArray(current.stack) || Array.isArray(current.heap);
   const btnBase = {
     border: '1px solid #cbd5e1',
@@ -1798,67 +1192,6 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   };
-  const stepControls = (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 7,
-      padding: '8px 0 0',
-      borderTop: '1px solid #f1f5f9',
-      background: '#fff',
-    }}>
-      <button
-        type="button"
-        aria-label="Previous code step"
-        disabled={sub === 0}
-        onClick={() => setSub(sub - 1)}
-        style={{ ...btnBase, opacity: sub === 0 ? 0.35 : 1, cursor: sub === 0 ? 'default' : 'pointer' }}
-      >
-        Prev
-      </button>
-      <div style={{ flex: 1, display: 'flex', gap: 3 }}>
-        {Array.from({ length: maxSub + 1 }).map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Go to code step ${i + 1}`}
-            onClick={() => setSub(i)}
-            style={{
-              flex: 1,
-              height: 6,
-              border: 'none',
-              padding: 0,
-              borderRadius: 2,
-              background: i === sub ? '#f59e0b' : i < sub ? '#92400e' : '#e2e8f0',
-              cursor: 'pointer',
-            }}
-          />
-        ))}
-      </div>
-      <span style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 10,
-        color: '#94a3b8',
-        whiteSpace: 'nowrap',
-      }}>{sub + 1}/{maxSub + 1}</span>
-      <button
-        type="button"
-        aria-label="Next code step"
-        disabled={sub === maxSub}
-        onClick={() => setSub(sub + 1)}
-        style={{
-          ...btnBase,
-          border: 'none',
-          background: '#f59e0b',
-          color: '#fff',
-          opacity: sub === maxSub ? 0.35 : 1,
-          cursor: sub === maxSub ? 'default' : 'pointer',
-        }}
-      >
-        Next
-      </button>
-    </div>
-  );
 
   return (
     <div style={{
@@ -1880,7 +1213,7 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
       }}>
         <div>
           <div style={{ fontSize: 9.5, fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            {detail.kicker || 'Code Stepper'}
+            Loop Stepper
           </div>
           <div style={{ fontSize: 12.5, color: '#1e293b', fontWeight: 800 }}>{detail.title}</div>
         </div>
@@ -1891,7 +1224,7 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
             color: '#92400e',
             background: '#fff7ed',
           }}>
-            Exit code stepper
+            Exit loop stepper
           </button>
         )}
       </div>
@@ -1950,10 +1283,6 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
           </div>
           <div>{current.note}</div>
         </div>
-        {Object.keys(subgoals).length > 0 && (
-          <FuncsSubgoalNowPanel subgoal={currentSubgoal} goal={currentGoal} />
-        )}
-        {stepControls}
         <div style={{
           display: 'grid',
           gap: 10,
@@ -1975,6 +1304,58 @@ function FuncsLoopStepperDetail({ detail, currentStep = 0, onStepChange, onClose
             <FuncsConsole lines={current.console || []} />
           </section>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <button
+            type="button"
+            aria-label="Previous loop step"
+            disabled={sub === 0}
+            onClick={() => setSub(sub - 1)}
+            style={{ ...btnBase, opacity: sub === 0 ? 0.35 : 1, cursor: sub === 0 ? 'default' : 'pointer' }}
+          >
+            Prev
+          </button>
+          <div style={{ flex: 1, display: 'flex', gap: 3 }}>
+            {Array.from({ length: maxSub + 1 }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to loop step ${i + 1}`}
+                onClick={() => setSub(i)}
+                style={{
+                  flex: 1,
+                  height: 6,
+                  border: 'none',
+                  padding: 0,
+                  borderRadius: 2,
+                  background: i === sub ? '#f59e0b' : i < sub ? '#92400e' : '#e2e8f0',
+                  cursor: 'pointer',
+                }}
+              />
+            ))}
+          </div>
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            color: '#94a3b8',
+            whiteSpace: 'nowrap',
+          }}>{sub + 1}/{maxSub + 1}</span>
+          <button
+            type="button"
+            aria-label="Next loop step"
+            disabled={sub === maxSub}
+            onClick={() => setSub(sub + 1)}
+            style={{
+              ...btnBase,
+              border: 'none',
+              background: '#f59e0b',
+              color: '#fff',
+              opacity: sub === maxSub ? 0.35 : 1,
+              cursor: sub === maxSub ? 'default' : 'pointer',
+            }}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1985,6 +1366,7 @@ function FuncsFullExamplePage({ sequence, lesson }) {
   const header = fullExample.header;
   const step = sequence?.currentStep ?? 0;
   const [expandedLine, setExpandedLine] = React.useState(null);
+  const [activeDef, setActiveDef] = React.useState(null);
   const [showEval, setShowEval] = React.useState(false);
   const [showLoopTrace, setShowLoopTrace] = React.useState(false);
   const [loopTraceStep, setLoopTraceStep] = React.useState(0);
@@ -2005,14 +1387,6 @@ function FuncsFullExamplePage({ sequence, lesson }) {
     ? loopTraceSteps[Math.min(loopTraceStep, Math.max(loopTraceSteps.length - 1, 0))]
     : null;
   const codeActiveKey = activeLoopTraceStep?.rowKey || activeKey;
-  const { goals, subgoals } = funcsNormalizeGoalSubgoalModel(fullExample, state);
-  const activeSubgoalId = funcsSubgoalId(
-    activeLoopTraceStep?.subgoal || activeLoopTraceStep?.sg || state.subgoal || activeStep?.subgoal || activeStep?.sg,
-  );
-  const activeSubgoal = activeSubgoalId ? subgoals[activeSubgoalId] : null;
-  const activeGoalId = funcsResolveGoalId(activeLoopTraceStep?.goal || state.goal || activeStep?.goal || activeStep?.goalFocus, goals) || funcsGoalIdForSubgoal(activeSubgoal, goals);
-  const activeGoal = activeGoalId ? goals[activeGoalId] || activeGoalId : null;
-  const codePaneGoalFocusId = !codeActiveKey && !activeSubgoalId ? funcsResolveGoalId(activeStep?.goalFocus, goals) : null;
   const codeRunKeys = activeLoopTraceStep
     ? new Set(loopTraceSteps
       .slice(0, Math.min(loopTraceStep + 1, loopTraceSteps.length))
@@ -2090,27 +1464,21 @@ function FuncsFullExamplePage({ sequence, lesson }) {
         gridTemplateColumns: showEval ? '34% 66%' : '55% 45%',
       }}>
         <div className="funcs-full-example-code-pane" style={{ borderRight: '1px solid #e2e6ee', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          {Object.keys(goals).length > 0 ? (
-            <FuncsCodeGoalHeader goals={goals} activeGoal={codePaneGoalFocusId} />
-          ) : (
-            <div style={{ padding: '10px 18px', borderBottom: '1px solid #edf1f7' }}>
-              <div style={{
-                fontSize: 9.5, fontWeight: 800, textTransform: 'uppercase',
-                letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 4,
-              }}>{header.programLabel}</div>
-              <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.35 }}>
-                {header.programNote}
-              </div>
+          <div style={{ padding: '10px 18px', borderBottom: '1px solid #edf1f7' }}>
+            <div style={{
+              fontSize: 9.5, fontWeight: 800, textTransform: 'uppercase',
+              letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 4,
+            }}>{header.programLabel}</div>
+            <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.35 }}>
+              {header.programNote}
             </div>
-          )}
+          </div>
           <div style={{ flex: 1, overflow: 'auto', paddingTop: 8 }}>
             <FuncsCodeBlock
               code={fullExample.code}
               translations={fullExample.translations}
               tokens={fullExample.tokens}
               definitions={fullExample.definitions}
-              subgoals={subgoals}
-              activeSubgoal={activeSubgoalId}
               activeLine={activeLine}
               runThroughLine={activeLine}
               activeKey={codeActiveKey}
@@ -2118,7 +1486,18 @@ function FuncsFullExamplePage({ sequence, lesson }) {
               expandable
               expandedLine={expandedLine}
               onToggleLine={(key) => setExpandedLine(prev => prev === key ? null : key)}
+              onDefinition={setActiveDef}
             />
+          </div>
+          <div style={{
+            minHeight: 38, padding: '8px 18px', borderTop: '1px solid #e2e6ee',
+            background: '#fbfcfe', fontSize: 12.5, color: '#475569',
+          }}>
+            {activeDef ? (
+              <span><strong style={{ color: '#1e293b' }}>{activeDef}:</strong> {tokenSpec[activeDef]?.description}</span>
+            ) : (
+              <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Hover a highlighted token to see its definition.</span>
+            )}
           </div>
         </div>
         <div style={{ minHeight: 0, display: 'flex', flexDirection: 'column', background: '#fbfcfe' }}>
@@ -2168,7 +1547,7 @@ function FuncsFullExamplePage({ sequence, lesson }) {
                     fontSize: 11.5, fontWeight: 800, cursor: 'pointer',
                     animation: 'funcsEvalPromptGlow 2.25s ease-in-out infinite',
                   }}>
-                  {state.loopTrace.triggerLabel || 'Show code steps'}
+                  Show loop steps
                 </button>
               </div>
             )}
@@ -2186,9 +1565,6 @@ function FuncsFullExamplePage({ sequence, lesson }) {
               />
             ) : (
               <React.Fragment>
-                {fullExample.showSubgoalPanel && Object.keys(subgoals).length > 0 && (
-                  <FuncsSubgoalNowPanel subgoal={activeSubgoal} goal={activeGoal?.label || activeGoalId} />
-                )}
                 <div>
                   <div style={{
                     fontSize: 9.5, fontWeight: 800, color: '#94a3b8',
@@ -4163,20 +3539,11 @@ Object.assign(window, {
   funcsValidateLoopTrace,
   FuncsStackedEvaluationDetail,
   FuncsLoopStepperDetail,
-  FuncsSubgoalTag,
-  FuncsSubgoalNowPanel,
-  funcsNormalizeSubgoals,
-  FuncsCodeGoalHeader,
-  funcsNormalizeGoals,
-  funcsResolveGoalId,
-  funcsGoalIdForSubgoal,
-  funcsNormalizeGoalSubgoalModel,
   funcsNormalizeCodeLines,
   funcsNormalizeTokenSpec,
   funcsNormalizeSyntaxGroups,
   FuncsSyntaxDrawer,
   FuncsTokenizedLine,
-  FuncsFrameCodeWindow,
   FuncsCodeBlock,
   FuncsConsole,
   FuncsMemoryStatePanel,

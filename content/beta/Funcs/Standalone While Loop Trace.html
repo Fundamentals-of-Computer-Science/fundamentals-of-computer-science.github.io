@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Standalone While Loop Trace</title>
+<style>
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
+body {
+  background: #f4f1eb;
+  color: #172033;
+  font-family: "Source Sans 3", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button { font: inherit; }
+.page {
+  min-height: 100vh;
+  padding: 18px;
+}
+.shell {
+  min-height: calc(100vh - 36px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #fff;
+  border: 1px solid #d8d2c8;
+  box-shadow: 0 10px 30px rgba(43,37,30,0.12);
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #fbfcfe;
+}
+.eyebrow {
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 2px 0 0;
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+.topbar p {
+  max-width: 720px;
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(380px, 56%) minmax(320px, 44%);
+}
+.pane {
+  min-height: 0;
+  overflow: auto;
+}
+.code-pane {
+  border-right: 1px solid #e2e6ee;
+  background: #fff;
+}
+.state-pane {
+  background: #fbfcfe;
+}
+.goal {
+  padding: 14px 18px;
+  border-bottom: 1px solid #edf1f7;
+}
+.goal-card {
+  border: 1px solid #dbe1ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 10px 12px;
+}
+.quiet-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.quiet-label .mark {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 11px;
+}
+.goal-card p {
+  margin: 6px 0 0 30px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.code-card {
+  margin: 16px 18px;
+  border: 1px solid #dfe5ee;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #fff;
+}
+.subgoal {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px 4px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.subgoal .tag {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 18px;
+  border: 1px solid #dbe1ea;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.subgoal .hint {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #94a3b8;
+}
+.code-row {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 9px;
+  align-items: start;
+  min-height: 36px;
+  margin: 0 10px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.35;
+  transform: translateX(0);
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.code-row.active {
+  border-color: #94a3b8;
+  border-left-color: #2563eb;
+  background: #f8fbff;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.08);
+  transform: translateX(4px);
+}
+.code-row.active.step-pop {
+  animation: rowPop 260ms ease;
+}
+.num {
+  color: #94a3b8;
+  text-align: right;
+  user-select: none;
+}
+.indent-1 { padding-left: 26px; }
+.kw { color: #7c3aed; font-weight: 800; }
+.type { color: #2563eb; font-weight: 800; }
+.fn { color: #0f766e; font-weight: 800; }
+.name { color: #1e40af; font-weight: 800; }
+.val { color: #15803d; font-weight: 800; }
+.op { color: #b45309; font-weight: 800; }
+.brace { color: #475569; font-weight: 800; }
+.status {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #fff;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.chip {
+  flex: 0 0 auto;
+  border-radius: 4px;
+  padding: 3px 8px;
+  color: #047857;
+  background: #d1fae5;
+  font-size: 11px;
+  font-weight: 900;
+}
+.status p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.status.bump .chip {
+  animation: chipPop 260ms ease;
+}
+.panel-stack {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+.panel-title {
+  margin: 0 0 7px;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.motion-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+  overflow: hidden;
+}
+.motion-panel.motion {
+  animation: panelFlash 320ms ease;
+}
+.loop-cycle {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.loop-node {
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.loop-node.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+  transform: translateY(-3px);
+  animation: nodePulse 420ms ease;
+}
+.loop-note {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.count-rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding-top: 10px;
+}
+.count-rail::before {
+  content: "";
+  position: absolute;
+  top: 23px;
+  right: 12%;
+  left: 12%;
+  height: 3px;
+  border-radius: 999px;
+  background: #dbeafe;
+}
+.count-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  font-weight: 900;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.count-dot.active {
+  border-color: #15803d;
+  background: #dcfce7;
+  color: #166534;
+  transform: scale(1.16);
+  animation: dotPop 300ms ease;
+}
+.memory.motion,
+.console-body.motion {
+  animation: panelFlash 320ms ease;
+}
+.out-token {
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+.out-token.new {
+  animation: printIn 260ms ease;
+}
+.memory {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  background: #fff;
+}
+.memory th,
+.memory td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  font-size: 13px;
+}
+.memory th {
+  color: #94a3b8;
+  background: #f8fafc;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.memory tr:last-child td { border-bottom: 0; }
+.empty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+  color: #94a3b8;
+  background: #fff;
+  font-style: italic;
+}
+.console {
+  overflow: hidden;
+  border-radius: 8px;
+  background: #171524;
+  color: #f8fafc;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+.console-head {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: #cbd5e1;
+  font-size: 11px;
+}
+.console-body {
+  min-height: 58px;
+  padding: 14px 12px;
+  color: #f8fafc;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+.muted { color: #94a3b8; font-style: italic; }
+.footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 18px;
+  border-top: 1px solid #e2e6ee;
+  background: #fff;
+}
+.progress {
+  display: grid;
+  gap: 5px;
+}
+.progress-text {
+  color: #64748b;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+.bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #2563eb;
+  transition: width 220ms ease;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+}
+.controls button {
+  min-width: 112px;
+  min-height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  cursor: pointer;
+}
+.controls button.primary {
+  border-color: #1d4ed8;
+  background: #2563eb;
+  color: #fff;
+}
+.controls button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+@keyframes rowPop {
+  0% { transform: translateX(0); }
+  55% { transform: translateX(8px); }
+  100% { transform: translateX(4px); }
+}
+@keyframes chipPop {
+  0% { transform: scale(0.96); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes nodePulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.22); }
+  100% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+}
+@keyframes dotPop {
+  0% { transform: scale(0.86); }
+  65% { transform: scale(1.2); }
+  100% { transform: scale(1.16); }
+}
+@keyframes panelFlash {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.20); }
+  100% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+}
+@keyframes printIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+@media (max-width: 860px) {
+  .page { padding: 10px; }
+  .shell { min-height: calc(100vh - 20px); }
+  .topbar { align-items: flex-start; flex-direction: column; }
+  .grid { grid-template-columns: 1fr; }
+  .code-pane { border-right: 0; border-bottom: 1px solid #e2e6ee; }
+  .footer { grid-template-columns: 1fr; }
+  .controls { justify-content: stretch; }
+  .controls button { flex: 1 1 0; min-width: 0; }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="shell" aria-label="Standalone while loop trace">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Standalone example</div>
+        <h1>While Loops And Progress</h1>
+      </div>
+      <p>Use the controls to trace the repeated loop cycle: initialize state, check the condition, run the body, update progress, check again, and leave the loop.</p>
+    </header>
+
+    <section class="grid">
+      <div class="pane code-pane">
+        <div class="goal">
+          <div class="goal-card">
+            <div class="quiet-label"><span class="mark">A</span> Trace the loop control cycle</div>
+            <p>Follow the initialization, condition checks, body work, progress updates, and exit as one complete control-flow goal.</p>
+          </div>
+        </div>
+        <div class="code-card" id="codeCard"></div>
+      </div>
+
+      <div class="pane state-pane">
+        <div class="status">
+          <span class="chip" id="statusLabel">Before execution</span>
+          <p id="statusDesc">count does not exist yet.</p>
+        </div>
+        <div class="panel-stack">
+          <section>
+            <h2 class="panel-title">Loop motion</h2>
+            <div class="motion-panel" id="motionPanel">
+              <div class="loop-cycle" aria-label="Loop control cycle">
+                <div class="loop-node" data-phase="init">Initialize</div>
+                <div class="loop-node" data-phase="check">Check</div>
+                <div class="loop-node" data-phase="work">Body</div>
+                <div class="loop-node" data-phase="advance">Advance</div>
+                <div class="loop-node" data-phase="after">Exit</div>
+              </div>
+              <div class="count-rail" aria-label="count value">
+                <span class="count-dot" data-count="0">0</span>
+                <span class="count-dot" data-count="1">1</span>
+                <span class="count-dot" data-count="2">2</span>
+                <span class="count-dot" data-count="3">3</span>
+              </div>
+              <div class="loop-note" id="motionNote">No loop state has been created yet.</div>
+            </div>
+          </section>
+          <section>
+            <h2 class="panel-title">State</h2>
+            <div id="memoryPanel"></div>
+          </section>
+          <section>
+            <h2 class="panel-title">Console</h2>
+            <div class="console">
+              <div class="console-head">stdout</div>
+              <div class="console-body" id="consolePanel"><span class="muted">(no output)</span></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="progress" aria-live="polite">
+        <div class="progress-text" id="progressText">before execution · 0/12</div>
+        <div class="track"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls">
+        <button id="backBtn" type="button">Previous</button>
+        <button id="restartBtn" type="button">Restart</button>
+        <button id="nextBtn" type="button" class="primary">Next</button>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<script>
+const subgoals = {
+  init: { n: "a", label: "Establish the initial state", hint: "" },
+  check: { n: "b", label: "Evaluate the continuation check", hint: "encloses the block below" },
+  work: { n: "c", label: "Execute the core work", hint: "each pass" },
+  advance: { n: "d", label: "Advance the loop state", hint: "each pass" },
+  after: { n: "e", label: "Continue after the loop", hint: "" },
+};
+
+const codeRows = [
+  { key: "init", subgoal: "init", num: "1", html: '<span class="type">int</span> count <span class="op">=</span> <span class="val">0</span>;' },
+  { key: "check", subgoal: "check", num: "2", html: '<span class="kw">while</span> (count <span class="op">&lt;</span> <span class="val">3</span>) <span class="brace">{</span>' },
+  { key: "work", subgoal: "work", num: "3", indent: 1, html: '<span class="fn">Console.WriteLine</span>(count);' },
+  { key: "advance", subgoal: "advance", num: "4", indent: 1, html: 'count <span class="op">=</span> count <span class="op">+</span> <span class="val">1</span>;' },
+  { key: "close", subgoal: "advance", num: "5", html: '<span class="brace">}</span>' },
+  { key: "after", subgoal: "after", num: "6", html: '<span class="fn">Console.WriteLine</span>(<span class="val">"done"</span>);' },
+];
+
+const steps = [
+  { label: "Before execution", desc: "count does not exist yet.", row: null, memory: [], console: [] },
+  { label: "initialize count", desc: "Create count and start it at 0 before the first condition check.", row: "init", memory: [{ name: "count", type: "int", value: "0" }], console: [] },
+  { label: "check condition: count is 0", desc: "Since 0 is less than 3, the loop body runs.", row: "check", memory: [{ name: "count", type: "int", value: "0" }], console: [] },
+  { label: "body: print count", desc: "Print the current value of count.", row: "work", memory: [{ name: "count", type: "int", value: "0" }], console: ["0"] },
+  { label: "body: update count", desc: "Add 1. The next check sees count as 1.", row: "advance", memory: [{ name: "count", type: "int", value: "1" }], console: ["0"] },
+  { label: "check condition: count is 1", desc: "Since 1 is less than 3, the body runs again.", row: "check", memory: [{ name: "count", type: "int", value: "1" }], console: ["0"] },
+  { label: "body: print count", desc: "Print the current value before it changes.", row: "work", memory: [{ name: "count", type: "int", value: "1" }], console: ["0", "1"] },
+  { label: "body: update count", desc: "Add 1 again. The next check sees count as 2.", row: "advance", memory: [{ name: "count", type: "int", value: "2" }], console: ["0", "1"] },
+  { label: "check condition: count is 2", desc: "Since 2 is still less than 3, the body runs one more time.", row: "check", memory: [{ name: "count", type: "int", value: "2" }], console: ["0", "1"] },
+  { label: "body: print count", desc: "Print the last value that satisfies the condition.", row: "work", memory: [{ name: "count", type: "int", value: "2" }], console: ["0", "1", "2"] },
+  { label: "body: update count", desc: "Add 1. The next condition check sees count as 3.", row: "advance", memory: [{ name: "count", type: "int", value: "3" }], console: ["0", "1", "2"] },
+  { label: "check condition: count is 3", desc: "Since 3 is not less than 3, skip the body and continue after the loop.", row: "check", memory: [{ name: "count", type: "int", value: "3" }], console: ["0", "1", "2"] },
+  { label: "after loop", desc: "The loop is finished, so execution moves to the next line after the block.", row: "after", memory: [{ name: "count", type: "int", value: "3" }], console: ["0", "1", "2", "done"] },
+];
+
+let stepIndex = 0;
+let previousStepIndex = 0;
+let previousConsoleLength = 0;
+
+function restartAnimation(el, className) {
+  if (!el) return;
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+}
+
+function renderCode() {
+  const card = document.getElementById("codeCard");
+  card.innerHTML = "";
+  let lastSubgoal = null;
+  codeRows.forEach((row) => {
+    if (row.subgoal !== lastSubgoal) {
+      const sg = subgoals[row.subgoal];
+      const sgEl = document.createElement("div");
+      sgEl.className = "subgoal";
+      sgEl.innerHTML = `<span class="tag">${sg.n}</span><span>${sg.label}</span><span class="hint">${sg.hint || ""}</span>`;
+      card.appendChild(sgEl);
+      lastSubgoal = row.subgoal;
+    }
+    const rowEl = document.createElement("div");
+    rowEl.className = `code-row${row.indent ? " indent-1" : ""}`;
+    rowEl.dataset.key = row.key;
+    rowEl.innerHTML = `<span class="num">${row.num}</span><code>${row.html}</code>`;
+    card.appendChild(rowEl);
+  });
+}
+
+function renderMemory(memory) {
+  const panel = document.getElementById("memoryPanel");
+  if (!memory.length) {
+    panel.innerHTML = '<div class="empty">No bindings yet.</div>';
+    return;
+  }
+  const rows = memory.map(item => `<tr><td><strong>${item.name}</strong></td><td>${item.type}</td><td>${item.value}</td></tr>`).join("");
+  panel.innerHTML = `<table class="memory"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody>${rows}</tbody></table>`;
+  restartAnimation(panel.querySelector(".memory"), "motion");
+}
+
+function phaseForStep(step) {
+  if (!step.row) return "none";
+  if (step.row === "close") return "advance";
+  return step.row;
+}
+
+function renderMotion(step) {
+  const phase = phaseForStep(step);
+  const count = step.memory[0]?.value || "";
+  document.querySelectorAll(".loop-node").forEach(node => {
+    node.classList.toggle("active", node.dataset.phase === phase);
+  });
+  document.querySelectorAll(".count-dot").forEach(dot => {
+    dot.classList.toggle("active", dot.dataset.count === count);
+  });
+  document.getElementById("motionNote").textContent = step.desc;
+  restartAnimation(document.getElementById("motionPanel"), "motion");
+}
+
+function renderConsole(step, movingForward) {
+  const panel = document.getElementById("consolePanel");
+  if (!step.console.length) {
+    panel.innerHTML = '<span class="muted">(no output)</span>';
+    previousConsoleLength = 0;
+    return;
+  }
+  panel.innerHTML = step.console.map((item, index) => {
+    const newClass = movingForward && index >= previousConsoleLength ? " new" : "";
+    return `<span class="out-token${newClass}">${item}</span>`;
+  }).join(" ");
+  previousConsoleLength = step.console.length;
+  restartAnimation(panel, "motion");
+}
+
+function render() {
+  const step = steps[stepIndex];
+  const movingForward = stepIndex > previousStepIndex;
+  document.querySelectorAll(".code-row").forEach(row => {
+    const active = row.dataset.key === step.row;
+    row.classList.toggle("active", active);
+    row.classList.remove("step-pop");
+    if (active) {
+      void row.offsetWidth;
+      row.classList.add("step-pop");
+    }
+  });
+  document.getElementById("statusLabel").textContent = step.label;
+  document.getElementById("statusDesc").textContent = step.desc;
+  restartAnimation(document.querySelector(".status"), "bump");
+  renderMotion(step);
+  renderMemory(step.memory);
+  renderConsole(step, movingForward);
+  document.getElementById("progressText").textContent = `${step.label} · ${stepIndex}/${steps.length - 1}`;
+  document.getElementById("progressBar").style.width = `${(stepIndex / (steps.length - 1)) * 100}%`;
+  document.getElementById("backBtn").disabled = stepIndex === 0;
+  document.getElementById("nextBtn").textContent = stepIndex === steps.length - 1 ? "Done" : "Next";
+  document.getElementById("nextBtn").disabled = stepIndex === steps.length - 1;
+  previousStepIndex = stepIndex;
+}
+
+document.getElementById("backBtn").addEventListener("click", () => {
+  stepIndex = Math.max(0, stepIndex - 1);
+  render();
+});
+document.getElementById("nextBtn").addEventListener("click", () => {
+  stepIndex = Math.min(steps.length - 1, stepIndex + 1);
+  render();
+});
+document.getElementById("restartBtn").addEventListener("click", () => {
+  stepIndex = 0;
+  previousConsoleLength = 0;
+  render();
+});
+
+renderCode();
+render();
+</script>
+</body>
+</html>

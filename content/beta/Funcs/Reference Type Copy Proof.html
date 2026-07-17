@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Recursive Numeric Methods - Lesson Sequence</title>
+<title>Class Reference Semantics - Component Proof</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
@@ -13,28 +13,20 @@
 <style>
 * { box-sizing: border-box; margin: 0; }
 html, body, #root { width: 100%; height: 100%; }
-body {
-  background: #f4f1eb;
-  font-family: "Source Sans 3", sans-serif;
-}
+body { background: #f4f1eb; font-family: "Source Sans 3", sans-serif; }
 </style>
 
 <script type="text/babel" src="tb-core.jsx"></script>
 <script type="text/babel" src="tb-quiz.jsx"></script>
-<script type="text/babel" src="tb-cycle-components.jsx?v=simplify-loop-nav-1"></script>
-<script type="text/babel" src="lesson-kit/concept-lesson-kit.jsx?v=simplify-loop-nav-1"></script>
-<script type="text/babel" src="tb-ch2-sequence.jsx?v=simplify-loop-nav-1"></script>
+<script type="text/babel" src="tb-cycle-components.jsx?v=copy-semantics-proof-1"></script>
+<script type="text/babel" src="lesson-kit/concept-lesson-kit.jsx?v=copy-semantics-proof-1"></script>
+<script type="text/babel" src="tb-grammar-proof-sequence.jsx?v=copy-semantics-proof-1"></script>
 <script type="text/babel">
-const { Ch2RecursionSequence } = window;
+const { ReferenceTypeCopyProofSequence } = window;
 
 function App() {
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      padding: 18,
-      background: '#f4f1eb',
-    }}>
+    <div style={{ width: '100%', height: '100%', padding: 18, background: '#f4f1eb' }}>
       <div style={{
         width: '100%',
         height: '100%',
@@ -43,7 +35,7 @@ function App() {
         background: '#fff',
         overflow: 'hidden',
       }}>
-        <Ch2RecursionSequence />
+        <ReferenceTypeCopyProofSequence />
       </div>
     </div>
   );
