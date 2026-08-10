@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="Controlled comparison of the FunCS lesson-flow control, redesign-existing-projects revision, and Impeccable revision."/>
+<title>Lesson Flow Design Skill Comparison</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #18202b;
+  --muted: #5f6b7a;
+  --line: #cfd5dc;
+  --surface: #ffffff;
+  --ground: #eef0f2;
+  --active: #234f7d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100dvh; background: var(--ground); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, a { font: inherit; }
+button:focus-visible, a:focus-visible { outline: 3px solid #79a8d8; outline-offset: 3px; }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 4; transform: translateY(-160%); background: var(--ink); color: #fff; padding: 9px 12px; }
+.skip-link:focus { transform: translateY(0); }
+.page { width: min(1880px, 100%); margin: 0 auto; padding: 20px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 520px); gap: 28px; align-items: end; margin-bottom: 16px; }
+h1 { max-width: 20ch; margin: 0 0 8px; font-size: clamp(27px, 3vw, 44px); line-height: 1.05; letter-spacing: -.025em; text-wrap: balance; }
+.lede, .method-note { margin: 0; color: var(--muted); line-height: 1.5; }
+.lede { max-width: 72ch; }
+.method-note { border-left: 1px solid #9aa4af; padding-left: 14px; font-size: 13px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; border: 1px solid var(--line); background: var(--surface); padding: 12px; margin-bottom: 14px; }
+.control-group { display: grid; gap: 5px; }
+.control-group > span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+.button-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.control-button, .open-link { min-height: 38px; border: 1px solid #b8c0c9; border-radius: 5px; background: #fff; color: #273343; padding: 7px 11px; cursor: pointer; text-decoration: none; transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease; }
+.control-button:hover, .open-link:hover { background: #f2f5f7; border-color: #8793a0; }
+.control-button:active, .open-link:active { transform: translateY(1px); }
+.control-button[aria-pressed="true"] { border-color: var(--active); background: var(--active); color: #fff; }
+.open-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.comparison-scroll { overflow-x: auto; padding: 1px 1px 12px; }
+.comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.comparison[data-mode="all"] { grid-template-columns: repeat(3, minmax(520px, 1fr)); min-width: 1584px; }
+.panel { min-width: 0; border: 1px solid #bfc6ce; background: var(--surface); }
+.panel-head { display: flex; align-items: baseline; gap: 10px; min-height: 48px; border-bottom: 1px solid var(--line); padding: 10px 12px; }
+.arm-label { flex: 0 0 auto; border: 1px solid #8d98a4; border-radius: 3px; padding: 2px 6px; color: #3f4b59; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.panel-head strong { font-size: 14px; }
+.panel-head a { margin-left: auto; color: #315f8d; font-size: 12px; }
+.frame-stage { display: flex; justify-content: center; min-height: 700px; overflow: auto; background: #dfe3e7; }
+.frame-stage iframe { display: block; width: 100%; min-width: 0; height: 720px; border: 0; background: #fff; }
+.comparison[data-viewport="phone"] .frame-stage { padding: 16px; }
+.comparison[data-viewport="phone"] iframe { width: 390px; min-width: 390px; height: 844px; border: 1px solid #9ba5b0; }
+.comparison[data-viewport="phone"] .panel { min-width: 424px; }
+.comparison[data-viewport="phone"][data-mode="pair"] { grid-template-columns: repeat(2, minmax(424px, 1fr)); min-width: 860px; }
+.comparison[data-viewport="phone"][data-mode="all"] { grid-template-columns: repeat(3, minmax(424px, 1fr)); min-width: 1296px; }
+.criteria { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.criteria + .criteria { margin-top: 8px; }
+.criteria a { color: #315f8d; }
+@media (max-width: 900px) {
+  .page { padding: 12px; }
+  .intro { grid-template-columns: 1fr; gap: 12px; }
+  .open-links { width: 100%; margin-left: 0; }
+  .comparison[data-mode="pair"] { grid-template-columns: 1fr; }
+  .comparison[data-viewport="desktop"][data-mode="pair"] { min-width: 0; }
+}
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#comparison">Skip to comparison</a>
+  <main class="page">
+    <header class="intro">
+      <div>
+        <h1>Lesson flow design-skill comparison</h1>
+        <p class="lede">The lesson data and interaction contract stay fixed. Use the controls to compare the frozen pre-promotion baseline against two independently produced visual revisions.</p>
+      </div>
+      <p class="method-note"><strong>Method:</strong> the historical control is frozen in dedicated baseline wrappers. One revision uses only <code>redesign-existing-projects</code>; the other uses the official Impeccable workflow beginning with <code>init</code> and <code>critique</code>.</p>
+    </header>
+
+    <section class="controls" aria-label="Comparison controls">
+      <div class="control-group">
+        <span>Lesson</span>
+        <div class="button-row">
+          <button class="control-button" type="button" data-lesson="ch24" aria-pressed="true">Ch2.4 recursion</button>
+          <button class="control-button" type="button" data-lesson="ch14" aria-pressed="false">Ch1.4 branching</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span>Experiment</span>
+        <div class="button-row">
+          <button class="control-button" type="button" data-arm="redesign" aria-pressed="true">Redesign skill</button>
+          <button class="control-button" type="button" data-arm="impeccable" aria-pressed="false">Impeccable</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span>Arrangement</span>
+        <div class="button-row">
+          <button class="control-button" type="button" data-mode="pair" aria-pressed="true">Control + one</button>
+          <button class="control-button" type="button" data-mode="all" aria-pressed="false">All three</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span>Viewport</span>
+        <div class="button-row">
+          <button class="control-button" type="button" data-viewport="desktop" aria-pressed="true">Fluid</button>
+          <button class="control-button" type="button" data-viewport="phone" aria-pressed="false">390 px</button>
+        </div>
+      </div>
+      <nav class="open-links" aria-label="Open selected pages">
+        <a class="open-link" data-open="control" href="#">Open control</a>
+        <a class="open-link" data-open="experiment" href="#">Open selected revision</a>
+      </nav>
+    </section>
+
+    <div class="comparison-scroll">
+      <section id="comparison" class="comparison" data-mode="pair" data-viewport="desktop" aria-label="Lesson design comparison">
+        <article class="panel" data-panel="control">
+          <header class="panel-head"><span class="arm-label">Control</span><strong data-title>Frozen pre-promotion baseline</strong><a data-popout href="#">Open</a></header>
+          <div class="frame-stage"><iframe title="Control lesson"></iframe></div>
+        </article>
+        <article class="panel" data-panel="redesign">
+          <header class="panel-head"><span class="arm-label">Redesign skill</span><strong data-title>Independent revision</strong><a data-popout href="#">Open</a></header>
+          <div class="frame-stage"><iframe title="Redesign-existing-projects lesson"></iframe></div>
+        </article>
+        <article class="panel" data-panel="impeccable" hidden>
+          <header class="panel-head"><span class="arm-label">Impeccable</span><strong data-title>Independent revision</strong><a data-popout href="#">Open</a></header>
+          <div class="frame-stage"><iframe title="Impeccable lesson"></iframe></div>
+        </article>
+      </section>
+    </div>
+    <p class="criteria"><strong>Hold constant:</strong> instructional copy, fixtures, stage order, code and memory states, answer checking, navigation, and viewport. Compare hierarchy, legibility, focus, interaction feedback, density, and the relationship between source code and program state.</p>
+    <p class="criteria"><strong>Method records:</strong> <a data-report="redesign" href="Redesign%20Skill%20Arm%20Rationale.md">redesign-skill audit and rationale</a> · <a data-report="impeccable" href="Impeccable%20Arm%20Rationale.md">Impeccable critique and command sequence</a></p>
+  </main>
+
+<script>
+const localPreview = decodeURIComponent(location.pathname).endsWith('/Lesson Flow Design Skill Comparison.html');
+const reportPaths = localPreview ? {
+  redesign: 'Redesign%20Skill%20Arm%20Rationale.md',
+  impeccable: 'Impeccable%20Arm%20Rationale.md',
+} : {
+  redesign: 'Redesign-Skill-Arm-Rationale.html',
+  impeccable: 'Impeccable-Arm-Rationale.html',
+};
+document.querySelectorAll('[data-report]').forEach(link => { link.href = reportPaths[link.dataset.report]; });
+const paths = localPreview ? {
+  ch24: {
+    control: 'Ch2%204%20Authoring%20Flow%20Baseline.html',
+    redesign: 'Ch2%204%20Redesign%20Skill.html',
+    impeccable: 'Ch2%204%20Impeccable.html',
+  },
+  ch14: {
+    control: 'Ch1%20Branching%20Scope%20Authoring%20Flow%20Baseline.html',
+    redesign: 'Ch1%20Branching%20Scope%20Redesign%20Skill.html',
+    impeccable: 'Ch1%20Branching%20Scope%20Impeccable.html',
+  },
+} : {
+  ch24: {
+    control: 'Ch2-4-Authoring-Flow-Baseline.html',
+    redesign: 'Ch2-4-Redesign-Skill.html',
+    impeccable: 'Ch2-4-Impeccable.html',
+  },
+  ch14: {
+    control: 'Ch1-Branching-Scope-Authoring-Flow-Baseline.html',
+    redesign: 'Ch1-Branching-Scope-Redesign-Skill.html',
+    impeccable: 'Ch1-Branching-Scope-Impeccable.html',
+  },
+};
+
+const state = { lesson: 'ch24', arm: 'redesign', mode: 'pair', viewport: 'desktop' };
+const comparison = document.querySelector('.comparison');
+
+function pressGroup(attribute, value) {
+  document.querySelectorAll(`[${attribute}]`).forEach(button => {
+    button.setAttribute('aria-pressed', String(button.getAttribute(attribute) === value));
+  });
+}
+
+function render() {
+  comparison.dataset.mode = state.mode;
+  comparison.dataset.viewport = state.viewport;
+  pressGroup('data-lesson', state.lesson);
+  pressGroup('data-arm', state.arm);
+  pressGroup('data-mode', state.mode);
+  pressGroup('data-viewport', state.viewport);
+
+  ['control', 'redesign', 'impeccable'].forEach(arm => {
+    const panel = document.querySelector(`[data-panel="${arm}"]`);
+    const path = paths[state.lesson][arm];
+    panel.hidden = state.mode === 'pair' && arm !== 'control' && arm !== state.arm;
+    panel.querySelector('iframe').src = path;
+    panel.querySelector('[data-popout]').href = path;
+  });
+
+  document.querySelector('[data-open="control"]').href = paths[state.lesson].control;
+  document.querySelector('[data-open="experiment"]').href = paths[state.lesson][state.arm];
+  const params = new URLSearchParams(state);
+  history.replaceState(null, '', `${location.pathname}?${params}`);
+}
+
+document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => { state.lesson = button.dataset.lesson; render(); }));
+document.querySelectorAll('[data-arm]').forEach(button => button.addEventListener('click', () => { state.arm = button.dataset.arm; render(); }));
+document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => { state.mode = button.dataset.mode; render(); }));
+document.querySelectorAll('[data-viewport]').forEach(button => button.addEventListener('click', () => { state.viewport = button.dataset.viewport; render(); }));
+
+const initial = new URLSearchParams(location.search);
+if (paths[initial.get('lesson')]) state.lesson = initial.get('lesson');
+if (['redesign', 'impeccable'].includes(initial.get('arm'))) state.arm = initial.get('arm');
+if (['pair', 'all'].includes(initial.get('mode'))) state.mode = initial.get('mode');
+if (['desktop', 'phone'].includes(initial.get('viewport'))) state.viewport = initial.get('viewport');
+render();
+</script>
+</body>
+</html>

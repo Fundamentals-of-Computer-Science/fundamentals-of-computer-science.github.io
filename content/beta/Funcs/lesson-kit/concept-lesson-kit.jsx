@@ -713,10 +713,19 @@ function FuncsCodeLineSource({ text, tokenSpec, onDef }) {
 function funcsTokenPieces(line, tokenSpec) {
   const tokens = Object.keys(tokenSpec || {}).sort((a, b) => b.length - a.length);
   const pieces = [];
+  const isIdentifierCharacter = (character) => /[A-Za-z0-9_]/.test(character || '');
+  const tokenStartsAt = (candidate, index) => {
+    if (!line.startsWith(candidate, index)) return false;
+    const before = line[index - 1];
+    const after = line[index + candidate.length];
+    if (isIdentifierCharacter(candidate[0]) && isIdentifierCharacter(before)) return false;
+    if (isIdentifierCharacter(candidate[candidate.length - 1]) && isIdentifierCharacter(after)) return false;
+    return true;
+  };
   let i = 0;
 
   while (i < line.length) {
-    const token = tokens.find((candidate) => line.startsWith(candidate, i));
+    const token = tokens.find((candidate) => tokenStartsAt(candidate, i));
     if (token) {
       pieces.push({ text: token, token, tone: tokenSpec[token]?.tone });
       i += token.length;
@@ -747,7 +756,7 @@ function funcsFrameCodeHighlight(code) {
   };
   let highlighted = String(code || '').replace(/"[^"]*"/g, match => placeholder(`<span style="color:#047857">${match}</span>`));
   highlighted = highlighted.replace(
-    /\b(int|double|string|bool|void|static|return|if|else|for|while|new|class|Console|WriteLine)\b/g,
+    /\b(int|double|string|bool|void|static|return|if|else|for|while|new|class|Console|WriteLine|Write|ReadLine)\b/g,
     match => placeholder(`<span style="color:#6d28d9;font-weight:500">${match}</span>`),
   );
   highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, match => placeholder(`<span style="color:#1d4ed8">${match}</span>`));

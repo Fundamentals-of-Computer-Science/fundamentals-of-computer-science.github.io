@@ -1,0 +1,772 @@
+:root {
+  --trace-canvas: #111816;
+  --trace-canvas-soft: #1d2723;
+  --trace-paper: #f2f3ee;
+  --trace-paper-deep: #e7eae4;
+  --trace-paper-raised: #fafaf7;
+  --trace-ink: #121916;
+  --trace-ink-soft: #46544e;
+  --trace-ink-faint: #59665f;
+  --trace-line: #bdc6c0;
+  --trace-line-strong: #7b8982;
+  --trace-signal: #cf4325;
+  --trace-signal-deep: #a82f18;
+  --trace-signal-soft: #f6d8cf;
+  --trace-success: #087463;
+  --trace-success-soft: #d8ede7;
+  --trace-warning: #8a5300;
+  --trace-warning-soft: #f3e2bc;
+  --trace-error: #a52d29;
+  --trace-error-soft: #f4d9d6;
+  --trace-focus: #137a67;
+  --trace-font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --trace-mono: "Azeret Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --trace-radius: 0.2rem;
+  --trace-space-1: 0.25rem;
+  --trace-space-2: 0.5rem;
+  --trace-space-3: 0.75rem;
+  --trace-space-4: 1rem;
+  --trace-space-5: 1.5rem;
+  --trace-space-6: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--trace-canvas);
+}
+
+html,
+body,
+main,
+#root {
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--trace-canvas);
+  color: var(--trace-ink);
+  font-family: var(--trace-font);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.impeccable-skip {
+  position: fixed;
+  top: var(--trace-space-3);
+  left: var(--trace-space-3);
+  z-index: 100;
+  transform: translateY(-180%);
+  background: var(--trace-paper-raised);
+  color: var(--trace-ink);
+  border: 2px solid var(--trace-signal);
+  padding: var(--trace-space-2) var(--trace-space-3);
+  font: 700 0.875rem/1.2 var(--trace-font);
+  text-decoration: none;
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.impeccable-skip:focus {
+  transform: translateY(0);
+}
+
+.impeccable-arm {
+  width: 100%;
+  height: 100dvh;
+  min-height: 36rem;
+  padding: clamp(0.5rem, 1.6vw, 1.5rem);
+  background: var(--trace-canvas);
+}
+
+.impeccable-frame {
+  width: min(100%, 96rem);
+  height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--trace-paper);
+  box-shadow: 0 1.5rem 4.5rem rgba(3, 8, 6, 0.42);
+}
+
+/* Replace the shared prototype type defaults with the arm's wayfinding roles. */
+.impeccable-arm,
+.impeccable-arm .flow-stage-frame,
+.impeccable-arm button,
+.impeccable-arm a {
+  font-family: var(--trace-font) !important;
+}
+
+.impeccable-arm code,
+.impeccable-arm pre,
+.impeccable-arm [style*="JetBrains Mono"],
+.impeccable-arm [style*="monospace"] {
+  font-family: var(--trace-mono) !important;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.impeccable-arm [style*="font-size: 8.5px"] {
+  font-size: 0.69rem !important;
+}
+
+.impeccable-arm [style*="font-size: 9px"] {
+  font-size: 0.7rem !important;
+}
+
+.impeccable-arm [style*="font-size: 9.5px"] {
+  font-size: 0.72rem !important;
+}
+
+.impeccable-arm [style*="font-size: 10px"] {
+  font-size: 0.75rem !important;
+}
+
+.impeccable-arm [style*="font-size: 10.5px"] {
+  font-size: 0.78rem !important;
+}
+
+.impeccable-arm [style*="color: rgb(148, 163, 184)"],
+.impeccable-arm [style*="color: #94a3b8"],
+.impeccable-arm [style*="color: rgb(138, 147, 163)"],
+.impeccable-arm [style*="color: #8a93a3"],
+.impeccable-arm [style*="color: rgb(193, 200, 212)"],
+.impeccable-arm [style*="color: #c1c8d4"] {
+  color: var(--trace-ink-faint) !important;
+}
+
+/* Shell and chapter line: the route begins before the lesson stage. */
+.impeccable-frame > div {
+  background: var(--trace-paper) !important;
+  color: var(--trace-ink) !important;
+  font-family: var(--trace-font) !important;
+}
+
+.impeccable-frame > div > div:first-child {
+  height: 3.75rem !important;
+  padding: 0 !important;
+  background: var(--trace-paper-raised) !important;
+  border-bottom: 1px solid var(--trace-line-strong) !important;
+}
+
+.impeccable-arm nav[aria-label="Chapters"] {
+  background: var(--trace-paper-raised) !important;
+  overflow: hidden !important;
+}
+
+.impeccable-arm nav[aria-label="Chapters"] > * {
+  position: relative;
+  min-width: 0 !important;
+  border-color: var(--trace-line) !important;
+  background: transparent !important;
+  color: var(--trace-ink-soft) !important;
+  box-shadow: none !important;
+  transition: background-color 180ms ease-out, color 180ms ease-out !important;
+}
+
+.impeccable-arm nav[aria-label="Chapters"] > *::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 0.55rem;
+  height: 0.55rem;
+  transform: translate(-50%, 50%);
+  border: 2px solid var(--trace-line-strong);
+  border-radius: 50%;
+  background: var(--trace-paper-raised);
+}
+
+.impeccable-arm nav[aria-label="Chapters"] > [aria-current="page"] {
+  background: var(--trace-signal-soft) !important;
+  color: var(--trace-ink) !important;
+  box-shadow: inset 0 -0.2rem 0 var(--trace-signal) !important;
+}
+
+.impeccable-arm nav[aria-label="Chapters"] > [aria-current="page"]::after {
+  border-color: var(--trace-signal);
+  background: var(--trace-signal);
+}
+
+.impeccable-arm nav[aria-label="Chapters"] span {
+  color: inherit !important;
+}
+
+.impeccable-arm [role="dialog"][aria-label="Chapter lesson selector"] {
+  top: 3.75rem !important;
+  left: clamp(0.75rem, 3vw, 3rem) !important;
+  right: clamp(0.75rem, 3vw, 3rem) !important;
+  max-height: calc(100% - 5.25rem);
+  overflow: auto;
+  border-top: 0.25rem solid var(--trace-signal);
+  box-shadow: 0 1rem 2.5rem rgba(17, 24, 22, 0.28);
+}
+
+/* The lesson viewport is one map sheet, not stacked white cards. */
+.impeccable-arm .tb-page-sequence-frame,
+.impeccable-arm .tb-page-sequence-content,
+.impeccable-arm .tb-page-sequence-page,
+.impeccable-arm .flow-stage-frame {
+  background: var(--trace-paper) !important;
+}
+
+.impeccable-arm .flow-stage-frame {
+  color: var(--trace-ink) !important;
+  font-size: 0.95rem !important;
+}
+
+.impeccable-arm .flow-stage-body {
+  width: min(100%, 52rem);
+  max-width: 52rem !important;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 3.5vw, 3.25rem) clamp(1.25rem, 4vw, 3.75rem) 4rem !important;
+  gap: clamp(1.25rem, 2.5vw, 2.25rem) !important;
+}
+
+.impeccable-arm .flow-stage-body > div:first-child {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.impeccable-arm .flow-stage-body > div:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  bottom: 0.15rem;
+  width: 0.75rem;
+  border: 1px solid var(--trace-ink);
+  background: var(--trace-signal);
+}
+
+.impeccable-arm h3 {
+  max-width: 24ch;
+  color: var(--trace-ink) !important;
+  font-size: clamp(1.75rem, 3vw, 2.65rem) !important;
+  font-weight: 650 !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.impeccable-arm h4 {
+  color: var(--trace-ink) !important;
+  font-size: clamp(1.18rem, 2vw, 1.45rem) !important;
+  font-weight: 650 !important;
+  line-height: 1.16 !important;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.impeccable-arm p,
+.impeccable-arm li {
+  color: var(--trace-ink-soft) !important;
+  font-size: 1rem !important;
+  line-height: 1.62 !important;
+  text-wrap: pretty;
+}
+
+/* Goal and quiz are parallel platforms joined by one high-contrast datum. */
+.impeccable-arm .flow-goal-layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(22rem, 0.88fr) !important;
+  background: var(--trace-paper);
+}
+
+.impeccable-arm .flow-rigorous-layout {
+  grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 1.22fr) !important;
+  background: var(--trace-paper);
+}
+
+.impeccable-arm .flow-goal-code,
+.impeccable-arm .flow-rigorous-code {
+  position: relative;
+  border-right: 1px solid var(--trace-ink) !important;
+  background: var(--trace-paper-raised) !important;
+}
+
+.impeccable-arm .flow-goal-code::after,
+.impeccable-arm .flow-rigorous-code::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: -0.19rem;
+  width: 0.32rem;
+  height: 3.75rem;
+  background: var(--trace-signal);
+}
+
+.impeccable-arm .flow-goal-state,
+.impeccable-arm .flow-rigorous-questions {
+  background: var(--trace-paper-deep) !important;
+}
+
+.impeccable-arm .flow-rigorous-questions {
+  padding: clamp(1.25rem, 2.5vw, 2.25rem) !important;
+  gap: var(--trace-space-4) !important;
+}
+
+.impeccable-arm .flow-rigorous-code [style*="opacity"] {
+  opacity: 1 !important;
+}
+
+/* Crisp locked previews preserve gating without turning text into noise. */
+.impeccable-arm .flow-stage-body section[aria-hidden="true"] {
+  filter: none !important;
+  opacity: 0.42 !important;
+  border-top: 1px dashed var(--trace-line-strong);
+  padding-top: var(--trace-space-4);
+}
+
+/* Containers use timetable rules and proximity, not rounded dashboard cards. */
+.impeccable-arm .flow-stage-body section,
+.impeccable-arm .flow-stage-body article,
+.impeccable-arm .flow-rigorous-questions section,
+.impeccable-arm [style*="border-radius: 9px"],
+.impeccable-arm [style*="border-radius: 8px"],
+.impeccable-arm [style*="border-radius: 7px"],
+.impeccable-arm [style*="border-radius: 6px"] {
+  border-radius: var(--trace-radius) !important;
+}
+
+.impeccable-arm .flow-stage-body > article {
+  border: 0 !important;
+  border-top: 1px solid var(--trace-line-strong) !important;
+  background: transparent !important;
+}
+
+.impeccable-arm .flow-stage-body > article > div:first-child {
+  background: var(--trace-paper-deep) !important;
+  border-bottom-color: var(--trace-line) !important;
+}
+
+.impeccable-arm [style*="background: rgb(248, 250, 252)"],
+.impeccable-arm [style*="background: #f8fafc"],
+.impeccable-arm [style*="background: rgb(251, 252, 254)"],
+.impeccable-arm [style*="background: #fbfcfe"] {
+  background: var(--trace-paper-deep) !important;
+}
+
+/* Signal roles: orange is action/location; semantic states retain their names. */
+.impeccable-arm [style*="color: rgb(37, 99, 235)"],
+.impeccable-arm [style*="color: #2563eb"],
+.impeccable-arm [style*="color: rgb(29, 78, 216)"],
+.impeccable-arm [style*="color: #1d4ed8"] {
+  color: var(--trace-signal-deep) !important;
+}
+
+.impeccable-arm [style*="background: rgb(37, 99, 235)"],
+.impeccable-arm [style*="background: #2563eb"] {
+  background: var(--trace-signal) !important;
+}
+
+.impeccable-arm [style*="background: rgb(239, 246, 255)"],
+.impeccable-arm [style*="background: #eff6ff"],
+.impeccable-arm [style*="background: rgb(219, 234, 254)"],
+.impeccable-arm [style*="background: #dbeafe"] {
+  background: var(--trace-signal-soft) !important;
+}
+
+.impeccable-arm [style*="border-color: rgb(37, 99, 235)"],
+.impeccable-arm [style*="border: 1px solid rgb(37, 99, 235)"],
+.impeccable-arm [style*="border: 1.5px solid rgb(37, 99, 235)"] {
+  border-color: var(--trace-signal) !important;
+}
+
+.impeccable-arm button {
+  min-height: 2.75rem;
+  color: var(--trace-ink) !important;
+  border-color: var(--trace-line-strong) !important;
+  border-radius: var(--trace-radius) !important;
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.impeccable-arm button:not(:disabled):hover {
+  border-color: var(--trace-signal) !important;
+  background-color: var(--trace-signal-soft) !important;
+}
+
+.impeccable-arm button:not(:disabled):active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.impeccable-arm button:focus-visible,
+.impeccable-arm a:focus-visible {
+  outline: 3px solid var(--trace-focus) !important;
+  outline-offset: 3px !important;
+}
+
+.impeccable-arm button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Five stages become one route line with stops. */
+.impeccable-arm .tb-page-sequence-footer {
+  position: relative;
+  min-height: 5rem;
+  border-top: 0 !important;
+  background: var(--trace-canvas) !important;
+  padding: var(--trace-space-3) var(--trace-space-4) !important;
+  grid-template-columns: minmax(0, 1fr) 30rem !important;
+  gap: var(--trace-space-4) !important;
+}
+
+.impeccable-arm .tb-page-sequence-tabs {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(7.25rem, 1fr));
+  gap: 0 !important;
+  overflow-x: auto;
+  scrollbar-color: var(--trace-line-strong) transparent;
+}
+
+.impeccable-arm .tb-page-sequence-tabs::before {
+  content: "";
+  position: absolute;
+  top: 1rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 1px;
+  background: var(--trace-line-strong);
+}
+
+.impeccable-arm .tb-page-sequence-tab,
+.impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-tab {
+  position: relative;
+  z-index: 1;
+  width: auto !important;
+  min-width: 7.25rem !important;
+  max-width: none !important;
+  min-height: 3.5rem;
+  padding: 1.55rem 0.65rem 0.45rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--trace-paper) !important;
+}
+
+.impeccable-arm .tb-page-sequence-tab::before {
+  content: "";
+  position: absolute;
+  top: 0.67rem;
+  left: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  transform: translateX(-50%);
+  border: 2px solid var(--trace-line);
+  border-radius: 50%;
+  background: var(--trace-canvas);
+  transition: background-color 180ms ease-out, transform 180ms ease-out;
+}
+
+.impeccable-arm .tb-page-sequence-tab[style*="rgb(239, 246, 255)"],
+.impeccable-arm .tb-page-sequence-tab[style*="#eff6ff"] {
+  background: rgba(242, 243, 238, 0.08) !important;
+}
+
+.impeccable-arm .tb-page-sequence-tab[style*="rgb(239, 246, 255)"]::before,
+.impeccable-arm .tb-page-sequence-tab[style*="#eff6ff"]::before {
+  border-color: var(--trace-signal);
+  background: var(--trace-signal);
+  transform: translateX(-50%) scale(1.18);
+}
+
+.impeccable-arm .tb-page-sequence-tab > span,
+.impeccable-arm .tb-page-sequence-tab-title {
+  color: var(--trace-paper) !important;
+}
+
+.impeccable-arm .tb-page-sequence-tab > span:first-child {
+  color: #ccd4cf !important;
+  letter-spacing: 0.05em !important;
+}
+
+.impeccable-arm .tb-page-sequence-tab-title {
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+}
+
+.impeccable-arm .tb-page-sequence-controls,
+.impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-controls {
+  order: initial !important;
+  grid-template-columns: 11.25rem 8rem 11.5rem !important;
+  grid-template-rows: 2.75rem !important;
+  width: 32rem !important;
+  min-width: 32rem !important;
+  gap: var(--trace-space-2) !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-status {
+  grid-column: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #d5ddd8 !important;
+  font-family: var(--trace-mono) !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.015em;
+  justify-self: stretch !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+}
+
+.impeccable-arm .tb-page-sequence-footer-stacked {
+  grid-template-columns: minmax(0, 1fr) 32rem !important;
+  justify-items: stretch !important;
+}
+
+.impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-tabs {
+  order: initial !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-button {
+  min-height: 2.75rem !important;
+  border-radius: var(--trace-radius) !important;
+  font-size: 0.78rem !important;
+  font-weight: 650 !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-button:first-of-type {
+  border: 1px solid #92a099 !important;
+  background: transparent !important;
+  color: var(--trace-paper) !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-button:last-of-type {
+  background: var(--trace-signal) !important;
+  color: #fff !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-button:last-of-type:not(:disabled):hover {
+  border-color: var(--trace-signal-deep) !important;
+  background: var(--trace-signal-deep) !important;
+}
+
+.impeccable-arm .tb-page-sequence-control-button:last-of-type:disabled {
+  background: #4b5651 !important;
+  color: #e8ece9 !important;
+}
+
+@media (pointer: coarse) {
+  .impeccable-arm button,
+  .impeccable-arm a {
+    min-height: 2.75rem !important;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .impeccable-arm .tb-page-sequence-footer,
+  .impeccable-arm .tb-page-sequence-footer-stacked {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-controls,
+  .impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-controls {
+    order: 1 !important;
+    justify-self: center;
+  }
+
+  .impeccable-arm .tb-page-sequence-tabs,
+  .impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-tabs {
+    order: 2 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .impeccable-arm {
+    min-height: 30rem;
+    padding: 0;
+  }
+
+  .impeccable-frame {
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .impeccable-frame > div > div:first-child {
+    height: 3.25rem !important;
+  }
+
+  .impeccable-arm nav[aria-label="Chapters"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  .impeccable-arm nav[aria-label="Chapters"] > * {
+    min-width: 0 !important;
+    min-height: 3.25rem !important;
+    padding: 0.35rem 0.2rem !important;
+  }
+
+  .impeccable-arm nav[aria-label="Chapters"] > * span:first-child {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.025em !important;
+  }
+
+  .impeccable-arm nav[aria-label="Chapters"] > [aria-current="page"] > span:last-child {
+    display: none;
+  }
+
+  .impeccable-arm [role="dialog"][aria-label="Chapter lesson selector"] {
+    top: 3.25rem !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+
+  .impeccable-arm .flow-goal-layout,
+  .impeccable-arm .flow-rigorous-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: max-content max-content !important;
+  }
+
+  .impeccable-arm .flow-goal-code,
+  .impeccable-arm .flow-rigorous-code {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--trace-ink) !important;
+  }
+
+  .impeccable-arm .flow-goal-code::after,
+  .impeccable-arm .flow-rigorous-code::after {
+    top: auto;
+    right: auto;
+    bottom: -0.19rem;
+    left: 0;
+    width: 3.75rem;
+    height: 0.32rem;
+  }
+
+  .impeccable-arm .flow-stage-body {
+    width: 100%;
+    padding: 1.5rem 1rem 3rem !important;
+    gap: 1.5rem !important;
+  }
+
+  .impeccable-arm h3 {
+    font-size: clamp(1.65rem, 8vw, 2.15rem) !important;
+  }
+
+  .impeccable-arm .flow-rigorous-questions {
+    padding: 1.25rem 1rem 2rem !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-footer,
+  .impeccable-arm .tb-page-sequence-footer-stacked {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 0.35rem !important;
+    padding: 0.45rem 0.5rem max(0.45rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-controls,
+  .impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-controls {
+    order: 1;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) !important;
+    grid-template-rows: auto 2.75rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 0.3rem 0.45rem !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-control-status {
+    grid-column: 1 / -1 !important;
+    justify-self: stretch !important;
+    min-width: 0;
+    min-height: 1.25rem;
+    padding: 0 0.25rem !important;
+    overflow: visible !important;
+    text-align: center;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-tabs,
+  .impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-tabs {
+    order: 2;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-tabs::before {
+    top: 0.73rem;
+    left: 7%;
+    right: 7%;
+  }
+
+  .impeccable-arm .tb-page-sequence-tab,
+  .impeccable-arm .tb-page-sequence-footer-stacked .tb-page-sequence-tab {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 2.85rem;
+    padding: 1.35rem 0.1rem 0.25rem !important;
+    justify-items: center;
+  }
+
+  .impeccable-arm .tb-page-sequence-tab::before {
+    top: 0.4rem;
+  }
+
+  .impeccable-arm .tb-page-sequence-tab > span:first-child {
+    font-size: 0.64rem !important;
+    letter-spacing: 0.015em !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-tab-title,
+  .impeccable-arm .tb-page-sequence-tab > span:not(:first-child) {
+    display: none !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-control-button {
+    min-width: 0 !important;
+    min-height: 2.75rem !important;
+    padding-inline: 0.5rem !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    line-height: 1.15;
+  }
+}
+
+@media (max-width: 390px) {
+  .impeccable-arm .flow-stage-body {
+    padding-inline: 0.8rem !important;
+  }
+
+  .impeccable-arm .tb-page-sequence-tab > span:first-child {
+    font-size: 0.58rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .impeccable-arm *,
+  .impeccable-arm *::before,
+  .impeccable-arm *::after {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+}
