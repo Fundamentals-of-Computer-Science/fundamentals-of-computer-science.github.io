@@ -42,11 +42,20 @@ python3 -m http.server 8123
 
 Then open:
 
+- `http://127.0.0.1:8123/beta/Funcs/Ch0%201%20Programs%20Input%20Output%20Tour.html`
 - `http://127.0.0.1:8123/beta/Funcs/Ch1%20Data%20Memory%20Sequence.html`
 - `http://127.0.0.1:8123/beta/Funcs/Ch1%20Boolean%20Expressions%20Sequence.html`
 - `http://127.0.0.1:8123/beta/Funcs/Ch2%20Numeric%20Data%20Memory%20Sequence.html`
 
 Use another local port if `8123` is already occupied.
+
+Chapter 0 is the approved exception to the five-stage lesson flow. Its fixture
+defines a nine-page `flow.sequence`: the five canonical stages, each used once
+in canonical order, plus four fixture-driven `intro` pages. Chapter 1 and later
+lessons keep the five-stage default unless a later chapter plan approves a
+different sequence. Author the sequence through the shared
+`lesson-kit/flow-lesson-stages.jsx` contract and run `flowValidateLesson` after
+the fixture loads.
 
 The underlying commands are:
 

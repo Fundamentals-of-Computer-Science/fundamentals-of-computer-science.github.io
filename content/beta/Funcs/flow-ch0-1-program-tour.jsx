@@ -144,7 +144,7 @@ const CH0_PROGRAM_CHAPTERS = (window.FUNCS_CHAPTERS || []).map(chapter => ({
 const CH0_PROGRAM_EXAMPLES = [
   {
     label: 'Lesson 1',
-    source: 'ch0-1',
+    source: 'ch0/index.md',
     title: 'Interact with a Program Using the Console',
     href: 'Ch0 1 Programs Input Output Tour.html',
     current: true,
@@ -236,7 +236,7 @@ const CH0_PROGRAM_TOUR_LESSON = {
         title: 'Read a value from the console and write it to program state.',
         body: [
           'Console.ReadLine() retrieves Rome after the user enters it. The declaration writes that text to program state under city.',
-          'The console call supplies the value; the surrounding declaration stores it. The call alone would not create the city binding.',
+          'A Result-Producing Form is code that supplies a value another part can store or use. Console.ReadLine() is a value-returning call of this kind: it supplies Rome. The surrounding declaration stores that value; the call alone would not create the city binding.',
         ],
         code: ['string city = Console.ReadLine();'],
         translations: ['Retrieve Rome, then store city = "Rome".'],
@@ -245,7 +245,7 @@ const CH0_PROGRAM_TOUR_LESSON = {
         n: 3,
         title: 'Compute and display a program value in the console.',
         body: [
-          'The program can display stored text, a property value, or an operator result. Each argument is evaluated before the output call displays it.',
+          'Variable reads, property accesses, and operator expressions are also Result-Producing Forms. Here, city, city.Length, and 7 + 2 supply values before the output action calls display them.',
           'city supplies Rome, city.Length supplies 4, and 7 + 2 supplies 9. These output instructions leave city unchanged.',
         ],
         code: [
@@ -277,7 +277,7 @@ const CH0_PROGRAM_TOUR_LESSON = {
     sequence: [
       { id: 'intro-start', blockType: 'intro', intro: 'start', kicker: 'Start', title: 'How This Lesson Works' },
       { id: 'goal', blockType: 'fullExample', kicker: 'Example', title: 'Full Example' },
-      { id: 'intro-pre-quiz', blockType: 'intro', intro: 'preQuiz', kicker: 'Prepare', title: 'How to Answer the Pre-Quiz' },
+      { id: 'intro-pre-quiz', blockType: 'intro', intro: 'preQuiz', kicker: 'Prepare', title: 'Pre-Quiz Guide' },
       { id: 'pre-quiz', blockType: 'preQuiz', kicker: 'Check', title: 'Pre-Quiz' },
       { id: 'main-lesson', blockType: 'mainLesson', kicker: 'Read', title: 'Main Lesson' },
       { id: 'intro-post-quiz', blockType: 'intro', intro: 'postQuiz', kicker: 'Prepare', title: 'Try a New Program' },
@@ -453,7 +453,7 @@ const CH0_PROGRAM_TOUR_LESSON = {
           q: 'Which statement correctly describes Console.WriteLine(name.Length)?',
           choices: ['name.Length supplies 3, then WriteLine displays 3.', 'WriteLine stores 3 in name.', 'WriteLine computes the length without evaluating name.Length.'],
           correct: 0,
-          why: 'The inner property access supplies 3. The outer action call displays that value and leaves name unchanged.',
+          why: 'The inner property access is a Result-Producing Form that supplies 3. The outer action call displays that value and leaves name unchanged.',
         },
       },
     },
@@ -537,7 +537,7 @@ const CH0_PROGRAM_TOUR_LESSON = {
           q: 'Why does line 5 display 6?',
           choices: ['4 + 2 is evaluated first, and WriteLine displays the resulting value.', 'WriteLine stores 6 in color.', 'ReadLine converts 4 + 2 into text.'],
           correct: 0,
-          why: 'The operator expression supplies 6. WriteLine displays that value; it does not perform the arithmetic or change color.',
+          why: 'The operator expression is a Result-Producing Form that supplies 6. WriteLine is an action call that displays the value; it does not perform the arithmetic or change color.',
         },
       ],
     },
