@@ -100,6 +100,30 @@ const TEMPLATE_LESSON = {
 
   /* Everything below is what the revised flow adds. */
   flow: {
+    /* Omit sequence and intros for the standard five-page lesson. Chapter 0
+       uses a data-only sequence like the one below, with exactly one of each
+       canonical blockType and any number of shared intro pages.
+
+    sequence: [
+      { id: 'intro-start', blockType: 'intro', intro: 'start', kicker: 'Start', title: 'How This Lesson Works' },
+      { id: 'goal', blockType: 'fullExample' },
+      { id: 'intro-pre-quiz', blockType: 'intro', intro: 'preQuiz', kicker: 'Prepare', title: 'How to Answer the Pre-Quiz' },
+      { id: 'pre-quiz', blockType: 'preQuiz' },
+      { id: 'main-lesson', blockType: 'mainLesson' },
+      { id: 'intro-rigorous-quiz', blockType: 'intro', intro: 'rigorousQuiz', kicker: 'Prepare', title: 'Try the Same Procedure' },
+      { id: 'rigorous-quiz', blockType: 'rigorousQuiz', title: 'Post-Reading Quiz' },
+      { id: 'intro-exercises', blockType: 'intro', intro: 'exercises', kicker: 'Prepare', title: 'Practice Independently' },
+      { id: 'exercises', blockType: 'exercises' },
+    ],
+    intros: {
+      start: {
+        title: '', lede: '', nextLabel: '',
+        sections: [{ id: '', title: '', body: [''], cards: [{ label: '', body: '' }], steps: [{ label: '', body: '' }], code: [''] }],
+        callout: { label: '', body: '' },
+      },
+    },
+    */
+
     goal: {
       intent: '',                       // review-only note; drop in production
       badge: 'Full walkthrough',
@@ -161,11 +185,11 @@ const TEMPLATE_LESSON = {
       intent: '',
       intro: '',
       problems: [
-        { n: 1, title: '', tag: 'warm-up', statement: '', given: [''], constraints: ['', '', ''] },
-        { n: 2, title: '', tag: 'core', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''] },
-        { n: 3, title: '', tag: 'core', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''] },
-        { n: 4, title: '', tag: 'core', statement: '', given: [''], constraints: ['', '', ''] },
-        { n: 5, title: '', tag: 'stretch', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''] },
+        { n: 1, title: '', tag: 'warm-up', statement: '', given: [''], constraints: ['', '', ''], model: [''], feedback: '' },
+        { n: 2, title: '', tag: 'core', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''], model: [''], feedback: '' },
+        { n: 3, title: '', tag: 'core', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''], model: [''], feedback: '' },
+        { n: 4, title: '', tag: 'core', statement: '', given: [''], constraints: ['', '', ''], model: [''], feedback: '' },
+        { n: 5, title: '', tag: 'stretch', statement: '', example: { in: '', out: '' }, constraints: ['', '', ''], model: [''], feedback: '' },
       ],
     },
   },

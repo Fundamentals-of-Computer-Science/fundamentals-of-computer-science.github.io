@@ -1,8 +1,10 @@
 # FunCS Flow Lesson Authoring
 
 The data-authored flow is the canonical beta lesson format. A lesson is one
-JSON-compatible JavaScript object; shared components render its five stages,
-chapter navigation, code, memory, console, questions, and footer controls.
+JSON-compatible JavaScript object. Shared components render the standard five
+stages, chapter navigation, code, memory, console, questions, and footer
+controls. An optional sequence can insert shared Intro pages while retaining
+one copy of every canonical stage.
 
 Start from `flow-lesson-template.jsx`. Use
 `flow-ch0-1-program-tour.jsx` as the smallest complete beginner lesson and
@@ -11,8 +13,8 @@ Start from `flow-lesson-template.jsx`. Use
 ## Canonical entry points
 
 - `flow-lesson-kit.jsx`: shared question primitives and presentation helpers.
-- `flow-lesson-stages.jsx`: the five stage renderers, validator, and
-  `FlowLessonSequence`.
+- `flow-lesson-stages.jsx`: the five canonical stage renderers, shared Intro
+  renderer, sequence resolver, validator, and `FlowLessonSequence`.
 - `flow-lesson.css`: canonical presentation selected through the design-skill
   comparison.
 - `flow-lesson-template.jsx`: empty JSON-compatible fixture skeleton.
@@ -39,8 +41,56 @@ Start from `flow-lesson-template.jsx`. Use
 8. Write pre-quiz details and rigorous-quiz cards using only the shared
    `choice`, `chips`, `order`, and `row` question shapes.
 9. Write five open-ended exercises: warm-up, core work, repair, and transfer.
-10. Run `flowValidateLesson(lesson)` and fix every missing path before browser
+   Add a concise model answer and feedback when the lesson requires them.
+10. Keep the standard five-page sequence unless the approved Chapter Map calls
+    for Intro pages. When it does, author `flow.sequence[]` and `flow.intros{}`
+    with data only.
+11. Run `flowValidateLesson(lesson)` and fix every missing path before browser
     review.
+
+## Standard and extended sequences
+
+When `flow.sequence` is absent, `FlowLessonSequence` renders the standard order:
+
+1. `fullExample`
+2. `preQuiz`
+3. `mainLesson`
+4. `rigorousQuiz`
+5. `exercises`
+
+An extended sequence may add any number of `intro` pages. It must keep the
+canonical stage order and include each canonical `blockType` exactly once.
+Every page needs a unique `id`. Each Intro descriptor names a key from
+`flow.intros`:
+
+```js
+flow: {
+  sequence: [
+    { id: 'intro-start', blockType: 'intro', intro: 'start', title: 'How This Lesson Works' },
+    { id: 'goal', blockType: 'fullExample' },
+    { id: 'intro-pre-quiz', blockType: 'intro', intro: 'preQuiz', title: 'Prepare for the Pre-Quiz' },
+    { id: 'pre-quiz', blockType: 'preQuiz' },
+    { id: 'main-lesson', blockType: 'mainLesson' },
+    { id: 'intro-rigorous-quiz', blockType: 'intro', intro: 'rigorousQuiz', title: 'Try a New Program' },
+    { id: 'rigorous-quiz', blockType: 'rigorousQuiz' },
+    { id: 'intro-exercises', blockType: 'intro', intro: 'exercises', title: 'Practice Independently' },
+    { id: 'exercises', blockType: 'exercises' },
+  ],
+  intros: {
+    start: {
+      title: 'How you interact with a program',
+      lede: 'Short opening copy.',
+      sections: [
+        { id: 'interface', title: 'Read the interface', body: ['One paragraph.'] },
+      ],
+      callout: { label: 'Remember', body: 'One focused note.' },
+    },
+  },
+}
+```
+
+Intro sections support authored `body`, `cards`, `steps`, and `code` arrays.
+They do not accept React elements, callbacks, or lesson-specific components.
 
 ## Required fixture surface
 
@@ -65,6 +115,7 @@ const LESSON = {
   rigorousQuiz: { title: '', prompt: '', transferCode: { lines: [] } },
   exercises: { title: '', label: 'Exercises', intro: '' },
   flow: {
+    // Optional: sequence: [], intros: {},
     goal: {},
     preQuiz: { categories: [], shuffled: [], details: {} },
     mainLesson: { checks: [] },
@@ -75,8 +126,8 @@ const LESSON = {
 ```
 
 The fixture must not contain React elements, render callbacks, or
-lesson-specific components. Arrays, object fields, call frames, and console
-values remain data rendered by the shared grammar.
+lesson-specific components. Arrays, object fields, call frames, Intro content,
+and console values remain data rendered by the shared grammar.
 
 ## Validation and preview
 
@@ -110,13 +161,18 @@ Then open a page under `http://127.0.0.1:8123/beta/Funcs/`. Do not use
 
 ## Author review checklist
 
-- All five stage tabs render and stage boundaries use `TBPageSequence`.
+- The standard flow renders five tabs. An approved extended flow renders its
+  authored tab count and still contains all five canonical stages.
+- Extended sequences use only known `blockType` values, unique IDs, and shared
+  data-authored Intro pages.
 - Goal focus precedes executable source steps.
 - Code highlighting, memory state, and console output describe the same moment.
 - Pre-quiz ordering gates details; all details gate Main Lesson.
 - Each lesson act has one check; later acts stay locked until it is answered.
 - Rigorous Quiz uses the transfer program and advances one card at a time.
 - Exercises are open-ended and do not introduce a new renderer.
+- Model answers and feedback diagnose the failed code subgoal when they are
+  part of the approved content.
 - Keyboard focus is visible and controls retain usable touch targets.
 - Desktop and 390px views have no page-level horizontal overflow.
 - The fixture and touched JSX files parse; the static route and Quartz build pass.

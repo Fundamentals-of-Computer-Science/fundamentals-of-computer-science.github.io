@@ -7,6 +7,82 @@ function flowBlock(lesson, key) {
   return (lesson.flow || {})[key] || {};
 }
 
+function flowNavigationLabel(prefix, page, fallback) {
+  return `${prefix}: ${page?.title || fallback}`;
+}
+
+/* Shared orientation page. Chapter 0 uses four instances of this renderer,
+   each supplied entirely by fixture data. */
+function FlowIntroStage({ lesson, page, chrome, sequence, navigation }) {
+  const { FlowStageFrame, FLOW_MONO } = window;
+  const intro = flowBlock(lesson, 'intros')[page.intro] || {};
+  const sections = intro.sections || [];
+  const controls = {
+    tone: 'read',
+    backLabel: flowNavigationLabel('Back', navigation?.prev, 'previous page'),
+    canBack: Boolean(navigation?.prev && sequence?.goPrevPage),
+    nextLabel: intro.nextLabel || flowNavigationLabel('Next', navigation?.next, 'continue'),
+    canNext: Boolean(navigation?.next && sequence?.goNextPage),
+    status: intro.status || `${sequence?.active + 1 || 1} of ${sequence?.pageCount || 1}`,
+    onBack: () => sequence?.goPrevPage(),
+    onNext: () => sequence?.goNextPage(),
+  };
+
+  return (
+    <FlowStageFrame chrome={chrome} sequence={sequence} intent={intro.intent} controls={controls}>
+      <article className="flow-intro-page">
+        <header className="flow-intro-header">
+          <div className="flow-intro-eyebrow">{intro.eyebrow || page.kicker || 'Introduction'}</div>
+          <h3>{intro.title || page.title}</h3>
+          {intro.lede && <p>{intro.lede}</p>}
+        </header>
+
+        {sections.map((section, sectionIndex) => (
+          <section className="flow-intro-section" key={section.id || section.title || sectionIndex}>
+            {section.title && <h4>{section.title}</h4>}
+            {(section.body || []).map((paragraph, paragraphIndex) => (
+              <p key={`${section.id || sectionIndex}-body-${paragraphIndex}`}>{paragraph}</p>
+            ))}
+            {section.cards?.length > 0 && (
+              <div className="flow-intro-card-grid">
+                {section.cards.map((card, cardIndex) => (
+                  <div className="flow-intro-card" key={card.id || card.label || cardIndex}>
+                    <div className="flow-intro-card-label">{card.label}</div>
+                    <p>{card.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {section.steps?.length > 0 && (
+              <ol className="flow-intro-steps">
+                {section.steps.map((step, stepIndex) => (
+                  <li key={step.id || step.label || stepIndex}>
+                    <span className="flow-intro-step-number" aria-hidden="true">{stepIndex + 1}</span>
+                    <div>
+                      {step.label && <div className="flow-intro-step-label">{step.label}</div>}
+                      <p>{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {section.code?.length > 0 && (
+              <pre className="flow-intro-code"><code>{section.code.join('\n')}</code></pre>
+            )}
+          </section>
+        ))}
+
+        {intro.callout && (
+          <aside className="flow-intro-callout">
+            <div style={{ fontFamily: FLOW_MONO }}>{intro.callout.label}</div>
+            <p>{intro.callout.body}</p>
+          </aside>
+        )}
+      </article>
+    </FlowStageFrame>
+  );
+}
+
 function flowGoalSteps(fullExample) {
   const initialStep = { id: 'before-execution', stateIndex: 0 };
   const goals = Object.values(fullExample.goals || fullExample.code?.goals || {});
@@ -43,7 +119,7 @@ function flowGoalSteps(fullExample) {
 
 /* 1 · Goal Introduction — the shipped walkthrough; only the footer verb changes
    until execution starts. */
-function FlowGoalStage({ lesson, chrome, sequence }) {
+function FlowGoalStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FlowPaneLabel, FLOW_MONO, FuncsCodeGoalHeader, FuncsCodeBlock, FuncsMemoryStatePanel, FuncsConsole } = window;
   const goal = flowBlock(lesson, 'goal');
   const full = lesson.fullExample;
@@ -61,14 +137,19 @@ function FlowGoalStage({ lesson, chrome, sequence }) {
 
   const controls = {
     tone: started ? 'run' : 'read',
-    backLabel: started ? 'Back: previous step' : 'Back',
-    canBack: started,
-    nextLabel: !started ? (goal.startLabel || 'Continue — start running') : atEnd ? 'Next: Pre-Quiz' : (goal.runLabel || 'Run next line'),
+    backLabel: started ? 'Back: previous step' : flowNavigationLabel('Back', navigation?.prev, 'previous page'),
+    canBack: started || Boolean(navigation?.prev && sequence?.goPrevPage),
+    nextLabel: !started
+      ? (goal.startLabel || 'Continue — start running')
+      : atEnd ? flowNavigationLabel('Next', navigation?.next, 'continue') : (goal.runLabel || 'Run next line'),
     status: !started
       ? (goal.startStatus || 'goal · nothing has run')
       : `${state.label} · ${stepIndex}/${Math.max(1, steps.length - 1)}`,
     canNext: !atEnd || Boolean(sequence?.goNextPage),
-    onBack: () => setStepIndex(index => Math.max(0, index - 1)),
+    onBack: () => {
+      if (started) setStepIndex(index => Math.max(0, index - 1));
+      else sequence?.goPrevPage();
+    },
     onNext: () => {
       if (atEnd) sequence?.goNextPage();
       else setStepIndex(index => Math.min(steps.length - 1, index + 1));
@@ -115,7 +196,7 @@ function FlowGoalStage({ lesson, chrome, sequence }) {
 
 /* 2 · Pre-Quiz — part 1 asks for the order of the categories, part 2 opens each
    category in that order for one detail question. */
-function FlowPreQuizStage({ lesson, chrome, sequence }) {
+function FlowPreQuizStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FlowQuestion, FlowExplain, FlowTypeTag, FuncsSubgoalTag, FLOW_MONO, flowQuestionRight, flowQuestionKind } = window;
   const pq = flowBlock(lesson, 'preQuiz');
   const categories = pq.categories || [];
@@ -144,7 +225,7 @@ function FlowPreQuizStage({ lesson, chrome, sequence }) {
 
   const controls = phase === 'order'
     ? {
-      tone: 'read', backLabel: 'Back: Goal Introduction', canBack: Boolean(sequence?.goPrevPage), canNext: orderComplete,
+      tone: 'read', backLabel: flowNavigationLabel('Back', navigation?.prev, 'Goal Introduction'), canBack: Boolean(sequence?.goPrevPage), canNext: orderComplete,
       nextLabel: orderChecked ? 'Part 2 — answer each category' : 'Check the order',
       status: orderChecked ? `order ${orderScore}/${correctOrder.length} in place` : `${order.length}/${correctOrder.length} placed`,
       onBack: () => sequence?.goPrevPage(),
@@ -152,7 +233,7 @@ function FlowPreQuizStage({ lesson, chrome, sequence }) {
     }
     : {
       tone: 'read', backLabel: 'Back: the order', canBack: true, onBack: () => setPhase('order'),
-      canNext: answeredCount === correctOrder.length, nextLabel: 'Next: Main Lesson',
+      canNext: answeredCount === correctOrder.length, nextLabel: flowNavigationLabel('Next', navigation?.next, 'Main Lesson'),
       status: `${answeredCount}/${correctOrder.length} categories answered`, onNext: () => sequence?.goNextPage(),
     };
 
@@ -242,7 +323,7 @@ function FlowLessonCheck({ check, index, answer, onAnswer }) {
   );
 }
 
-function FlowMainLessonStage({ lesson, chrome, sequence }) {
+function FlowMainLessonStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FLOW_MONO, flowQuestionDone } = window;
   const main = lesson.mainLesson;
   const flow = flowBlock(lesson, 'mainLesson');
@@ -254,7 +335,7 @@ function FlowMainLessonStage({ lesson, chrome, sequence }) {
   const complete = firstLocked === -1;
 
   const controls = {
-    tone: 'read', backLabel: 'Back: Pre-Quiz', canBack: Boolean(sequence?.goPrevPage), canNext: complete, nextLabel: 'Next: Rigorous Quiz',
+    tone: 'read', backLabel: flowNavigationLabel('Back', navigation?.prev, 'Pre-Quiz'), canBack: Boolean(sequence?.goPrevPage), canNext: complete, nextLabel: flowNavigationLabel('Next', navigation?.next, 'Rigorous Quiz'),
     status: complete ? `lesson complete · ${answered}/${acts.length} checks` : `${answered}/${acts.length} checks answered`,
     onBack: () => sequence?.goPrevPage(),
     onNext: () => sequence?.goNextPage(),
@@ -309,7 +390,7 @@ function FlowMainLessonStage({ lesson, chrome, sequence }) {
 
 /* 4 · Rigorous Quiz — one question in view at a time, each scoped to a single
    moment of the trace, in whatever assessment type suits it. */
-function FlowRigorousQuizStage({ lesson, chrome, sequence }) {
+function FlowRigorousQuizStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FlowQuestion, FlowExplain, FlowTypeTag, FuncsCodeBlock, FLOW_MONO, flowQuestionDone, flowQuestionRight, flowQuestionSummary, flowQuestionKind } = window;
   const quiz = lesson.rigorousQuiz;
   const flow = flowBlock(lesson, 'rigorousQuiz');
@@ -320,7 +401,7 @@ function FlowRigorousQuizStage({ lesson, chrome, sequence }) {
   const score = cards.filter(card => flowQuestionRight(card, state[card.id])).length;
 
   const controls = {
-    tone: 'read', backLabel: 'Back: Main Lesson', canBack: Boolean(sequence?.goPrevPage), canNext: done, nextLabel: 'Next: Exercises',
+    tone: 'read', backLabel: flowNavigationLabel('Back', navigation?.prev, 'Main Lesson'), canBack: Boolean(sequence?.goPrevPage), canNext: done, nextLabel: flowNavigationLabel('Next', navigation?.next, 'Exercises'),
     status: done ? `${score}/${cards.length} correct` : `question ${activeIdx + 1} of ${cards.length}`,
     onBack: () => sequence?.goPrevPage(),
     onNext: () => sequence?.goNextPage(),
@@ -381,16 +462,18 @@ function FlowRigorousQuizStage({ lesson, chrome, sequence }) {
 }
 
 /* 5 · Exercises — numbered, self-contained problems worked away from the page. */
-function FlowExercisesStage({ lesson, chrome, sequence }) {
+function FlowExercisesStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FLOW_MONO } = window;
   const flow = flowBlock(lesson, 'exercises');
   const problems = flow.problems || [];
   const set = lesson.exercises || {};
+  const hasNextPage = Boolean(sequence?.goNextPage && navigation?.next);
 
   const controls = {
-    tone: 'read', backLabel: 'Back: Rigorous Quiz', canBack: Boolean(sequence?.goPrevPage), canNext: false, nextLabel: 'End of lesson',
+    tone: 'read', backLabel: flowNavigationLabel('Back', navigation?.prev, 'Rigorous Quiz'), canBack: Boolean(sequence?.goPrevPage), canNext: hasNextPage, nextLabel: hasNextPage ? flowNavigationLabel('Next', navigation.next, 'Next page') : 'End of lesson',
     status: `${(set.title || 'exercises').toLowerCase()} · ${problems.length} problems`,
     onBack: () => sequence?.goPrevPage(),
+    onNext: () => sequence?.goNextPage(),
   };
 
   return (
@@ -432,6 +515,13 @@ function FlowExercisesStage({ lesson, chrome, sequence }) {
                   {ex.constraints.map(c => <li key={c} style={{ fontSize: 12.8, lineHeight: 1.5, color: '#475569' }}>{c}</li>)}
                 </ul>
               </div>
+              {ex.model?.length > 0 && (
+                <details className="flow-exercise-model">
+                  <summary>Check a model answer</summary>
+                  <pre><code>{ex.model.join('\n')}</code></pre>
+                  {ex.feedback && <p>{ex.feedback}</p>}
+                </details>
+              )}
             </div>
           </article>
         ))}
@@ -449,12 +539,38 @@ const FLOW_LESSON_STAGES = [
 ];
 
 const FLOW_LESSON_RENDERERS = {
+  intro: FlowIntroStage,
   fullExample: FlowGoalStage,
   preQuiz: FlowPreQuizStage,
   mainLesson: FlowMainLessonStage,
   rigorousQuiz: FlowRigorousQuizStage,
   exercises: FlowExercisesStage,
 };
+
+function flowSequenceDescriptors(lesson) {
+  const authored = lesson.flow?.sequence;
+  if (!Array.isArray(authored)) {
+    return FLOW_LESSON_STAGES.map(({ component, ...stage }) => ({ ...stage }));
+  }
+  return authored.map(stage => {
+    const canonical = FLOW_LESSON_STAGES.find(candidate => candidate.blockType === stage.blockType);
+    const { component, ...canonicalData } = canonical || {};
+    return {
+      ...canonicalData,
+      ...stage,
+      id: stage.id,
+      kicker: stage.kicker || canonicalData.kicker || 'Introduction',
+      title: stage.title || canonicalData.title || 'Introduction',
+    };
+  });
+}
+
+function flowResolveLessonStages(lesson) {
+  return flowSequenceDescriptors(lesson).map(stage => ({
+    ...stage,
+    component: FLOW_LESSON_RENDERERS[stage.blockType],
+  }));
+}
 
 /* Authoring check: what a lesson must supply before the revised flow can render it. */
 function flowValidateLesson(lesson) {
@@ -472,25 +588,74 @@ function flowValidateLesson(lesson) {
   if (!flow.rigorousQuiz?.cards?.length) missing.push('flow.rigorousQuiz.cards[]');
   if (!lesson.rigorousQuiz?.transferCode) missing.push('rigorousQuiz.transferCode');
   if (!flow.exercises?.problems?.length) missing.push('flow.exercises.problems[]');
+
+  if (Object.prototype.hasOwnProperty.call(flow, 'sequence')) {
+    if (!Array.isArray(flow.sequence) || flow.sequence.length === 0) {
+      missing.push('flow.sequence[]');
+    } else {
+      const knownTypes = new Set(Object.keys(FLOW_LESSON_RENDERERS));
+      const ids = new Set();
+      flow.sequence.forEach((page, index) => {
+        if (!page?.id) missing.push(`flow.sequence[${index}].id`);
+        else if (ids.has(page.id)) missing.push(`flow.sequence duplicate id: ${page.id}`);
+        else ids.add(page.id);
+
+        if (!knownTypes.has(page?.blockType)) {
+          missing.push(`flow.sequence[${index}].blockType`);
+          return;
+        }
+        if (page.blockType === 'intro') {
+          if (!page.intro) missing.push(`flow.sequence[${index}].intro`);
+          const intro = flow.intros?.[page.intro];
+          if (!intro) missing.push(`flow.intros.${page.intro || 'unknown'}`);
+          else if (!intro.title || !intro.sections?.length) missing.push(`flow.intros.${page.intro}.title/sections[]`);
+        }
+      });
+
+      const canonicalTypes = FLOW_LESSON_STAGES.map(stage => stage.blockType);
+      canonicalTypes.forEach(blockType => {
+        const count = flow.sequence.filter(page => page.blockType === blockType).length;
+        if (count !== 1) missing.push(`flow.sequence requires exactly one ${blockType} page`);
+      });
+      const canonicalOrder = flow.sequence
+        .map(page => canonicalTypes.indexOf(page.blockType))
+        .filter(index => index >= 0);
+      if (canonicalOrder.some((value, index) => index > 0 && value <= canonicalOrder[index - 1])) {
+        missing.push('flow.sequence canonical stage order');
+      }
+    }
+  }
   return { valid: missing.length === 0, missing };
 }
 
 function FlowLessonSequence({ lesson }) {
   const { TBPageSequence, FuncsChapterOverviewPanel } = window;
   const validation = flowValidateLesson(lesson);
-  const pages = React.useMemo(() => FLOW_LESSON_STAGES.map(stage => {
-    const StageComponent = stage.component;
-    function FlowSequenceStage(props) {
-      return <StageComponent {...props} lesson={lesson} chrome="sequence" />;
-    }
-    FlowSequenceStage.displayName = `FlowSequence${StageComponent.name || stage.id}`;
-    return {
-      id: stage.id,
-      kicker: stage.kicker,
-      title: stage.title,
-      component: FlowSequenceStage,
-    };
-  }), [lesson]);
+  const pages = React.useMemo(() => {
+    const stages = flowResolveLessonStages(lesson);
+    return stages.map((stage, index) => {
+      const StageComponent = stage.component;
+      function FlowSequenceStage(props) {
+        if (!StageComponent) return null;
+        return (
+          <StageComponent
+            {...props}
+            lesson={lesson}
+            page={stage}
+            navigation={{ prev: stages[index - 1] || null, next: stages[index + 1] || null }}
+            chrome="sequence"
+          />
+        );
+      }
+      FlowSequenceStage.displayName = `FlowSequence${StageComponent?.name || stage.id}`;
+      return {
+        id: stage.id,
+        kicker: stage.kicker,
+        title: stage.title,
+        component: FlowSequenceStage,
+      };
+    });
+  }, [lesson]);
   if (!validation.valid) {
     return <div style={{ padding: 24, color: '#991b1b', fontFamily: 'sans-serif' }}>Lesson is missing: {validation.missing.join(', ')}</div>;
   }
@@ -508,7 +673,7 @@ function FlowLessonSequence({ lesson }) {
 }
 
 Object.assign(window, {
-  flowBlock, flowGoalSteps, FlowGoalStage, FlowPreQuizStage, FlowLessonCheck, FlowMainLessonStage,
+  flowBlock, flowNavigationLabel, flowGoalSteps, FlowIntroStage, FlowGoalStage, FlowPreQuizStage, FlowLessonCheck, FlowMainLessonStage,
   FlowRigorousQuizStage, FlowExercisesStage, FLOW_LESSON_STAGES, FLOW_LESSON_RENDERERS,
-  flowValidateLesson, FlowLessonSequence,
+  flowSequenceDescriptors, flowResolveLessonStages, flowValidateLesson, FlowLessonSequence,
 });
