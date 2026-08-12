@@ -8,6 +8,8 @@ import { transformSync } from 'esbuild';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixturePath = path.join(here, 'flow-ch1-1-boolean-values.jsx');
 const stagesPath = path.join(here, 'lesson-kit', 'flow-lesson-stages.jsx');
+const flowKitPath = path.join(here, 'lesson-kit', 'flow-lesson-kit.jsx');
+const conceptKitPath = path.join(here, 'lesson-kit', 'concept-lesson-kit.jsx');
 
 assert.ok(fs.existsSync(fixturePath), 'Create flow-ch1-1-boolean-values.jsx before this contract can pass.');
 
@@ -32,8 +34,10 @@ const sandbox = {
   },
 };
 const context = vm.createContext(sandbox);
-evaluateJsx(stagesPath, context);
+const stagesSource = evaluateJsx(stagesPath, context);
 const fixtureSource = evaluateJsx(fixturePath, context);
+const flowKitSource = fs.readFileSync(flowKitPath, 'utf8');
+const conceptKitSource = fs.readFileSync(conceptKitPath, 'utf8');
 
 const lesson = sandbox.window.CH1_BOOLEAN_VALUES_LESSON;
 assert.ok(lesson, 'The fixture must expose window.CH1_BOOLEAN_VALUES_LESSON.');
@@ -47,13 +51,19 @@ assert.deepEqual(
   ['fullExample', 'preQuiz', 'mainLesson', 'rigorousQuiz', 'exercises'],
 );
 
-assert.equal(lesson.fullExample.code.goals.produceDisplay.label, 'Produce and display Boolean values.');
+assert.deepEqual(
+  Object.values(lesson.fullExample.code.goals).map(goal => `${goal.n} ${goal.label}`),
+  [
+    'A Store and compute Boolean values in program state.',
+    'B Display program state in the console.',
+  ],
+);
 assert.deepEqual(
   Object.values(lesson.fullExample.subgoals).map(subgoal => `${subgoal.n} ${subgoal.label}`),
   [
     'A.a Store Boolean values in separate variables.',
     'A.b Compute new Boolean values from stored values.',
-    'A.c Display Boolean results in the console.',
+    'B.a Display Boolean values from program state.',
   ],
 );
 
@@ -93,7 +103,22 @@ for (const question of quizQuestions) {
   assert.doesNotMatch(question.q, /\bexplain\b/i, `Quiz prompt must be immediately answerable: ${question.q}`);
   assert.doesNotMatch(question.type || '', /\bexplain\b/i, `Quiz type must stay bounded: ${question.type}`);
 }
+const choiceCorrectPositions = quizQuestions.filter(question => question.kind === 'choice').map(question => question.correct);
+assert.ok(new Set(choiceCorrectPositions).size >= 3, 'Choice answer positions must vary across the lesson.');
+assert.ok(choiceCorrectPositions.filter(position => position === 0).length < choiceCorrectPositions.length / 2, 'The first choice must not be the dominant correct position.');
 assert.equal(lesson.flow.preQuiz.categories.length, 3);
+assert.equal(lesson.flow.preQuiz.hideOrderOrdinals, true);
+assert.deepEqual(Array.from(lesson.flow.preQuiz.part1Code), [
+  'bool active = true;',
+  'bool inactive = !active;',
+  'Console.WriteLine(inactive);',
+]);
+assert.deepEqual(Array.from(lesson.flow.preQuiz.details.store.contextCode), [
+  'bool original = true;',
+  'bool saved = original;',
+  'original = false;',
+]);
+assert.doesNotMatch(lesson.flow.preQuiz.part1Prompt, /door-status program/i);
 assert.equal(lesson.flow.mainLesson.checks.length, 3);
 assert.equal(lesson.flow.rigorousQuiz.cards.length, 8);
 assert.deepEqual(
@@ -128,8 +153,8 @@ assert.deepEqual(
   ],
 );
 assert.equal(lesson.flow.exercises.problems.length, 5);
-assert.match(lesson.flow.exercises.problems[0].statement, /A\.a.*A\.b.*A\.c/);
-assert.match(lesson.flow.exercises.problems[1].statement, /A\.a.*A\.c/);
+assert.match(lesson.flow.exercises.problems[0].statement, /A\.a.*A\.b.*B\.a/);
+assert.match(lesson.flow.exercises.problems[1].statement, /A\.a.*B\.a/);
 
 const authoredCode = [
   ...openingLines.map(line => line.text),
@@ -147,5 +172,12 @@ function assertDataOnly(value, trail = 'lesson') {
 assertDataOnly(lesson);
 assert.doesNotThrow(() => JSON.stringify(lesson));
 assert.match(fixtureSource, /Object\.assign\(window,/);
+assert.match(stagesSource, /hideOrderOrdinals/);
+assert.match(stagesSource, /part1Code/);
+assert.match(stagesSource, /contextCode/);
+assert.match(stagesSource, /state\.evalDetail/);
+assert.match(stagesSource, /FuncsStackedEvaluationDetail/);
+assert.match(flowKitSource, /overflowWrap:\s*['"]anywhere['"]/);
+assert.match(conceptKitSource, /whiteSpace:\s*['"]pre-wrap['"]/);
 
 console.log('C1.1 Boolean values fixture contract passed.');

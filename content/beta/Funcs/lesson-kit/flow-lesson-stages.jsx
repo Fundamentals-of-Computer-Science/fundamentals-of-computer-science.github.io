@@ -120,11 +120,12 @@ function flowGoalSteps(fullExample) {
 /* 1 · Goal Introduction — the shipped walkthrough; only the footer verb changes
    until execution starts. */
 function FlowGoalStage({ lesson, chrome, sequence, navigation }) {
-  const { FlowStageFrame, FlowPaneLabel, FLOW_MONO, FuncsCodeGoalHeader, FuncsCodeBlock, FuncsMemoryStatePanel, FuncsConsole } = window;
+  const { FlowStageFrame, FlowPaneLabel, FLOW_MONO, FuncsCodeGoalHeader, FuncsCodeBlock, FuncsMemoryStatePanel, FuncsConsole, FuncsStackedEvaluationDetail } = window;
   const goal = flowBlock(lesson, 'goal');
   const full = lesson.fullExample;
   const steps = React.useMemo(() => flowGoalSteps(full), [full]);
   const [stepIndex, setStepIndex] = React.useState(0);
+  const [showEval, setShowEval] = React.useState(false);
   const step = steps[stepIndex] || steps[0] || { stateIndex: 0 };
   const stateIndex = Math.min(step.stateIndex ?? stepIndex, Math.max(0, full.states.length - 1));
   const state = step.rowState || full.states[stateIndex] || full.states[0];
@@ -134,6 +135,10 @@ function FlowGoalStage({ lesson, chrome, sequence, navigation }) {
   const activeKey = started && !goalFocused ? (step.rowKey || goal.activeKey) : null;
   const activeSubgoal = started && !goalFocused ? (step.subgoal || step.activeSubgoal || goal.activeSubgoal) : null;
   const activeGoal = started ? (step.goal || step.activeGoal || goal.activeGoal) : null;
+
+  React.useEffect(() => {
+    setShowEval(false);
+  }, [stepIndex]);
 
   const controls = {
     tone: started ? 'run' : 'read',
@@ -177,15 +182,41 @@ function FlowGoalStage({ lesson, chrome, sequence, navigation }) {
             <span style={{ fontSize: 12.5, color: '#475569', lineHeight: 1.4 }}>{state.desc}</span>
           </div>
           <div style={{ padding: 14, display: 'grid', gap: 12, alignContent: 'start' }}>
-            <div>
-              <FlowPaneLabel>State</FlowPaneLabel>
-              <FuncsMemoryStatePanel state={state} />
-            </div>
-            <FuncsConsole lines={state.console || []} />
-            {!started && goal.note && (
-              <div style={{ fontFamily: FLOW_MONO, fontSize: 10.5, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '7px 9px', lineHeight: 1.45 }}>
-                {goal.note}
+            {state.evalDetail && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEval(value => !value)}
+                  style={{
+                    border: `1px solid ${showEval ? '#bfdbfe' : '#f59e0b'}`,
+                    background: showEval ? '#dbeafe' : '#fff7ed',
+                    color: showEval ? '#1d4ed8' : '#92400e',
+                    borderRadius: 5,
+                    padding: '5px 10px',
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showEval ? 'Show memory state' : 'Show evaluation steps'}
+                </button>
               </div>
+            )}
+            {showEval && state.evalDetail ? (
+              <FuncsStackedEvaluationDetail detail={state.evalDetail} onClose={() => setShowEval(false)} />
+            ) : (
+              <React.Fragment>
+                <div>
+                  <FlowPaneLabel>State</FlowPaneLabel>
+                  <FuncsMemoryStatePanel state={state} />
+                </div>
+                <FuncsConsole lines={state.console || []} />
+                {!started && goal.note && (
+                  <div style={{ fontFamily: FLOW_MONO, fontSize: 10.5, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '7px 9px', lineHeight: 1.45 }}>
+                    {goal.note}
+                  </div>
+                )}
+              </React.Fragment>
             )}
           </div>
         </div>
@@ -201,10 +232,14 @@ function FlowPreQuizStage({ lesson, chrome, sequence, navigation }) {
   const pq = flowBlock(lesson, 'preQuiz');
   const categories = pq.categories || [];
   const byId = Object.fromEntries(categories.map(cat => [cat.id, cat]));
+  const orderItems = Object.fromEntries(categories.map(cat => [
+    cat.id,
+    pq.hideOrderOrdinals ? { ...cat, n: null } : cat,
+  ]));
   const correctOrder = categories.map(cat => cat.id);
   const orderQuestion = {
     kind: 'order',
-    items: byId,
+    items: orderItems,
     bank: pq.shuffled || correctOrder,
     correct: correctOrder,
     placeholder: 'tap a category below',
@@ -254,6 +289,9 @@ function FlowPreQuizStage({ lesson, chrome, sequence, navigation }) {
         {phase === 'order' ? (
           <React.Fragment>
             <div style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.45, maxWidth: 560 }}>{pq.part1Prompt}</div>
+            {pq.part1Code?.length > 0 && (
+              <pre style={{ margin: 0, maxWidth: 560, overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: 8, background: '#f8fafc', padding: '9px 12px', fontFamily: FLOW_MONO, fontSize: 12.2, lineHeight: 1.6, color: '#1e293b' }}><code>{pq.part1Code.join('\n')}</code></pre>
+            )}
             <FlowQuestion question={orderQuestion} value={order} onChange={setOrder} revealed={orderChecked} />
             {orderChecked && (
               <FlowExplain correct={orderScore === correctOrder.length}>
@@ -271,14 +309,15 @@ function FlowPreQuizStage({ lesson, chrome, sequence, navigation }) {
                 const ok = flowQuestionRight(question, ans);
                 const isFocus = focus === id;
                 return (
-                  <button key={id} type="button" onClick={() => setFocus(id)} style={{
+                  <button className="flow-prequiz-category" key={id} type="button" onClick={() => setFocus(id)} style={{
                     display: 'flex', alignItems: 'center', gap: 9, textAlign: 'left', padding: '7px 10px', borderRadius: 8, cursor: 'pointer',
+                    minWidth: 0, width: '100%', maxWidth: '100%', overflow: 'hidden',
                     border: `1.5px solid ${isFocus ? '#2563eb' : ans != null ? (ok ? '#bbf7d0' : '#fed7aa') : '#e2e8f0'}`,
                     background: isFocus ? '#f8fbff' : ans != null ? (ok ? '#f0fdf4' : '#fff7ed') : '#fff',
                   }}>
                     <span style={{ fontFamily: FLOW_MONO, fontSize: 10, color: '#94a3b8', width: 14 }}>{i + 1}</span>
                     <FuncsSubgoalTag subgoal={byId[id]} active={isFocus} />
-                    <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <span className="flow-prequiz-category-meta" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7 }}>
                       <FlowTypeTag>{question.type || flowQuestionKind(question)}</FlowTypeTag>
                       <span style={{ fontSize: 11, fontWeight: 900, color: ans == null ? '#c1c8d4' : ok ? '#16a34a' : '#d97706' }}>{ans == null ? '○' : ok ? '✓' : '~'}</span>
                     </span>
@@ -288,7 +327,10 @@ function FlowPreQuizStage({ lesson, chrome, sequence, navigation }) {
             </div>
             {detail && (
               <section style={{ border: '1.5px solid #bfdbfe', borderRadius: 9, background: '#fff', padding: 12, display: 'grid', gap: 9 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 800, lineHeight: 1.35, color: '#1e293b' }}>{detail.q}</div>
+                {detail.contextCode?.length > 0 && (
+                  <pre style={{ margin: 0, overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: 7, background: '#f8fafc', padding: '8px 11px', fontFamily: FLOW_MONO, fontSize: 12, lineHeight: 1.55, color: '#1e293b' }}><code>{detail.contextCode.join('\n')}</code></pre>
+                )}
+                <div style={{ fontSize: 14.5, fontWeight: 800, lineHeight: 1.35, color: '#1e293b', overflowWrap: 'anywhere' }}>{detail.q}</div>
                 <FlowQuestion question={detail} value={given} onChange={(v) => setAnswers(prev => ({ ...prev, [focus]: v }))} revealed={given != null} />
                 {given != null && <FlowExplain correct={flowQuestionRight(detail, given)}>{detail.why}</FlowExplain>}
               </section>

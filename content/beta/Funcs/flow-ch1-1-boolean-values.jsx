@@ -2,28 +2,34 @@
    One JSON-compatible lesson object; every page renders through the shared flow kit. */
 
 const CH1_BOOLEAN_VALUES_GOALS = {
-  produceDisplay: {
-    id: 'produceDisplay',
+  state: {
+    id: 'state',
     n: 'A',
-    label: 'Produce and display Boolean values.',
-    gloss: 'Store Boolean values, compute new values from them, and display the results.',
+    label: 'Store and compute Boolean values in program state.',
+    gloss: 'Create Boolean bindings and store results computed from them.',
+  },
+  display: {
+    id: 'display',
+    n: 'B',
+    label: 'Display program state in the console.',
+    gloss: 'Read stored Boolean values and display them as console output.',
   },
 };
 
 const CH1_BOOLEAN_VALUES_SUBGOALS = {
   store: {
-    id: 'store', n: 'A.a', goal: 'produceDisplay',
+    id: 'store', n: 'A.a', goal: 'state',
     label: 'Store Boolean values in separate variables.',
     gloss: 'Create, copy, and update Boolean bindings so each variable keeps its own current value.',
   },
   compute: {
-    id: 'compute', n: 'A.b', goal: 'produceDisplay',
+    id: 'compute', n: 'A.b', goal: 'state',
     label: 'Compute new Boolean values from stored values.',
     gloss: 'Apply Boolean operators to stored values and bind each computed result.',
   },
   display: {
-    id: 'display', n: 'A.c', goal: 'produceDisplay',
-    label: 'Display Boolean results in the console.',
+    id: 'display', n: 'B.a', goal: 'display',
+    label: 'Display Boolean values from program state.',
     gloss: 'Evaluate each argument, then display its resulting Boolean value.',
   },
 };
@@ -481,7 +487,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
     goal: {
       intent: 'Show all three code jobs in one door-status program.',
       badge: 'Full example',
-      activeGoal: 'produceDisplay',
+      activeGoal: 'state',
       activeSubgoal: 'store',
       activeKey: 'door-line-1',
       startLabel: 'Start running the example',
@@ -493,7 +499,12 @@ const CH1_BOOLEAN_VALUES_LESSON = {
     preQuiz: {
       intent: 'Check the three code jobs before the lesson adds more detail.',
       kicker: 'Pre-Quiz · Boolean Values, State, and Visible Results',
-      part1Prompt: 'Put the three code jobs in the order used by the door-status program.',
+      part1Prompt: 'Read this program, then put its three code jobs in source order.',
+      part1Code: [
+        'bool active = true;',
+        'bool inactive = !active;',
+        'Console.WriteLine(inactive);',
+      ],
       part2Prompt: 'Open each code job and answer its short question.',
       orderSuccess: 'The program stores values, computes new values, then displays the results.',
       orderRetry: 'Start with the declarations and assignment. Computations use stored values before WriteLine displays the results.',
@@ -509,33 +520,39 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           why: 'Boolean operators produce results that can be stored under new names.',
         },
         {
-          id: 'display', n: 'A.c',
-          label: 'Display Boolean results in the console.',
+          id: 'display', n: 'B.a',
+          label: 'Display Boolean values from program state.',
           why: 'WriteLine makes a stored result visible without changing it.',
         },
       ],
+      hideOrderOrdinals: true,
       shuffled: ['display', 'store', 'compute'],
       details: {
         store: {
           type: 'fill the state pair', kind: 'choice', mono: true,
-          q: 'What values are stored after line 3?',
-          choices: [
-            'doorClosed = false; recordedDoorClosed = true',
-            'doorClosed = false; recordedDoorClosed = false',
-            'doorClosed = true; recordedDoorClosed = true',
+          q: 'Which pair is in Program State after line 3?',
+          contextCode: [
+            'bool original = true;',
+            'bool saved = original;',
+            'original = false;',
           ],
-          correct: 0,
-          why: 'Line 2 copies true into separate storage. Line 3 changes only doorClosed.',
+          choices: [
+            'original = false; saved = false',
+            'original = false; saved = true',
+            'original = true; saved = false',
+          ],
+          correct: 1,
+          why: 'A.a stores Boolean values in separate variables. Line 2 gives saved its own Boolean value. Line 3 writes only to original.',
         },
         compute: {
           type: 'pick the computing line', kind: 'choice', mono: true,
           q: 'Which line computes and stores a Boolean result?',
           choices: [
-            'bool ready = !false;',
-            'bool ready = "true";',
             'string ready = "true";',
+            'bool ready = "true";',
+            'bool ready = !false;',
           ],
-          correct: 0,
+          correct: 2,
           why: '!false produces the Boolean value true, and the declaration stores it in ready.',
         },
         display: {
@@ -560,34 +577,34 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           type: 'choose the state pair', kind: 'choice', mono: true,
           q: 'Which state is correct after both declarations run?',
           choices: [
-            'powerAvailable = true; maintenanceMode = false',
             'powerAvailable = false; maintenanceMode = true',
+            'powerAvailable = true; maintenanceMode = false',
             'powerAvailable = true; maintenanceMode = true',
           ],
-          correct: 0,
+          correct: 1,
           why: 'A.a stores Boolean values in separate variables. Each declaration creates one bool binding with the value on its right side.',
         },
         {
           type: 'choose the state and cause', kind: 'choice', mono: true,
           q: 'Which option gives the state after line 3 and the line that made the values differ?',
           choices: [
-            'originalStatus = false; savedStatus = true; line 3 changes only originalStatus',
             'originalStatus = false; savedStatus = false; line 3 changes both variables',
             'originalStatus = true; savedStatus = true; line 2 changes only savedStatus',
+            'originalStatus = false; savedStatus = true; line 3 changes only originalStatus',
           ],
-          correct: 0,
+          correct: 2,
           why: 'A.a stores separate Boolean values. Line 2 gives savedStatus its own true value, and line 3 writes only to originalStatus.',
         },
         {
           type: 'match results and display', kind: 'choice', mono: true,
           q: 'Which option matches the four stored results and the value displayed by the final line?',
           choices: [
-            'opposite = true; bothReady = false; sameValue = false; differentValues = true; display True',
             'opposite = false; bothReady = true; sameValue = true; differentValues = false; display False',
+            'opposite = true; bothReady = false; sameValue = false; differentValues = true; display True',
             'opposite = true; bothReady = true; sameValue = false; differentValues = false; display True',
           ],
-          correct: 0,
-          why: 'A.b computes each stored result. A.c evaluates opposite, then WriteLine displays True without changing any binding.',
+          correct: 1,
+          why: 'A.b computes each stored result. B.a evaluates opposite, then WriteLine displays True without changing any binding.',
         },
       ],
     },
@@ -601,22 +618,22 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           id: 'state-after-rebind', type: 'choose the state triple', kind: 'choice', mono: true,
           q: 'Which state is correct immediately after line 4 runs?',
           choices: [
-            'primaryOnline = false; backupOnline = true; savedPrimaryOnline = true',
             'primaryOnline = false; backupOnline = true; savedPrimaryOnline = false',
             'primaryOnline = true; backupOnline = true; savedPrimaryOnline = true',
+            'primaryOnline = false; backupOnline = true; savedPrimaryOnline = true',
           ],
-          correct: 0,
+          correct: 2,
           why: 'Line 3 copies true into savedPrimaryOnline. Line 4 changes only primaryOnline.',
         },
         {
           id: 'copy-line', type: 'pick the copying line', kind: 'choice', mono: true,
           q: 'Which line creates the saved Boolean binding?',
           choices: [
-            'line 3: bool savedPrimaryOnline = primaryOnline;',
             'line 4: primaryOnline = false;',
+            'line 3: bool savedPrimaryOnline = primaryOnline;',
             'line 6: bool primaryOffline = !primaryOnline;',
           ],
-          correct: 0,
+          correct: 1,
           why: 'Line 3 declares savedPrimaryOnline and copies the value read from primaryOnline.',
         },
         {
@@ -690,7 +707,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
       problems: [
         {
           n: 1, title: 'Complete an open-status program', tag: 'guided labels',
-          statement: 'Complete the program using the labels: A.a stores isOpen, A.b computes isClosed, and A.c displays both stored values.',
+          statement: 'Complete the program using the labels: A.a stores isOpen, A.b computes isClosed, and B.a displays both stored values.',
           given: [
             'bool isOpen = false;',
             'bool isClosed = ___;',
@@ -700,7 +717,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           constraints: [
             'A.a: keep isOpen bound to false.',
             'A.b: use ! with isOpen.',
-            'A.c: display isOpen first and isClosed second.',
+            'B.a: display isOpen first and isClosed second.',
             'Predict the two console values.',
           ],
           model: [
@@ -710,11 +727,11 @@ const CH1_BOOLEAN_VALUES_LESSON = {
             'Console.WriteLine(isClosed);',
             'Console: False, True',
           ],
-          feedback: 'If the output differs, check the matching code job. A.a establishes isOpen = false. A.b applies ! and stores true. A.c displays both values in source order.',
+          feedback: 'If the output differs, check the matching code job. A.a establishes isOpen = false. A.b applies ! and stores true. B.a displays both values in source order.',
         },
         {
           n: 2, title: 'Preserve an earlier signal', tag: 'copy and rebind',
-          statement: 'Retain the labels: A.a copies and rebinds the signal values; A.c displays the current and saved values.',
+          statement: 'Retain the labels: A.a copies and rebinds the signal values; B.a displays the current and saved values.',
           given: [
             'bool currentSignal = true;',
             'bool savedSignal = ___;',
@@ -725,13 +742,13 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           constraints: [
             'A.a: copy currentSignal into savedSignal before line 3.',
             'A.a: do not assign a second value to savedSignal.',
-            'A.c: predict the two console values.',
+            'B.a: predict the two console values.',
           ],
           model: [
             'bool savedSignal = currentSignal;',
             'Console: False, True',
           ],
-          feedback: 'A.a creates two independent Boolean bindings, so savedSignal retains true. A.c displays the current value of each binding.',
+          feedback: 'A.a creates two independent Boolean bindings, so savedSignal retains true. B.a displays the current value of each binding.',
         },
         {
           n: 3, title: 'Compute two readiness results', tag: 'reduced guidance',

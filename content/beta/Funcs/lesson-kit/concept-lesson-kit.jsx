@@ -367,7 +367,7 @@ function FuncsSubgoalTag({ subgoal, active = false, compact = false }) {
   if (!subgoal) return null;
 
   return (
-    <span style={{
+    <span className="funcs-subgoal-tag" style={{
       display: 'inline-flex',
       alignItems: 'center',
       gap: 5,
@@ -1364,6 +1364,7 @@ function FuncsConsole({ lines }) {
           fontFamily: "'JetBrains Mono', monospace", fontSize: 13,
           color: output.length ? '#e2e8f0' : '#6c7086',
           fontStyle: output.length ? 'normal' : 'italic',
+          whiteSpace: 'pre-wrap',
         }}>{output.length ? output.join('\n') : '(no output)'}</div>
       </div>
     </div>

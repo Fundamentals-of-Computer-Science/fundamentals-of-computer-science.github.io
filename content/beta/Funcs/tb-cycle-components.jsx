@@ -376,7 +376,7 @@ function TBMemoryMini({ rows }) {
       background: '#fff', marginTop: 10,
     }}>
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(0, 0.65fr) minmax(0, 0.65fr)', columnGap: 6,
         padding: '5px 8px', background: '#f8fafc',
         fontSize: 8.5, textTransform: 'uppercase', letterSpacing: '0.08em',
         color: '#94a3b8', fontWeight: 800,
@@ -385,12 +385,12 @@ function TBMemoryMini({ rows }) {
       </div>
       {rows.map((row) => (
         <div key={row.name} style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+          display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(0, 0.65fr) minmax(0, 0.65fr)', columnGap: 6,
           padding: '6px 8px', borderTop: '1px solid #edf2f7',
           fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
           color: '#334155',
         }}>
-          <strong>{row.name}</strong>
+          <strong style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{row.name}</strong>
           <span style={{ color: '#64748b' }}>{row.type}</span>
           <span style={{
             color: row.value === 'true' ? '#059669' : row.value === 'false' ? '#dc2626' : '#334155',

@@ -61,6 +61,25 @@ const FLOW_RESPONSIVE_STYLES = `
     .flow-stage-heading-row > :last-child {
       margin-left: 0 !important;
     }
+
+    .flow-prequiz-category {
+      align-items: flex-start !important;
+      flex-wrap: wrap;
+    }
+
+    .flow-prequiz-category-meta {
+      width: 100%;
+      margin-left: 23px !important;
+    }
+
+    .flow-prequiz-category .funcs-subgoal-tag {
+      white-space: normal !important;
+    }
+
+    .flow-prequiz-category .funcs-subgoal-tag > :last-child {
+      overflow: visible !important;
+      text-overflow: clip !important;
+    }
   }
 `;
 
@@ -226,10 +245,10 @@ function FlowChoiceBtn({ text, mono = false, onClick, chosen, isCorrect, reveale
     <button type="button" onClick={onClick} disabled={disabled} style={{
       display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', border, background: bg, color, borderRadius: 7,
       padding: '8px 11px', fontFamily: mono ? FLOW_MONO : FLOW_FONT, fontSize: mono ? 12 : 13, lineHeight: 1.4, fontWeight: chosen ? 700 : 500,
-      cursor: disabled ? 'default' : 'pointer',
+      minWidth: 0, maxWidth: '100%', overflow: 'hidden', cursor: disabled ? 'default' : 'pointer',
     }}>
       <span style={{ width: 14, height: 14, borderRadius: '50%', flexShrink: 0, border: chosen ? '4.5px solid ' + (revealed ? (isCorrect ? '#16a34a' : '#dc2626') : '#2563eb') : '1.5px solid #cbd5e1', background: '#fff', boxSizing: 'border-box' }}></span>
-      <span style={{ minWidth: 0 }}>{text}</span>
+      <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{text}</span>
       {revealed && isCorrect && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 900, color: '#16a34a', flexShrink: 0 }}>✓</span>}
     </button>
   );
