@@ -136,10 +136,10 @@ const CH1_V1_LESSON_MAP = [
   {
     id: 'ch1-boolean-data-memory',
     order: 1,
-    title: 'Boolean Data and Memory',
+    title: 'Boolean Values, State, and Visible Results',
     source: 'ch1/ch1-1.md',
-    href: 'Ch1 Data Memory Sequence.html',
-    learningTarget: 'Trace boolean declarations, assignments, value copies, and console output as changes to program memory.',
+    href: 'Ch1-1-Boolean-Values-State-Visible-Results.html',
+    learningTarget: 'Store and compute Boolean values in program state, then display that state in the console.',
     reviewConcepts: [],
   },
   {
@@ -611,7 +611,7 @@ function Ch1RoadmapPrototype() {
               Ten compact lessons cover the Chapter 1 concept clusters. The door-checker program is used as synthesis material in quizzes and exercises, not as one oversized walkthrough.
             </p>
           </div>
-          <a href="Ch1 Data Memory Sequence.html" style={{
+          <a href="Ch1-1-Boolean-Values-State-Visible-Results.html" style={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',

@@ -15,6 +15,7 @@ presentation is the selected `redesign-existing-projects` result from the
 three-arm design experiment.
 
 - [Chapter 0.1 interact with a program using the console](/beta/Funcs/Ch0-1-Programs-Input-Output-Tour.html)
+- [Chapter 1.1 Boolean values, state, and visible results](/beta/Funcs/Ch1-1-Boolean-Values-State-Visible-Results.html)
 - [Chapter 1.4 branching and scope](/beta/Funcs/Ch1-Branching-Scope-Authoring-Flow.html)
 - [Chapter 2.4 recursive numeric methods](/beta/Funcs/Ch2-4-Authoring-Flow.html)
 - [Flow lesson authoring guide](/beta/Funcs/lesson-kit/FLOW_AUTHORING.html)
