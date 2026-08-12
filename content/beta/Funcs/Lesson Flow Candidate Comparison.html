@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Lesson Flow Candidate Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"/>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: #eeeae3; color: #1e293b; font-family: "Source Sans 3", sans-serif; }
+a { color: #1d4ed8; }
+.page { width: min(1760px, 100%); margin: 0 auto; padding: 22px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end; margin-bottom: 18px; }
+.eyebrow { color: #2563eb; font: 700 11px/1.3 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+h1 { margin: 5px 0 6px; color: #172033; font-size: clamp(25px, 3vw, 40px); line-height: 1.05; }
+.lede { max-width: 760px; margin: 0; color: #596579; font-size: 15px; line-height: 1.5; }
+.links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.links a { border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; padding: 8px 11px; font-weight: 700; text-decoration: none; }
+.comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.panel { min-width: 0; overflow: hidden; border: 1px solid #d8d2c8; border-radius: 10px; background: #fff; box-shadow: 0 10px 28px rgba(43,37,30,.1); }
+.panel-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #e5e7eb; padding: 10px 13px; }
+.panel-head strong { color: #172033; font-size: 15px; }
+.tag { border-radius: 999px; padding: 2px 7px; background: #f1f5f9; color: #64748b; font: 600 9px/1.4 "JetBrains Mono", monospace; text-transform: uppercase; }
+iframe { display: block; width: 100%; height: min(720px, 72vh); border: 0; background: #f4f1eb; }
+.checklist { margin: 15px 0 0; color: #596579; font-size: 13px; line-height: 1.55; }
+.checklist strong { color: #334155; }
+@media (max-width: 980px) {
+  .page { padding: 12px; }
+  .hero { grid-template-columns: 1fr; }
+  .links { justify-content: flex-start; }
+  .comparison { grid-template-columns: 1fr; }
+  iframe { height: 680px; }
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">FunCS beta · controlled comparison</div>
+        <h1>Lesson Flow Candidate Comparison</h1>
+        <p class="lede">Chapter 2.4 appears in both panes: the unchanged current beta on the left and the additive authoring-kit candidate on the right. The branching lesson exercises the same candidate renderer with a second fixture.</p>
+      </div>
+      <nav class="links" aria-label="Open lesson pages">
+        <a data-page="current" href="Ch2-4-Sequence.html">Open current Ch2.4</a>
+        <a data-page="ch24" href="Ch2-4-Authoring-Flow.html">Open candidate Ch2.4</a>
+        <a data-page="ch14" href="Ch1-Branching-Scope-Authoring-Flow.html">Open candidate Ch1.4</a>
+      </nav>
+    </header>
+
+    <section class="comparison" aria-label="Current and candidate lesson comparison">
+      <article class="panel">
+        <div class="panel-head"><span class="tag">Control</span><strong>Current beta · Chapter 2.4</strong></div>
+        <iframe data-page="current" title="Current beta Chapter 2.4 lesson"></iframe>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><span class="tag">Candidate</span><strong>Authoring flow · Chapter 2.4</strong></div>
+        <iframe data-page="ch24" title="Candidate authoring flow Chapter 2.4 lesson"></iframe>
+      </article>
+    </section>
+
+    <p class="checklist"><strong>Compare:</strong> how the walkthrough starts and steps; how stage boundaries read; how checks gate the main lesson; how the footer carries Back/Next; and how each version behaves at a narrow viewport.</p>
+  </main>
+  <script>
+    const localPreview = decodeURIComponent(location.pathname).endsWith('/Lesson Flow Candidate Comparison.html');
+    const pagePaths = localPreview
+      ? {
+        current: 'Ch2%204%20Sequence.html',
+        ch24: 'Ch2%204%20Authoring%20Flow.html',
+        ch14: 'Ch1%20Branching%20Scope%20Authoring%20Flow.html',
+      }
+      : {
+        current: 'Ch2-4-Sequence.html',
+        ch24: 'Ch2-4-Authoring-Flow.html',
+        ch14: 'Ch1-Branching-Scope-Authoring-Flow.html',
+      };
+
+    document.querySelectorAll('[data-page]').forEach(element => {
+      const path = pagePaths[element.dataset.page];
+      if (element.tagName === 'IFRAME') element.src = path;
+      else element.href = path;
+    });
+  </script>
+</body>
+</html>

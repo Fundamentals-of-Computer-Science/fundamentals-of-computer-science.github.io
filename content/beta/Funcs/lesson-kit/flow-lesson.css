@@ -1,0 +1,697 @@
+/* canonical FunCS authoring flow presentation
+   Scoped to .flow-authoring-canonical so authoring pages opt into the promoted presentation. */
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #e9e2d8;
+}
+
+.flow-authoring-canonical {
+  --flow-canvas: #e9e2d8;
+  --flow-paper: #fbf9f5;
+  --flow-paper-strong: #fffdf9;
+  --flow-paper-muted: #f4efe8;
+  --flow-ink: #25211e;
+  --flow-ink-soft: #514a44;
+  --flow-muted: #746b63;
+  --flow-faint: #a1978d;
+  --flow-line: #ddd4c9;
+  --flow-line-soft: #ece5dc;
+  --flow-accent: #a34f36;
+  --flow-accent-dark: #7d3827;
+  --flow-accent-soft: #f3e5df;
+  --flow-accent-faint: #faf2ee;
+  --flow-focus: #c36547;
+  --flow-success: #35705a;
+  --flow-shadow: rgba(80, 56, 42, 0.15);
+  width: 100%;
+  height: 100dvh !important;
+  min-height: 100dvh;
+  padding: clamp(0.55rem, 1.6vw, 1.45rem) !important;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 253, 249, 0.86), transparent 34rem),
+    radial-gradient(circle at 92% 100%, rgba(163, 79, 54, 0.09), transparent 30rem),
+    var(--flow-canvas) !important;
+}
+
+.flow-authoring-canonical::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(94, 68, 52, 0.025) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px 4px);
+}
+
+.flow-authoring-canonical .candidate-frame {
+  width: min(100%, 90rem) !important;
+  height: 100% !important;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgba(126, 100, 82, 0.24) !important;
+  border-radius: 1.15rem 1.15rem 0.7rem 0.7rem;
+  background: var(--flow-paper) !important;
+  box-shadow:
+    0 1.4rem 4rem var(--flow-shadow),
+    0 0.2rem 0.7rem rgba(80, 56, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+}
+
+.flow-authoring-canonical .candidate-frame > div {
+  background: var(--flow-paper) !important;
+  color: var(--flow-ink) !important;
+}
+
+/* Type: keep the loaded reading and code faces; add editorial character to headings. */
+.flow-authoring-canonical .flow-stage-frame,
+.flow-authoring-canonical button,
+.flow-authoring-canonical a {
+  font-family: "Source Sans 3", sans-serif;
+}
+
+.flow-authoring-canonical h3,
+.flow-authoring-canonical h4 {
+  max-width: 23ch;
+  color: var(--flow-ink) !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.flow-authoring-canonical h3 {
+  font-size: clamp(1.8rem, 3vw, 2.45rem) !important;
+  line-height: 1.02 !important;
+}
+
+.flow-authoring-canonical h4 {
+  font-size: clamp(1.3rem, 2vw, 1.65rem) !important;
+  line-height: 1.1 !important;
+}
+
+.flow-authoring-canonical p,
+.flow-authoring-canonical li {
+  max-width: 65ch;
+  color: var(--flow-ink-soft) !important;
+  font-size: 0.96rem !important;
+  line-height: 1.65 !important;
+  text-wrap: pretty;
+}
+
+.flow-authoring-canonical code,
+.flow-authoring-canonical pre,
+.flow-authoring-canonical .tb-page-sequence-control-status {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lift the control's smallest type without changing the authored wording. */
+.flow-authoring-canonical [style*="font-size: 8px"],
+.flow-authoring-canonical [style*="font-size: 8.5px"],
+.flow-authoring-canonical [style*="font-size: 9px"],
+.flow-authoring-canonical [style*="font-size: 9.5px"] {
+  font-size: 0.66rem !important;
+}
+
+.flow-authoring-canonical [style*="font-size: 10px"],
+.flow-authoring-canonical [style*="font-size: 10.5px"] {
+  font-size: 0.72rem !important;
+}
+
+.flow-authoring-canonical [style*="font-size: 11px"],
+.flow-authoring-canonical [style*="font-size: 11.5px"] {
+  font-size: 0.78rem !important;
+}
+
+.flow-authoring-canonical [style*="font-size: 12px"],
+.flow-authoring-canonical [style*="font-size: 12.2px"],
+.flow-authoring-canonical [style*="font-size: 12.5px"],
+.flow-authoring-canonical [style*="font-size: 12.8px"] {
+  font-size: 0.84rem !important;
+}
+
+.flow-authoring-canonical [style*="font-size: 13px"],
+.flow-authoring-canonical [style*="font-size: 13.5px"] {
+  font-size: 0.9rem !important;
+}
+
+.flow-authoring-canonical [style*="font-size: 14px"],
+.flow-authoring-canonical [style*="font-size: 14.5px"] {
+  font-size: 0.96rem !important;
+}
+
+/* Top chapter rail: an editorial index rather than five equal cards. */
+.flow-authoring-canonical .candidate-frame > div > div:first-child {
+  height: 4rem !important;
+  padding-inline: clamp(0.75rem, 2vw, 1.5rem) !important;
+  border-bottom: 1px solid var(--flow-line) !important;
+  background: var(--flow-paper-strong) !important;
+  box-shadow: 0 0.35rem 1rem rgba(80, 56, 42, 0.055);
+}
+
+.flow-authoring-canonical nav[aria-label="Chapters"] {
+  background: transparent !important;
+  scrollbar-color: var(--flow-accent) transparent;
+}
+
+.flow-authoring-canonical nav[aria-label="Chapters"] > * {
+  min-width: 6.3rem !important;
+  border-left-color: var(--flow-line-soft) !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--flow-muted) !important;
+  box-shadow: none !important;
+}
+
+.flow-authoring-canonical nav[aria-label="Chapters"] > *:hover {
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical nav[aria-label="Chapters"] > [aria-current="page"] {
+  position: relative;
+  background: var(--flow-accent-faint) !important;
+  color: var(--flow-accent-dark) !important;
+  box-shadow: inset 0 -0.2rem 0 var(--flow-accent) !important;
+}
+
+.flow-authoring-canonical nav[aria-label="Chapters"] > [aria-current="page"] [style*="color: rgb(37, 99, 235)"],
+.flow-authoring-canonical nav[aria-label="Chapters"] > [aria-current="page"] [style*="color: rgb(29, 78, 216)"] {
+  color: var(--flow-accent) !important;
+}
+
+.flow-authoring-canonical [role="dialog"][aria-label="Chapter lesson selector"] {
+  overflow: hidden;
+  border: 1px solid var(--flow-line);
+  border-radius: 0.75rem;
+  box-shadow: 0 1.2rem 2.6rem rgba(80, 56, 42, 0.2);
+}
+
+/* Stage canvas and major layouts. */
+.flow-authoring-canonical .tb-page-sequence-frame,
+.flow-authoring-canonical .tb-page-sequence-content,
+.flow-authoring-canonical .flow-stage-frame-sequence {
+  background: var(--flow-paper) !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-content {
+  scrollbar-color: var(--flow-faint) transparent;
+}
+
+.flow-authoring-canonical .flow-stage-frame-sequence {
+  color: var(--flow-ink) !important;
+  font-size: 0.95rem !important;
+}
+
+.flow-authoring-canonical .flow-goal-layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.88fr) !important;
+  background: var(--flow-paper) !important;
+}
+
+.flow-authoring-canonical .flow-goal-code {
+  border-right: 1px solid var(--flow-line) !important;
+  background: var(--flow-paper-strong);
+}
+
+.flow-authoring-canonical .flow-goal-code > div:first-child {
+  padding: 0.9rem 1.35rem !important;
+  border-bottom-color: var(--flow-line-soft) !important;
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical .flow-goal-code > div:last-child {
+  padding: 1.15rem 1.4rem 1.8rem !important;
+}
+
+.flow-authoring-canonical .flow-goal-state {
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical .flow-goal-state > div:first-child {
+  padding: 0.85rem 1.25rem !important;
+  border-bottom-color: var(--flow-line) !important;
+  background: rgba(255, 253, 249, 0.64);
+}
+
+.flow-authoring-canonical .flow-goal-state > div:last-child {
+  padding: 1.25rem !important;
+  gap: 1.15rem !important;
+}
+
+.flow-authoring-canonical .flow-rigorous-layout {
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr) !important;
+  background: var(--flow-paper) !important;
+}
+
+.flow-authoring-canonical .flow-rigorous-code {
+  padding: 1.25rem 1.15rem 1.8rem !important;
+  border-right: 1px solid var(--flow-line) !important;
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical .flow-rigorous-questions {
+  padding: 1.5rem clamp(1.2rem, 3vw, 2.25rem) 2.4rem !important;
+  gap: 0.85rem !important;
+  background: var(--flow-paper) !important;
+}
+
+.flow-authoring-canonical .flow-stage-body {
+  width: min(100%, 50rem);
+  max-width: 50rem !important;
+  margin-inline: auto;
+  padding: 2.4rem clamp(1.3rem, 4vw, 3.25rem) 4.5rem !important;
+  gap: 2rem !important;
+}
+
+.flow-authoring-canonical .flow-stage-body > div:first-child {
+  padding-bottom: 0.35rem;
+}
+
+.flow-authoring-canonical .flow-stage-body > div:first-child > div:first-child,
+.flow-authoring-canonical .flow-stage-heading-row > div:first-child,
+.flow-authoring-canonical .flow-rigorous-questions > div:first-child > div:first-child {
+  color: var(--flow-accent) !important;
+}
+
+.flow-authoring-canonical .flow-stage-frame-sequence > div[style*="border-bottom"] > span:first-child {
+  border-color: #e4c7bb !important;
+  background: var(--flow-accent-soft) !important;
+  color: var(--flow-accent-dark) !important;
+}
+
+.flow-authoring-canonical .flow-stage-body > section[aria-hidden] {
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--flow-line);
+  gap: 0.9rem !important;
+}
+
+/* Pre-quiz receives the same readable measure as the narrative stages. */
+.flow-authoring-canonical .flow-stage-frame-sequence > div[style*="padding: 16px 20px 20px"] {
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  padding: 2rem clamp(1.2rem, 4vw, 3rem) 3.5rem !important;
+  gap: 1.2rem !important;
+}
+
+.flow-authoring-canonical .flow-stage-heading-row {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--flow-line);
+}
+
+/* Reduce generic card repetition; reserve elevation and tint for active work. */
+.flow-authoring-canonical .flow-stage-frame section:not([aria-hidden]),
+.flow-authoring-canonical .flow-stage-frame article {
+  border-color: var(--flow-line) !important;
+  border-radius: 0.7rem !important;
+  box-shadow: none;
+}
+
+.flow-authoring-canonical .flow-stage-frame section[style*="border: 1.5px solid rgb(191, 219, 254)"] {
+  border: 0 !important;
+  border-left: 0.26rem solid var(--flow-accent) !important;
+  background: var(--flow-paper-strong) !important;
+  box-shadow: 0 0.7rem 1.8rem rgba(80, 56, 42, 0.085);
+}
+
+.flow-authoring-canonical .flow-stage-body > section:not([aria-hidden]) > div:first-child {
+  border-bottom-color: var(--flow-line-soft) !important;
+  background: var(--flow-accent-faint) !important;
+}
+
+.flow-authoring-canonical .flow-stage-body > article {
+  overflow: hidden;
+  border: 0 !important;
+  border-left: 0.26rem solid var(--flow-line) !important;
+  background: var(--flow-paper-strong) !important;
+  box-shadow: 0 0.7rem 1.8rem rgba(80, 56, 42, 0.065);
+}
+
+.flow-authoring-canonical .flow-stage-body > article > div:first-child {
+  padding: 0.95rem 1.1rem !important;
+  border-bottom-color: var(--flow-line-soft) !important;
+  background: var(--flow-paper-muted);
+}
+
+.flow-authoring-canonical .flow-stage-body > article > div:last-child {
+  padding: 1.1rem 1.25rem 1.4rem !important;
+  gap: 1rem !important;
+}
+
+.flow-authoring-canonical .flow-stage-body > article > div:first-child > span:first-child {
+  border-radius: 0.22rem !important;
+  background: var(--flow-ink-soft) !important;
+}
+
+/* Shared data-authored Intro pages. */
+.flow-authoring-canonical .flow-intro-page {
+  width: min(100%, 58rem);
+  margin-inline: auto;
+  padding: 2.5rem clamp(1.25rem, 4vw, 3.5rem) 4.5rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.flow-authoring-canonical .flow-intro-header {
+  display: grid;
+  gap: 0.7rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-authoring-canonical .flow-intro-eyebrow,
+.flow-authoring-canonical .flow-intro-card-label,
+.flow-authoring-canonical .flow-intro-step-label {
+  color: var(--flow-accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-authoring-canonical .flow-intro-header h3,
+.flow-authoring-canonical .flow-intro-section h4,
+.flow-authoring-canonical .flow-intro-header p,
+.flow-authoring-canonical .flow-intro-section p,
+.flow-authoring-canonical .flow-intro-card p,
+.flow-authoring-canonical .flow-intro-callout p,
+.flow-authoring-canonical .flow-exercise-model p {
+  margin: 0;
+}
+
+.flow-authoring-canonical .flow-intro-section {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.flow-authoring-canonical .flow-intro-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.flow-authoring-canonical .flow-intro-card {
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid var(--flow-line);
+  border-radius: 0.65rem;
+  background: var(--flow-paper-strong);
+}
+
+.flow-authoring-canonical .flow-intro-steps {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.flow-authoring-canonical .flow-intro-steps > li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.flow-authoring-canonical .flow-intro-step-number {
+  width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+  background: var(--flow-accent-soft);
+  color: var(--flow-accent-dark);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.flow-authoring-canonical .flow-intro-code,
+.flow-authoring-canonical .flow-exercise-model pre {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--flow-line);
+  border-radius: 0.55rem;
+  background: var(--flow-paper-muted);
+  color: var(--flow-ink);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.flow-authoring-canonical .flow-intro-callout {
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  border-left: 0.24rem solid var(--flow-accent);
+  background: var(--flow-accent-faint);
+}
+
+.flow-authoring-canonical .flow-intro-callout > div {
+  color: var(--flow-accent-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.flow-authoring-canonical .flow-exercise-model {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--flow-line-soft);
+}
+
+.flow-authoring-canonical .flow-exercise-model summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--flow-accent-dark);
+  font-weight: 700;
+}
+
+.flow-authoring-canonical .flow-exercise-model summary:focus-visible {
+  outline: 0.2rem solid var(--flow-focus);
+  outline-offset: 0.18rem;
+}
+
+.flow-authoring-canonical .flow-exercise-model[open] {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.flow-authoring-canonical .flow-stage-frame [style*="border-radius: 999px"] {
+  border-radius: 0.25rem !important;
+}
+
+/* Non-semantic blue chrome becomes one restrained rust accent. */
+.flow-authoring-canonical .tb-page-sequence-tab[style*="rgb(37, 99, 235)"] > span,
+.flow-authoring-canonical .flow-stage-heading-row [style*="color: rgb(37, 99, 235)"],
+.flow-authoring-canonical .flow-stage-body [style*="color: rgb(37, 99, 235)"],
+.flow-authoring-canonical .flow-rigorous-questions [style*="color: rgb(37, 99, 235)"] {
+  color: var(--flow-accent) !important;
+}
+
+.flow-authoring-canonical button[style*="background: rgb(239, 246, 255)"],
+.flow-authoring-canonical span[style*="background: rgb(239, 246, 255)"] {
+  background: var(--flow-accent-soft) !important;
+}
+
+.flow-authoring-canonical button[style*="border: 1px solid rgb(37, 99, 235)"],
+.flow-authoring-canonical button[style*="border: 1.5px solid rgb(37, 99, 235)"] {
+  border-color: var(--flow-accent) !important;
+}
+
+/* Footer becomes a quiet tool rail with one clear forward action. */
+.flow-authoring-canonical .tb-page-sequence-footer {
+  padding: 0.75rem 0.9rem 0.85rem !important;
+  border-top: 1px solid var(--flow-line) !important;
+  background: rgba(255, 253, 249, 0.97) !important;
+  box-shadow: 0 -0.75rem 1.8rem rgba(80, 56, 42, 0.055);
+}
+
+.flow-authoring-canonical .tb-page-sequence-tabs {
+  gap: 0.25rem !important;
+  scrollbar-color: var(--flow-faint) transparent;
+}
+
+.flow-authoring-canonical .tb-page-sequence-tab {
+  position: relative;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.7rem !important;
+  border: 0 !important;
+  border-radius: 0.35rem !important;
+  background: transparent !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-tab:hover {
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-tab[style*="rgb(37, 99, 235)"] {
+  background: var(--flow-accent-faint) !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-tab[style*="rgb(37, 99, 235)"]::after {
+  content: "";
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.22rem;
+  left: 0.7rem;
+  height: 0.13rem;
+  border-radius: 1rem;
+  background: var(--flow-accent);
+}
+
+.flow-authoring-canonical .tb-page-sequence-tab-title {
+  color: var(--flow-ink) !important;
+  font-size: 0.82rem !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em;
+}
+
+.flow-authoring-canonical .tb-page-sequence-control-status {
+  color: var(--flow-muted) !important;
+  border: 0 !important;
+  border-radius: 0.2rem !important;
+  background: var(--flow-paper-muted) !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-control-button {
+  min-height: 2.25rem !important;
+  border-radius: 0.35rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 650 !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-control-button:first-of-type {
+  border-color: var(--flow-line) !important;
+  background: transparent !important;
+  color: var(--flow-ink-soft) !important;
+}
+
+.flow-authoring-canonical .tb-page-sequence-control-button:last-child {
+  background: var(--flow-accent) !important;
+  color: #fffdf9 !important;
+  box-shadow: 0 0.35rem 0.9rem rgba(126, 56, 39, 0.2);
+}
+
+/* Physical, keyboard-visible interaction states. */
+.flow-authoring-canonical button,
+.flow-authoring-canonical a[href] {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.75, 0.25, 1),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 220ms ease,
+    opacity 200ms ease;
+}
+
+.flow-authoring-canonical button:not(:disabled):hover,
+.flow-authoring-canonical a[href]:hover {
+  transform: translateY(-1px);
+}
+
+.flow-authoring-canonical button:not(:disabled):active,
+.flow-authoring-canonical a[href]:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.flow-authoring-canonical button:focus-visible,
+.flow-authoring-canonical a[href]:focus-visible {
+  outline: 0.2rem solid var(--flow-focus) !important;
+  outline-offset: 0.18rem !important;
+  box-shadow: 0 0 0 0.3rem var(--flow-paper-strong) !important;
+}
+
+.flow-authoring-canonical button:disabled,
+.flow-authoring-canonical [aria-disabled="true"] {
+  cursor: not-allowed !important;
+  filter: saturate(0.4);
+}
+
+@media (max-width: 760px) {
+  .flow-authoring-canonical {
+    padding: 0.35rem !important;
+  }
+
+  .flow-authoring-canonical .candidate-frame {
+    border-radius: 0.65rem 0.65rem 0.4rem 0.4rem;
+  }
+
+  .flow-authoring-canonical .candidate-frame > div > div:first-child {
+    height: 3.55rem !important;
+    padding-inline: 0.3rem !important;
+  }
+
+  .flow-authoring-canonical nav[aria-label="Chapters"] > * {
+    min-width: 5.65rem !important;
+    padding-inline: 0.4rem !important;
+  }
+
+  .flow-authoring-canonical .flow-goal-layout,
+  .flow-authoring-canonical .flow-rigorous-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .flow-authoring-canonical .flow-goal-code,
+  .flow-authoring-canonical .flow-rigorous-code {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--flow-line) !important;
+  }
+
+  .flow-authoring-canonical .flow-stage-body,
+  .flow-authoring-canonical .flow-intro-page,
+  .flow-authoring-canonical .flow-stage-frame-sequence > div[style*="padding: 16px 20px 20px"] {
+    padding: 1.8rem 1rem 3.5rem !important;
+    gap: 1.6rem !important;
+  }
+
+  .flow-authoring-canonical .flow-intro-card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flow-authoring-canonical .flow-rigorous-questions {
+    padding: 1.4rem 1rem 3rem !important;
+  }
+
+  .flow-authoring-canonical .tb-page-sequence-footer {
+    padding: 0.48rem 0.55rem 0.58rem !important;
+  }
+
+  .flow-authoring-canonical .tb-page-sequence-tabs {
+    gap: 0.12rem !important;
+  }
+
+  .flow-authoring-canonical .tb-page-sequence-tab {
+    min-height: 2.55rem;
+    padding: 0.42rem 0.55rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-authoring-canonical *,
+  .flow-authoring-canonical *::before,
+  .flow-authoring-canonical *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .flow-authoring-canonical button,
+  .flow-authoring-canonical a[href] {
+    transform: none !important;
+  }
+}

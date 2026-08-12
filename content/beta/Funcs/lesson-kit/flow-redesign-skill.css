@@ -1,0 +1,555 @@
+/* redesign-existing-projects experiment arm
+   Scoped to .redesign-skill-arm so the shared lesson kit and control stay unchanged. */
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #e9e2d8;
+}
+
+.redesign-skill-arm {
+  --rs-canvas: #e9e2d8;
+  --rs-paper: #fbf9f5;
+  --rs-paper-strong: #fffdf9;
+  --rs-paper-muted: #f4efe8;
+  --rs-ink: #25211e;
+  --rs-ink-soft: #514a44;
+  --rs-muted: #746b63;
+  --rs-faint: #a1978d;
+  --rs-line: #ddd4c9;
+  --rs-line-soft: #ece5dc;
+  --rs-accent: #a34f36;
+  --rs-accent-dark: #7d3827;
+  --rs-accent-soft: #f3e5df;
+  --rs-accent-faint: #faf2ee;
+  --rs-focus: #c36547;
+  --rs-success: #35705a;
+  --rs-shadow: rgba(80, 56, 42, 0.15);
+  width: 100%;
+  height: 100dvh !important;
+  min-height: 100dvh;
+  padding: clamp(0.55rem, 1.6vw, 1.45rem) !important;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 253, 249, 0.86), transparent 34rem),
+    radial-gradient(circle at 92% 100%, rgba(163, 79, 54, 0.09), transparent 30rem),
+    var(--rs-canvas) !important;
+}
+
+.redesign-skill-arm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(94, 68, 52, 0.025) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px 4px);
+}
+
+.redesign-skill-arm .candidate-frame {
+  width: min(100%, 90rem) !important;
+  height: 100% !important;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgba(126, 100, 82, 0.24) !important;
+  border-radius: 1.15rem 1.15rem 0.7rem 0.7rem;
+  background: var(--rs-paper) !important;
+  box-shadow:
+    0 1.4rem 4rem var(--rs-shadow),
+    0 0.2rem 0.7rem rgba(80, 56, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+}
+
+.redesign-skill-arm .candidate-frame > div {
+  background: var(--rs-paper) !important;
+  color: var(--rs-ink) !important;
+}
+
+/* Type: keep the loaded reading and code faces; add editorial character to headings. */
+.redesign-skill-arm .flow-stage-frame,
+.redesign-skill-arm button,
+.redesign-skill-arm a {
+  font-family: "Source Sans 3", sans-serif;
+}
+
+.redesign-skill-arm h3,
+.redesign-skill-arm h4 {
+  max-width: 23ch;
+  color: var(--rs-ink) !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.redesign-skill-arm h3 {
+  font-size: clamp(1.8rem, 3vw, 2.45rem) !important;
+  line-height: 1.02 !important;
+}
+
+.redesign-skill-arm h4 {
+  font-size: clamp(1.3rem, 2vw, 1.65rem) !important;
+  line-height: 1.1 !important;
+}
+
+.redesign-skill-arm p,
+.redesign-skill-arm li {
+  max-width: 65ch;
+  color: var(--rs-ink-soft) !important;
+  font-size: 0.96rem !important;
+  line-height: 1.65 !important;
+  text-wrap: pretty;
+}
+
+.redesign-skill-arm code,
+.redesign-skill-arm pre,
+.redesign-skill-arm .tb-page-sequence-control-status {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lift the control's smallest type without changing the authored wording. */
+.redesign-skill-arm [style*="font-size: 8px"],
+.redesign-skill-arm [style*="font-size: 8.5px"],
+.redesign-skill-arm [style*="font-size: 9px"],
+.redesign-skill-arm [style*="font-size: 9.5px"] {
+  font-size: 0.66rem !important;
+}
+
+.redesign-skill-arm [style*="font-size: 10px"],
+.redesign-skill-arm [style*="font-size: 10.5px"] {
+  font-size: 0.72rem !important;
+}
+
+.redesign-skill-arm [style*="font-size: 11px"],
+.redesign-skill-arm [style*="font-size: 11.5px"] {
+  font-size: 0.78rem !important;
+}
+
+.redesign-skill-arm [style*="font-size: 12px"],
+.redesign-skill-arm [style*="font-size: 12.2px"],
+.redesign-skill-arm [style*="font-size: 12.5px"],
+.redesign-skill-arm [style*="font-size: 12.8px"] {
+  font-size: 0.84rem !important;
+}
+
+.redesign-skill-arm [style*="font-size: 13px"],
+.redesign-skill-arm [style*="font-size: 13.5px"] {
+  font-size: 0.9rem !important;
+}
+
+.redesign-skill-arm [style*="font-size: 14px"],
+.redesign-skill-arm [style*="font-size: 14.5px"] {
+  font-size: 0.96rem !important;
+}
+
+/* Top chapter rail: an editorial index rather than five equal cards. */
+.redesign-skill-arm .candidate-frame > div > div:first-child {
+  height: 4rem !important;
+  padding-inline: clamp(0.75rem, 2vw, 1.5rem) !important;
+  border-bottom: 1px solid var(--rs-line) !important;
+  background: var(--rs-paper-strong) !important;
+  box-shadow: 0 0.35rem 1rem rgba(80, 56, 42, 0.055);
+}
+
+.redesign-skill-arm nav[aria-label="Chapters"] {
+  background: transparent !important;
+  scrollbar-color: var(--rs-accent) transparent;
+}
+
+.redesign-skill-arm nav[aria-label="Chapters"] > * {
+  min-width: 6.3rem !important;
+  border-left-color: var(--rs-line-soft) !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--rs-muted) !important;
+  box-shadow: none !important;
+}
+
+.redesign-skill-arm nav[aria-label="Chapters"] > *:hover {
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm nav[aria-label="Chapters"] > [aria-current="page"] {
+  position: relative;
+  background: var(--rs-accent-faint) !important;
+  color: var(--rs-accent-dark) !important;
+  box-shadow: inset 0 -0.2rem 0 var(--rs-accent) !important;
+}
+
+.redesign-skill-arm nav[aria-label="Chapters"] > [aria-current="page"] [style*="color: rgb(37, 99, 235)"],
+.redesign-skill-arm nav[aria-label="Chapters"] > [aria-current="page"] [style*="color: rgb(29, 78, 216)"] {
+  color: var(--rs-accent) !important;
+}
+
+.redesign-skill-arm [role="dialog"][aria-label="Chapter lesson selector"] {
+  overflow: hidden;
+  border: 1px solid var(--rs-line);
+  border-radius: 0.75rem;
+  box-shadow: 0 1.2rem 2.6rem rgba(80, 56, 42, 0.2);
+}
+
+/* Stage canvas and major layouts. */
+.redesign-skill-arm .tb-page-sequence-frame,
+.redesign-skill-arm .tb-page-sequence-content,
+.redesign-skill-arm .flow-stage-frame-sequence {
+  background: var(--rs-paper) !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-content {
+  scrollbar-color: var(--rs-faint) transparent;
+}
+
+.redesign-skill-arm .flow-stage-frame-sequence {
+  color: var(--rs-ink) !important;
+  font-size: 0.95rem !important;
+}
+
+.redesign-skill-arm .flow-goal-layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.88fr) !important;
+  background: var(--rs-paper) !important;
+}
+
+.redesign-skill-arm .flow-goal-code {
+  border-right: 1px solid var(--rs-line) !important;
+  background: var(--rs-paper-strong);
+}
+
+.redesign-skill-arm .flow-goal-code > div:first-child {
+  padding: 0.9rem 1.35rem !important;
+  border-bottom-color: var(--rs-line-soft) !important;
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm .flow-goal-code > div:last-child {
+  padding: 1.15rem 1.4rem 1.8rem !important;
+}
+
+.redesign-skill-arm .flow-goal-state {
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm .flow-goal-state > div:first-child {
+  padding: 0.85rem 1.25rem !important;
+  border-bottom-color: var(--rs-line) !important;
+  background: rgba(255, 253, 249, 0.64);
+}
+
+.redesign-skill-arm .flow-goal-state > div:last-child {
+  padding: 1.25rem !important;
+  gap: 1.15rem !important;
+}
+
+.redesign-skill-arm .flow-rigorous-layout {
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr) !important;
+  background: var(--rs-paper) !important;
+}
+
+.redesign-skill-arm .flow-rigorous-code {
+  padding: 1.25rem 1.15rem 1.8rem !important;
+  border-right: 1px solid var(--rs-line) !important;
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm .flow-rigorous-questions {
+  padding: 1.5rem clamp(1.2rem, 3vw, 2.25rem) 2.4rem !important;
+  gap: 0.85rem !important;
+  background: var(--rs-paper) !important;
+}
+
+.redesign-skill-arm .flow-stage-body {
+  width: min(100%, 50rem);
+  max-width: 50rem !important;
+  margin-inline: auto;
+  padding: 2.4rem clamp(1.3rem, 4vw, 3.25rem) 4.5rem !important;
+  gap: 2rem !important;
+}
+
+.redesign-skill-arm .flow-stage-body > div:first-child {
+  padding-bottom: 0.35rem;
+}
+
+.redesign-skill-arm .flow-stage-body > div:first-child > div:first-child,
+.redesign-skill-arm .flow-stage-heading-row > div:first-child,
+.redesign-skill-arm .flow-rigorous-questions > div:first-child > div:first-child {
+  color: var(--rs-accent) !important;
+}
+
+.redesign-skill-arm .flow-stage-frame-sequence > div[style*="border-bottom"] > span:first-child {
+  border-color: #e4c7bb !important;
+  background: var(--rs-accent-soft) !important;
+  color: var(--rs-accent-dark) !important;
+}
+
+.redesign-skill-arm .flow-stage-body > section[aria-hidden] {
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--rs-line);
+  gap: 0.9rem !important;
+}
+
+/* Pre-quiz receives the same readable measure as the narrative stages. */
+.redesign-skill-arm .flow-stage-frame-sequence > div[style*="padding: 16px 20px 20px"] {
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  padding: 2rem clamp(1.2rem, 4vw, 3rem) 3.5rem !important;
+  gap: 1.2rem !important;
+}
+
+.redesign-skill-arm .flow-stage-heading-row {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--rs-line);
+}
+
+/* Reduce generic card repetition; reserve elevation and tint for active work. */
+.redesign-skill-arm .flow-stage-frame section:not([aria-hidden]),
+.redesign-skill-arm .flow-stage-frame article {
+  border-color: var(--rs-line) !important;
+  border-radius: 0.7rem !important;
+  box-shadow: none;
+}
+
+.redesign-skill-arm .flow-stage-frame section[style*="border: 1.5px solid rgb(191, 219, 254)"] {
+  border: 0 !important;
+  border-left: 0.26rem solid var(--rs-accent) !important;
+  background: var(--rs-paper-strong) !important;
+  box-shadow: 0 0.7rem 1.8rem rgba(80, 56, 42, 0.085);
+}
+
+.redesign-skill-arm .flow-stage-body > section:not([aria-hidden]) > div:first-child {
+  border-bottom-color: var(--rs-line-soft) !important;
+  background: var(--rs-accent-faint) !important;
+}
+
+.redesign-skill-arm .flow-stage-body > article {
+  overflow: hidden;
+  border: 0 !important;
+  border-left: 0.26rem solid var(--rs-line) !important;
+  background: var(--rs-paper-strong) !important;
+  box-shadow: 0 0.7rem 1.8rem rgba(80, 56, 42, 0.065);
+}
+
+.redesign-skill-arm .flow-stage-body > article > div:first-child {
+  padding: 0.95rem 1.1rem !important;
+  border-bottom-color: var(--rs-line-soft) !important;
+  background: var(--rs-paper-muted);
+}
+
+.redesign-skill-arm .flow-stage-body > article > div:last-child {
+  padding: 1.1rem 1.25rem 1.4rem !important;
+  gap: 1rem !important;
+}
+
+.redesign-skill-arm .flow-stage-body > article > div:first-child > span:first-child {
+  border-radius: 0.22rem !important;
+  background: var(--rs-ink-soft) !important;
+}
+
+.redesign-skill-arm .flow-stage-frame [style*="border-radius: 999px"] {
+  border-radius: 0.25rem !important;
+}
+
+/* Non-semantic blue chrome becomes one restrained rust accent. */
+.redesign-skill-arm .tb-page-sequence-tab[style*="rgb(37, 99, 235)"] > span,
+.redesign-skill-arm .flow-stage-heading-row [style*="color: rgb(37, 99, 235)"],
+.redesign-skill-arm .flow-stage-body [style*="color: rgb(37, 99, 235)"],
+.redesign-skill-arm .flow-rigorous-questions [style*="color: rgb(37, 99, 235)"] {
+  color: var(--rs-accent) !important;
+}
+
+.redesign-skill-arm button[style*="background: rgb(239, 246, 255)"],
+.redesign-skill-arm span[style*="background: rgb(239, 246, 255)"] {
+  background: var(--rs-accent-soft) !important;
+}
+
+.redesign-skill-arm button[style*="border: 1px solid rgb(37, 99, 235)"],
+.redesign-skill-arm button[style*="border: 1.5px solid rgb(37, 99, 235)"] {
+  border-color: var(--rs-accent) !important;
+}
+
+/* Footer becomes a quiet tool rail with one clear forward action. */
+.redesign-skill-arm .tb-page-sequence-footer {
+  padding: 0.75rem 0.9rem 0.85rem !important;
+  border-top: 1px solid var(--rs-line) !important;
+  background: rgba(255, 253, 249, 0.97) !important;
+  box-shadow: 0 -0.75rem 1.8rem rgba(80, 56, 42, 0.055);
+}
+
+.redesign-skill-arm .tb-page-sequence-tabs {
+  gap: 0.25rem !important;
+  scrollbar-color: var(--rs-faint) transparent;
+}
+
+.redesign-skill-arm .tb-page-sequence-tab {
+  position: relative;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.7rem !important;
+  border: 0 !important;
+  border-radius: 0.35rem !important;
+  background: transparent !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-tab:hover {
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-tab[style*="rgb(37, 99, 235)"] {
+  background: var(--rs-accent-faint) !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-tab[style*="rgb(37, 99, 235)"]::after {
+  content: "";
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.22rem;
+  left: 0.7rem;
+  height: 0.13rem;
+  border-radius: 1rem;
+  background: var(--rs-accent);
+}
+
+.redesign-skill-arm .tb-page-sequence-tab-title {
+  color: var(--rs-ink) !important;
+  font-size: 0.82rem !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.01em;
+}
+
+.redesign-skill-arm .tb-page-sequence-control-status {
+  color: var(--rs-muted) !important;
+  border: 0 !important;
+  border-radius: 0.2rem !important;
+  background: var(--rs-paper-muted) !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-control-button {
+  min-height: 2.25rem !important;
+  border-radius: 0.35rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 650 !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-control-button:first-of-type {
+  border-color: var(--rs-line) !important;
+  background: transparent !important;
+  color: var(--rs-ink-soft) !important;
+}
+
+.redesign-skill-arm .tb-page-sequence-control-button:last-child {
+  background: var(--rs-accent) !important;
+  color: #fffdf9 !important;
+  box-shadow: 0 0.35rem 0.9rem rgba(126, 56, 39, 0.2);
+}
+
+/* Physical, keyboard-visible interaction states. */
+.redesign-skill-arm button,
+.redesign-skill-arm a[href] {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.75, 0.25, 1),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 220ms ease,
+    opacity 200ms ease;
+}
+
+.redesign-skill-arm button:not(:disabled):hover,
+.redesign-skill-arm a[href]:hover {
+  transform: translateY(-1px);
+}
+
+.redesign-skill-arm button:not(:disabled):active,
+.redesign-skill-arm a[href]:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.redesign-skill-arm button:focus-visible,
+.redesign-skill-arm a[href]:focus-visible {
+  outline: 0.2rem solid var(--rs-focus) !important;
+  outline-offset: 0.18rem !important;
+  box-shadow: 0 0 0 0.3rem var(--rs-paper-strong) !important;
+}
+
+.redesign-skill-arm button:disabled,
+.redesign-skill-arm [aria-disabled="true"] {
+  cursor: not-allowed !important;
+  filter: saturate(0.4);
+}
+
+@media (max-width: 760px) {
+  .redesign-skill-arm {
+    padding: 0.35rem !important;
+  }
+
+  .redesign-skill-arm .candidate-frame {
+    border-radius: 0.65rem 0.65rem 0.4rem 0.4rem;
+  }
+
+  .redesign-skill-arm .candidate-frame > div > div:first-child {
+    height: 3.55rem !important;
+    padding-inline: 0.3rem !important;
+  }
+
+  .redesign-skill-arm nav[aria-label="Chapters"] > * {
+    min-width: 5.65rem !important;
+    padding-inline: 0.4rem !important;
+  }
+
+  .redesign-skill-arm .flow-goal-layout,
+  .redesign-skill-arm .flow-rigorous-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .redesign-skill-arm .flow-goal-code,
+  .redesign-skill-arm .flow-rigorous-code {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--rs-line) !important;
+  }
+
+  .redesign-skill-arm .flow-stage-body,
+  .redesign-skill-arm .flow-stage-frame-sequence > div[style*="padding: 16px 20px 20px"] {
+    padding: 1.8rem 1rem 3.5rem !important;
+    gap: 1.6rem !important;
+  }
+
+  .redesign-skill-arm .flow-rigorous-questions {
+    padding: 1.4rem 1rem 3rem !important;
+  }
+
+  .redesign-skill-arm .tb-page-sequence-footer {
+    padding: 0.48rem 0.55rem 0.58rem !important;
+  }
+
+  .redesign-skill-arm .tb-page-sequence-tabs {
+    gap: 0.12rem !important;
+  }
+
+  .redesign-skill-arm .tb-page-sequence-tab {
+    min-height: 2.55rem;
+    padding: 0.42rem 0.55rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .redesign-skill-arm *,
+  .redesign-skill-arm *::before,
+  .redesign-skill-arm *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .redesign-skill-arm button,
+  .redesign-skill-arm a[href] {
+    transform: none !important;
+  }
+}
