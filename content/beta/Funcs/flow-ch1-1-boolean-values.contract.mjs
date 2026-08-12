@@ -73,6 +73,14 @@ assert.deepEqual(
   Array.from(lesson.fullExample.states.at(-1).console),
   ['True', 'True', 'False', 'False'],
 );
+for (const stateIndex of [4, 5, 6]) {
+  const detail = lesson.fullExample.states[stateIndex].evalDetail;
+  assert.ok(detail, `State ${stateIndex} must include reduction/evalDetail data.`);
+  assert.equal(typeof detail.title, 'string');
+  assert.equal(typeof detail.sourceLine, 'string');
+  assert.ok(detail.steps.length >= 3);
+  assert.ok(detail.frames.length >= 2);
+}
 
 const supportedKinds = new Set(['choice', 'chips', 'order', 'row']);
 const quizQuestions = [
@@ -92,6 +100,15 @@ assert.deepEqual(
   Array.from(lesson.flow.rigorousQuiz.cards.at(-1).cells, cell => cell.correct),
   ['True', 'False', 'True'],
 );
+const mainLessonText = [
+  lesson.mainLesson.intro,
+  ...lesson.mainLesson.acts.flatMap(act => act.body),
+].join(' ');
+for (const term of ['variable', 'binding', 'state', 'initializes', 'Rebinding', 'value types', 'expression', 'unary', 'binary', 'equality', 'inequality']) {
+  assert.match(mainLessonText, new RegExp(term, 'i'), `Main Lesson must introduce ${term}.`);
+}
+assert.match(lesson.flow.mainLesson.checks[1].q, /line that made the values differ/i);
+assert.match(lesson.flow.mainLesson.checks[2].q, /stored results.*displayed/i);
 
 assert.deepEqual(
   Array.from(lesson.rigorousQuiz.transferCode.lines, line => line.text),
@@ -111,6 +128,8 @@ assert.deepEqual(
   ],
 );
 assert.equal(lesson.flow.exercises.problems.length, 5);
+assert.match(lesson.flow.exercises.problems[0].statement, /A\.a.*A\.b.*A\.c/);
+assert.match(lesson.flow.exercises.problems[1].statement, /A\.a.*A\.c/);
 
 const authoredCode = [
   ...openingLines.map(line => line.text),

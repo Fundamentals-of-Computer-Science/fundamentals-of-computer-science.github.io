@@ -14,17 +14,17 @@ const CH1_BOOLEAN_VALUES_SUBGOALS = {
   store: {
     id: 'store', n: 'A.a', goal: 'produceDisplay',
     label: 'Store Boolean values in separate variables.',
-    gloss: 'Bind true or false to each variable so every name has its own stored value.',
+    gloss: 'Create, copy, and update Boolean bindings so each variable keeps its own current value.',
   },
   compute: {
     id: 'compute', n: 'A.b', goal: 'produceDisplay',
     label: 'Compute new Boolean values from stored values.',
-    gloss: 'Read stored values, apply a Boolean operator, and bind the result to a new name.',
+    gloss: 'Apply Boolean operators to stored values and bind each computed result.',
   },
   display: {
     id: 'display', n: 'A.c', goal: 'produceDisplay',
     label: 'Display Boolean results in the console.',
-    gloss: 'Read a Boolean variable and pass its value to Console.WriteLine.',
+    gloss: 'Evaluate each argument, then display its resulting Boolean value.',
   },
 };
 
@@ -148,6 +148,27 @@ const CH1_BOOLEAN_VALUES_STATES = [
       { name: 'doorOpen', type: 'bool', value: 'true' },
     ],
     console: [],
+    evalDetail: {
+      title: 'Evaluate Boolean NOT',
+      sourceLine: 'bool doorOpen = !doorClosed;',
+      steps: [
+        { label: 'Read', note: 'Read false from doorClosed.' },
+        { label: 'NOT', note: '!false evaluates to true.' },
+        { label: 'Bind', note: 'Store true in doorOpen.' },
+      ],
+      frames: [
+        {
+          expression: 'bool doorOpen = !doorClosed',
+          showAt: 0,
+          stack: [{ showAt: 0, span: [17, 27], label: 'var', value: 'false' }],
+          strike: { showAt: 1, span: [16, 27] },
+          arrowAfter: { showAt: 1 },
+        },
+        { expression: 'bool doorOpen = true', showAt: 1 },
+        { expression: 'doorOpen stores true', showAt: 2 },
+      ],
+      minCanvasWidth: 680,
+    },
   },
   {
     label: 'After line 5',
@@ -159,6 +180,24 @@ const CH1_BOOLEAN_VALUES_STATES = [
       { name: 'safeToStart', type: 'bool', value: 'false' },
     ],
     console: [],
+    evalDetail: {
+      title: 'Evaluate Boolean AND',
+      sourceLine: 'bool safeToStart = doorClosed && recordedDoorClosed;',
+      steps: [
+        { label: 'Read left', note: 'Read false from doorClosed.' },
+        { label: 'Read right', note: 'Read true from recordedDoorClosed.' },
+        { label: 'AND', note: 'false && true evaluates to false.' },
+        { label: 'Bind', note: 'Store false in safeToStart.' },
+      ],
+      frames: [
+        { expression: 'doorClosed && recordedDoorClosed', showAt: 0 },
+        { expression: 'false && recordedDoorClosed', showAt: 0 },
+        { expression: 'false && true', showAt: 1 },
+        { expression: 'false', showAt: 2 },
+        { expression: 'safeToStart stores false', showAt: 3 },
+      ],
+      minCanvasWidth: 760,
+    },
   },
   {
     label: 'After line 6',
@@ -171,6 +210,24 @@ const CH1_BOOLEAN_VALUES_STATES = [
       { name: 'sameStatus', type: 'bool', value: 'false' },
     ],
     console: [],
+    evalDetail: {
+      title: 'Evaluate Boolean equality',
+      sourceLine: 'bool sameStatus = doorClosed == recordedDoorClosed;',
+      steps: [
+        { label: 'Read left', note: 'Read false from doorClosed.' },
+        { label: 'Read right', note: 'Read true from recordedDoorClosed.' },
+        { label: 'Compare', note: 'false == true evaluates to false.' },
+        { label: 'Bind', note: 'Store false in sameStatus.' },
+      ],
+      frames: [
+        { expression: 'doorClosed == recordedDoorClosed', showAt: 0 },
+        { expression: 'false == recordedDoorClosed', showAt: 0 },
+        { expression: 'false == true', showAt: 1 },
+        { expression: 'false', showAt: 2 },
+        { expression: 'sameStatus stores false', showAt: 3 },
+      ],
+      minCanvasWidth: 760,
+    },
   },
   {
     label: 'After line 7',
@@ -354,8 +411,9 @@ const CH1_BOOLEAN_VALUES_LESSON = {
         n: 1,
         title: 'Store Boolean values in separate variables.',
         body: [
-          'A bool variable stores one Boolean value under a name. The literal true supplies the value for powerAvailable, and false supplies the value for maintenanceMode.',
-          'Each variable has its own storage location. Changing one variable does not change another variable.',
+          'C# names the Boolean type bool. Its only values are true and false. The quoted text "true" is a string value, not a Boolean value.',
+          'A variable is a named location in memory that holds a value of a specific type. A binding associates a variable name with its current value. Program state is the full set of bindings at one point in execution.',
+          'The first declaration creates powerAvailable and binds true. The second creates maintenanceMode and binds false. Each line adds one binding to state.',
         ],
         code: [
           'bool powerAvailable = true;',
@@ -369,8 +427,10 @@ const CH1_BOOLEAN_VALUES_LESSON = {
         n: 2,
         title: 'Copy a stored Boolean value before rebinding the original variable.',
         body: [
-          'On the right side of =, originalStatus is evaluated: the program reads its current value. That value is copied into savedStatus.',
-          'The next assignment replaces only the value in originalStatus. savedStatus remains true because it has a separate storage location.',
+          'A variable name on the right side of = is read before the surrounding declaration or assignment stores a result. Evaluating a variable means retrieving the value currently bound to that name.',
+          'Line 2 evaluates originalStatus first. At that moment, originalStatus supplies true. The declaration creates savedStatus and binds true to it.',
+          'Booleans are value types. Assigning one Boolean variable to another copies the value into a separate binding. Line 3 changes originalStatus to false, but it does not write to savedStatus.',
+          'The first line initializes a new variable. Rebinding replaces the value of a variable that already exists, so line 3 omits the bool type.',
         ],
         code: [
           'bool originalStatus = true;',
@@ -385,8 +445,11 @@ const CH1_BOOLEAN_VALUES_LESSON = {
         n: 3,
         title: 'Compute and display Boolean results.',
         body: [
-          'An expression is code that produces a value. The ! operator negates one Boolean value. The && operator produces true only when both values are true. The == and != operators compare two values.',
-          'The right side is evaluated before the result is stored. Console.WriteLine then reads a variable and displays its Boolean value without changing program state.',
+          'An expression is code that evaluates to a value. A Boolean operator reads one or more Boolean inputs and supplies a Boolean result.',
+          'NOT, written !, is unary: it has one input and reverses its Boolean value. AND, written &&, is binary: it has two inputs and supplies true only when both inputs are true.',
+          'Equality, written ==, supplies true when two values are the same. Inequality, written !=, supplies true when they differ. Both comparison operators are binary.',
+          'The assignment operator = binds a value to a variable. The equality operator == compares two values. The number of symbols changes the operation.',
+          'Console.WriteLine reviews the Chapter 0 output procedure. Its argument is evaluated first, then WriteLine displays the supplied value without changing the Boolean binding it reads.',
         ],
         code: [
           'bool opposite = !false;',
@@ -502,29 +565,29 @@ const CH1_BOOLEAN_VALUES_LESSON = {
             'powerAvailable = true; maintenanceMode = true',
           ],
           correct: 0,
-          why: 'Each declaration stores its literal value in a separate variable.',
+          why: 'A.a stores Boolean values in separate variables. Each declaration creates one bool binding with the value on its right side.',
         },
         {
-          type: 'choose the state pair', kind: 'choice', mono: true,
-          q: 'Which state is correct after line 3 rebinds originalStatus?',
+          type: 'choose the state and cause', kind: 'choice', mono: true,
+          q: 'Which option gives the state after line 3 and the line that made the values differ?',
           choices: [
-            'originalStatus = false; savedStatus = true',
-            'originalStatus = false; savedStatus = false',
-            'originalStatus = true; savedStatus = true',
+            'originalStatus = false; savedStatus = true; line 3 changes only originalStatus',
+            'originalStatus = false; savedStatus = false; line 3 changes both variables',
+            'originalStatus = true; savedStatus = true; line 2 changes only savedStatus',
           ],
           correct: 0,
-          why: 'Line 2 copied true into savedStatus. Line 3 changes only originalStatus.',
+          why: 'A.a stores separate Boolean values. Line 2 gives savedStatus its own true value, and line 3 writes only to originalStatus.',
         },
         {
-          type: 'choose the result sequence', kind: 'choice', mono: true,
-          q: 'In code order, which four values are computed?',
+          type: 'match results and display', kind: 'choice', mono: true,
+          q: 'Which option matches the four stored results and the value displayed by the final line?',
           choices: [
-            'true, false, false, true',
-            'false, true, true, false',
-            'true, true, false, false',
+            'opposite = true; bothReady = false; sameValue = false; differentValues = true; display True',
+            'opposite = false; bothReady = true; sameValue = true; differentValues = false; display False',
+            'opposite = true; bothReady = true; sameValue = false; differentValues = false; display True',
           ],
           correct: 0,
-          why: '! reverses one value, && needs two true values, == tests equality, and != tests difference.',
+          why: 'A.b computes each stored result. A.c evaluates opposite, then WriteLine displays True without changing any binding.',
         },
       ],
     },
@@ -627,7 +690,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
       problems: [
         {
           n: 1, title: 'Complete an open-status program', tag: 'guided labels',
-          statement: 'Complete the missing lines so the program stores the opposite door status and displays both values.',
+          statement: 'Complete the program using the labels: A.a stores isOpen, A.b computes isClosed, and A.c displays both stored values.',
           given: [
             'bool isOpen = false;',
             'bool isClosed = ___;',
@@ -635,8 +698,9 @@ const CH1_BOOLEAN_VALUES_LESSON = {
             'Console.WriteLine(___);',
           ],
           constraints: [
-            'Use ! with isOpen.',
-            'Display isOpen first and isClosed second.',
+            'A.a: keep isOpen bound to false.',
+            'A.b: use ! with isOpen.',
+            'A.c: display isOpen first and isClosed second.',
             'Predict the two console values.',
           ],
           model: [
@@ -646,11 +710,11 @@ const CH1_BOOLEAN_VALUES_LESSON = {
             'Console.WriteLine(isClosed);',
             'Console: False, True',
           ],
-          feedback: 'Store the given value, compute its opposite, then display each stored result.',
+          feedback: 'If the output differs, check the matching code job. A.a establishes isOpen = false. A.b applies ! and stores true. A.c displays both values in source order.',
         },
         {
           n: 2, title: 'Preserve an earlier signal', tag: 'copy and rebind',
-          statement: 'Copy the current signal before it changes, then display the current and saved values.',
+          statement: 'Retain the labels: A.a copies and rebinds the signal values; A.c displays the current and saved values.',
           given: [
             'bool currentSignal = true;',
             'bool savedSignal = ___;',
@@ -659,15 +723,15 @@ const CH1_BOOLEAN_VALUES_LESSON = {
             'Console.WriteLine(savedSignal);',
           ],
           constraints: [
-            'Copy currentSignal into savedSignal before line 3.',
-            'Do not assign a second value to savedSignal.',
-            'Predict the two console values.',
+            'A.a: copy currentSignal into savedSignal before line 3.',
+            'A.a: do not assign a second value to savedSignal.',
+            'A.c: predict the two console values.',
           ],
           model: [
             'bool savedSignal = currentSignal;',
             'Console: False, True',
           ],
-          feedback: 'The copy receives true before currentSignal changes. Separate storage preserves the earlier value.',
+          feedback: 'A.a creates two independent Boolean bindings, so savedSignal retains true. A.c displays the current value of each binding.',
         },
         {
           n: 3, title: 'Compute two readiness results', tag: 'reduced guidance',
