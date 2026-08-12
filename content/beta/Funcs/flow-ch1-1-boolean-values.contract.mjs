@@ -1,0 +1,132 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+import { transformSync } from 'esbuild';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const fixturePath = path.join(here, 'flow-ch1-1-boolean-values.jsx');
+const stagesPath = path.join(here, 'lesson-kit', 'flow-lesson-stages.jsx');
+
+assert.ok(fs.existsSync(fixturePath), 'Create flow-ch1-1-boolean-values.jsx before this contract can pass.');
+
+function evaluateJsx(filePath, context) {
+  const source = fs.readFileSync(filePath, 'utf8');
+  const compiled = transformSync(source, {
+    loader: 'jsx',
+    format: 'iife',
+    target: 'es2020',
+  }).code;
+  vm.runInContext(compiled, context, { filename: filePath });
+  return source;
+}
+
+const sandbox = {
+  console,
+  window: {
+    FUNCS_CHAPTERS: [
+      { id: 'ch0', label: 'Chapter 0' },
+      { id: 'ch1', label: 'Chapter 1' },
+    ],
+  },
+};
+const context = vm.createContext(sandbox);
+evaluateJsx(stagesPath, context);
+const fixtureSource = evaluateJsx(fixturePath, context);
+
+const lesson = sandbox.window.CH1_BOOLEAN_VALUES_LESSON;
+assert.ok(lesson, 'The fixture must expose window.CH1_BOOLEAN_VALUES_LESSON.');
+
+const validation = sandbox.window.flowValidateLesson(lesson);
+assert.equal(validation.valid, true, `Fixture validator failures: ${Array.from(validation.missing).join(', ')}`);
+assert.deepEqual(Array.from(validation.missing), []);
+assert.equal(Object.hasOwn(lesson.flow, 'sequence'), false, 'Chapter 1 lessons must use the canonical five-stage default.');
+assert.deepEqual(
+  Array.from(sandbox.window.flowSequenceDescriptors(lesson), stage => stage.blockType),
+  ['fullExample', 'preQuiz', 'mainLesson', 'rigorousQuiz', 'exercises'],
+);
+
+assert.equal(lesson.fullExample.code.goals.produceDisplay.label, 'Produce and display Boolean values.');
+assert.deepEqual(
+  Object.values(lesson.fullExample.subgoals).map(subgoal => `${subgoal.n} ${subgoal.label}`),
+  [
+    'A.a Store Boolean values in separate variables.',
+    'A.b Compute new Boolean values from stored values.',
+    'A.c Display Boolean results in the console.',
+  ],
+);
+
+const openingLines = lesson.fullExample.code.lines;
+assert.equal(openingLines.length, 10);
+assert.deepEqual(
+  openingLines.reduce((counts, line) => ({ ...counts, [line.subgoal]: (counts[line.subgoal] || 0) + 1 }), {}),
+  { store: 3, compute: 3, display: 4 },
+);
+assert.equal(lesson.fullExample.states.length, 11);
+assert.equal(lesson.fullExample.executionTrace.length, 10);
+assert.deepEqual(
+  Array.from(lesson.fullExample.executionTrace, step => step.stateIndex),
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+);
+assert.deepEqual(
+  Array.from(lesson.fullExample.states.at(-1).console),
+  ['True', 'True', 'False', 'False'],
+);
+
+const supportedKinds = new Set(['choice', 'chips', 'order', 'row']);
+const quizQuestions = [
+  ...Object.values(lesson.flow.preQuiz.details),
+  ...lesson.flow.mainLesson.checks,
+  ...lesson.flow.rigorousQuiz.cards,
+];
+for (const question of quizQuestions) {
+  assert.ok(supportedKinds.has(question.kind), `Unsupported quiz kind: ${question.kind}`);
+  assert.doesNotMatch(question.q, /\bexplain\b/i, `Quiz prompt must be immediately answerable: ${question.q}`);
+  assert.doesNotMatch(question.type || '', /\bexplain\b/i, `Quiz type must stay bounded: ${question.type}`);
+}
+assert.equal(lesson.flow.preQuiz.categories.length, 3);
+assert.equal(lesson.flow.mainLesson.checks.length, 3);
+assert.equal(lesson.flow.rigorousQuiz.cards.length, 8);
+assert.deepEqual(
+  Array.from(lesson.flow.rigorousQuiz.cards.at(-1).cells, cell => cell.correct),
+  ['True', 'False', 'True'],
+);
+
+assert.deepEqual(
+  Array.from(lesson.rigorousQuiz.transferCode.lines, line => line.text),
+  [
+    'bool primaryOnline = true;',
+    'bool backupOnline = true;',
+    'bool savedPrimaryOnline = primaryOnline;',
+    'primaryOnline = false;',
+    '',
+    'bool primaryOffline = !primaryOnline;',
+    'bool systemsReady = primaryOnline && backupOnline;',
+    'bool primaryChanged = primaryOnline != savedPrimaryOnline;',
+    '',
+    'Console.WriteLine(primaryOffline);',
+    'Console.WriteLine(systemsReady);',
+    'Console.WriteLine(primaryChanged);',
+  ],
+);
+assert.equal(lesson.flow.exercises.problems.length, 5);
+
+const authoredCode = [
+  ...openingLines.map(line => line.text),
+  ...lesson.rigorousQuiz.transferCode.lines.map(line => line.text),
+  ...lesson.mainLesson.acts.flatMap(act => act.code || []),
+  ...lesson.flow.exercises.problems.flatMap(problem => [...(problem.given || []), ...(problem.model || [])]),
+].join('\n');
+assert.doesNotMatch(authoredCode, /\|\||\bif\s*\(|\bwhile\s*\(|Console\.ReadLine|\bstatic\s+\w+/, 'Keep C1.1 inside its approved syntax boundary.');
+
+function assertDataOnly(value, trail = 'lesson') {
+  if (typeof value === 'function') assert.fail(`${trail} contains a function.`);
+  if (!value || typeof value !== 'object') return;
+  for (const [key, child] of Object.entries(value)) assertDataOnly(child, `${trail}.${key}`);
+}
+assertDataOnly(lesson);
+assert.doesNotThrow(() => JSON.stringify(lesson));
+assert.match(fixtureSource, /Object\.assign\(window,/);
+
+console.log('C1.1 Boolean values fixture contract passed.');
