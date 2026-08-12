@@ -454,7 +454,7 @@ function FlowRigorousQuizStage({ lesson, chrome, sequence, navigation }) {
       <div className="flow-rigorous-layout" style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '40% 60%' }}>
         <div className="flow-rigorous-code" style={{ borderRight: '1px solid #e2e6ee', minHeight: 0, overflow: 'auto', padding: '12px 10px' }}>
           <div style={{ fontSize: 9.5, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 4px 8px' }}>{flow.codeLabel || 'Transfer program'}</div>
-          <FuncsCodeBlock code={quiz.transferCode} tokens={lesson.fullExample.code?.tokens || lesson.fullExample.tokens} runKeys={new Set()} />
+          <FuncsCodeBlock code={quiz.transferCode} tokens={lesson.fullExample.code?.tokens || lesson.fullExample.tokens} />
         </div>
         <div className="flow-rigorous-questions" style={{ minHeight: 0, overflow: 'auto', padding: '14px 16px 18px', background: '#fbfcfe', display: 'grid', gap: 9, alignContent: 'start' }}>
           <div>

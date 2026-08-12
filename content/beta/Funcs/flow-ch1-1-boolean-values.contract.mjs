@@ -177,6 +177,11 @@ assert.match(stagesSource, /part1Code/);
 assert.match(stagesSource, /contextCode/);
 assert.match(stagesSource, /state\.evalDetail/);
 assert.match(stagesSource, /FuncsStackedEvaluationDetail/);
+assert.doesNotMatch(
+  stagesSource,
+  /<FuncsCodeBlock[^>]*runKeys=\{new Set\(\)\}/,
+  'Rigorous Quiz reference code must remain at full opacity; an empty run-key set dims every row.',
+);
 assert.match(flowKitSource, /overflowWrap:\s*['"]anywhere['"]/);
 assert.match(conceptKitSource, /whiteSpace:\s*['"]pre-wrap['"]/);
 

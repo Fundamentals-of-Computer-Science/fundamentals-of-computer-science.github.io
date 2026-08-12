@@ -129,6 +129,26 @@ The fixture must not contain React elements, render callbacks, or
 lesson-specific components. Arrays, object fields, call frames, Intro content,
 and console values remain data rendered by the shared grammar.
 
+## Quiz implementation rules
+
+- Make every quiz question self-contained. Include the source needed to answer
+  it on the same page through `part1Code`, `contextCode`, or the transfer-code
+  block; do not require recall of an earlier example's exact code.
+- Use bounded, immediately checkable `choice`, `chips`, `order`, or `row`
+  answers. Put broader explanation and reflection in Main Lesson prose or
+  Exercises instead of open quiz responses.
+- Do not expose labels, ordinals, ordering, or styling that reveals the answer.
+  Use `hideOrderOrdinals: true` when subgoal numbers would cue an order task,
+  and distribute correct choice indices so the first option is not a default.
+- Keep question evidence visually available. Reference and transfer code used
+  to answer a quiz stays at full opacity throughout the quiz; never pass an
+  empty `runKeys` set merely to make a code block noninteractive. Dimming or
+  blurring is reserved for content that is intentionally gated and not needed
+  to answer the current question.
+- Goals and subgoals describe observable jobs performed by the code. Learner
+  directions such as trace, predict, remember, or explain belong in prose,
+  prompts, and Exercises rather than code-frame labels.
+
 ## Validation and preview
 
 The page wrapper loads the shared kit, the fixture, and then renders:
@@ -168,6 +188,8 @@ Then open a page under `http://127.0.0.1:8123/beta/Funcs/`. Do not use
 - Goal focus precedes executable source steps.
 - Code highlighting, memory state, and console output describe the same moment.
 - Pre-quiz ordering gates details; all details gate Main Lesson.
+- Quiz questions include their own required source, avoid ordinal and
+  answer-position cues, and keep reference code at full opacity.
 - Each lesson act has one check; later acts stay locked until it is answered.
 - Rigorous Quiz uses the transfer program and advances one card at a time.
 - Exercises are open-ended and do not introduce a new renderer.
