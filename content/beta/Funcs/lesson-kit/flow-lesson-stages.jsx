@@ -142,7 +142,9 @@ function FlowGoalStage({ lesson, chrome, sequence, navigation }) {
 
   const controls = {
     tone: started ? 'run' : 'read',
-    backLabel: started ? 'Back: previous step' : flowNavigationLabel('Back', navigation?.prev, 'previous page'),
+    backLabel: started
+      ? 'Back: previous step'
+      : navigation?.prev ? flowNavigationLabel('Back', navigation.prev, 'previous page') : 'previous page',
     canBack: started || Boolean(navigation?.prev && sequence?.goPrevPage),
     nextLabel: !started
       ? (goal.startLabel || 'Continue — start running')

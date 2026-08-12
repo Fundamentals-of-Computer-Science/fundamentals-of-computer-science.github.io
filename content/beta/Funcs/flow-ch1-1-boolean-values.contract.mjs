@@ -107,6 +107,7 @@ const choiceCorrectPositions = quizQuestions.filter(question => question.kind ==
 assert.ok(new Set(choiceCorrectPositions).size >= 3, 'Choice answer positions must vary across the lesson.');
 assert.ok(choiceCorrectPositions.filter(position => position === 0).length < choiceCorrectPositions.length / 2, 'The first choice must not be the dominant correct position.');
 assert.equal(lesson.flow.preQuiz.categories.length, 3);
+assert.equal(lesson.flow.goal.startLabel, 'Start example');
 assert.equal(lesson.flow.preQuiz.hideOrderOrdinals, true);
 assert.deepEqual(Array.from(lesson.flow.preQuiz.part1Code), [
   'bool active = true;',
@@ -182,6 +183,7 @@ assert.doesNotMatch(
   /<FuncsCodeBlock[^>]*runKeys=\{new Set\(\)\}/,
   'Rigorous Quiz reference code must remain at full opacity; an empty run-key set dims every row.',
 );
+assert.match(stagesSource, /:\s*'previous page'/);
 assert.match(flowKitSource, /overflowWrap:\s*['"]anywhere['"]/);
 assert.match(conceptKitSource, /whiteSpace:\s*['"]pre-wrap['"]/);
 

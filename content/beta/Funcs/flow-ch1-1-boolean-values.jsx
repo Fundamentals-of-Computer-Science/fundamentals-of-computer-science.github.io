@@ -490,7 +490,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
       activeGoal: 'state',
       activeSubgoal: 'store',
       activeKey: 'door-line-1',
-      startLabel: 'Start running the example',
+      startLabel: 'Start example',
       startStatus: 'example not yet run',
       runLabel: 'Run next line',
       note: 'Source shows the current instruction. State shows each stored bool. Console shows only values already displayed.',
