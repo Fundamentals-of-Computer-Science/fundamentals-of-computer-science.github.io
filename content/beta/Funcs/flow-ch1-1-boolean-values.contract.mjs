@@ -7,6 +7,11 @@ import { transformSync } from 'esbuild';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixturePath = path.join(here, 'flow-ch1-1-boolean-values.jsx');
+const pagePath = path.join(here, 'Ch1-1-Boolean-Values-State-Visible-Results.html');
+const roadmapPath = path.join(here, 'tb-ch1-v1-sequence.jsx');
+const roadmapPagePath = path.join(here, 'Ch1 Roadmap.html');
+const betaIndexPath = path.join(here, '..', 'index.md');
+const presentationPath = path.join(here, 'lesson-kit', 'flow-lesson.css');
 const stagesPath = path.join(here, 'lesson-kit', 'flow-lesson-stages.jsx');
 const flowKitPath = path.join(here, 'lesson-kit', 'flow-lesson-kit.jsx');
 const conceptKitPath = path.join(here, 'lesson-kit', 'concept-lesson-kit.jsx');
@@ -36,6 +41,11 @@ const sandbox = {
 const context = vm.createContext(sandbox);
 const stagesSource = evaluateJsx(stagesPath, context);
 const fixtureSource = evaluateJsx(fixturePath, context);
+const pageSource = fs.readFileSync(pagePath, 'utf8');
+const roadmapSource = fs.readFileSync(roadmapPath, 'utf8');
+const roadmapPageSource = fs.readFileSync(roadmapPagePath, 'utf8');
+const betaIndexSource = fs.readFileSync(betaIndexPath, 'utf8');
+const presentationSource = fs.readFileSync(presentationPath, 'utf8');
 const flowKitSource = fs.readFileSync(flowKitPath, 'utf8');
 const conceptKitSource = fs.readFileSync(conceptKitPath, 'utf8');
 
@@ -186,5 +196,33 @@ assert.doesNotMatch(
 assert.match(stagesSource, /:\s*'previous page'/);
 assert.match(flowKitSource, /overflowWrap:\s*['"]anywhere['"]/);
 assert.match(conceptKitSource, /whiteSpace:\s*['"]pre-wrap['"]/);
+
+const publishedLessonPath = 'Ch1-1-Boolean-Values-State-Visible-Results.html';
+assert.match(
+  betaIndexSource,
+  /Chapter 1\.1 Boolean values, state, and visible results.*Ch1-1-Boolean-Values-State-Visible-Results\.html/i,
+  'The public beta index must link to the current C1.1 lesson.',
+);
+assert.equal(
+  (roadmapSource.match(new RegExp(publishedLessonPath, 'g')) || []).length,
+  2,
+  'The Chapter 1 roadmap card and Start lesson 1 button must both open the current C1.1 lesson.',
+);
+assert.match(
+  roadmapPageSource,
+  /tb-ch1-v1-sequence\.jsx\?v=task-72-3-4/,
+  'The roadmap must cache-bust its updated lesson-map fixture.',
+);
+assert.match(pageSource, /candidate-shell flow-authoring-canonical/);
+assert.match(
+  presentationSource,
+  /\.flow-authoring-canonical\s*\{[\s\S]*?padding:\s*0\s*!important;/,
+  'Canonical standalone lessons must fill the viewport without an inset shell.',
+);
+assert.match(
+  presentationSource,
+  /\.flow-authoring-canonical \.candidate-frame\s*\{[\s\S]*?width:\s*100%\s*!important;[\s\S]*?border:\s*0\s*!important;[\s\S]*?border-radius:\s*0;[\s\S]*?box-shadow:\s*none\s*!important;/,
+  'Canonical standalone lesson frames must not render as floating windows.',
+);
 
 console.log('C1.1 Boolean values fixture contract passed.');

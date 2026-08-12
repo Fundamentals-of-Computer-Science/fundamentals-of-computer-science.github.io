@@ -321,7 +321,7 @@ const CH1_BOOLEAN_VALUES_EXAMPLES = [
     label: 'Lesson 1',
     source: 'ch1/ch1-1.md',
     title: 'Boolean Values, State, and Visible Results',
-    href: 'Ch1 1 Boolean Values State Visible Results.html',
+    href: 'Ch1-1-Boolean-Values-State-Visible-Results.html',
     current: true,
     summary: 'Store Boolean values, compute new values, and display the results.',
     tags: ['bool', 'value copy', '!', '&&', '==', '!='],

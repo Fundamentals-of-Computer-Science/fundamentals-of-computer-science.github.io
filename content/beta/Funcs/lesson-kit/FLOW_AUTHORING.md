@@ -161,6 +161,17 @@ The page wrapper loads the shared kit, the fixture, and then renders:
 </div>
 ```
 
+Canonical lesson pages are standalone teaching surfaces, so this wrapper fills
+the viewport edge to edge. Do not give `.candidate-shell` page padding or make
+`.candidate-frame` look like a floating browser window with a maximum width,
+rounded corners, border, or drop shadow. The frozen comparison pages keep their
+own experiment-specific wrappers.
+
+Give new standalone lesson HTML files their normalized, hyphenated public
+filename, and use that exact filename in fixture and roadmap links. The same
+relative link must work from the source HTTP preview and the generated Pages
+output. Cache-bust a roadmap fixture when its destination data changes.
+
 `FlowLessonSequence` calls `flowValidateLesson` before rendering. For an
 explicit browser check, evaluate:
 
