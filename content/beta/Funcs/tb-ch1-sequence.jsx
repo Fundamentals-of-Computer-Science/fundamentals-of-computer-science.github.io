@@ -112,20 +112,66 @@ const CH1_FULL_STATES = [
           note: 'Substitute `true` for `x`. The copied value is what gets bound to copy_of_x.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'bool copy_of_x = x',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [17, 18], label: 'var', value: 'true' }],
-          strike: { showAt: 2, activeAt: [2], span: [17, 18] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'bool copy_of_x = x',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                17,
+                18
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  17,
+                  18
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'bool copy_of_x = true',
           showAt: 2,
-          activeAt: [2],
-        },
+          levels: [
+            {
+              expression: 'bool copy_of_x = true',
+              showAt: 2,
+              activeAt: [
+                2
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 760,
     },
@@ -156,20 +202,66 @@ const CH1_FULL_STATES = [
           note: 'Write the resolved value into `x`. No other variable is part of this evaluation.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'x = false',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [4, 9], label: 'literal', value: 'false' }],
-          strike: { showAt: 2, activeAt: [2], span: [4, 9] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'x = false',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                4,
+                9
+              ],
+              label: 'literal',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  4,
+                  9
+                ]
+              }
+            },
+            {
+              expression: 'false',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'write x = false',
           showAt: 2,
-          activeAt: [2],
-        },
+          levels: [
+            {
+              expression: 'write x = false',
+              showAt: 2,
+              activeAt: [
+                2
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 660,
     },
@@ -204,26 +296,85 @@ const CH1_FULL_STATES = [
           note: 'WriteLine sends the evaluated value to the console output.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'Console.WriteLine(copy_of_x)',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [18, 27], label: 'var', value: 'true' }],
-          strike: { showAt: 2, activeAt: [2], span: [18, 27] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(copy_of_x)',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                18,
+                27
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  18,
+                  27
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'Console.WriteLine(true)',
           showAt: 2,
-          activeAt: [2, 3],
-          arrowAfter: { showAt: 3, activeAt: [3] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(true)',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 3,
+            activeAt: [
+              3
+            ]
+          }
         },
         {
-          expression: 'stdout: true',
           showAt: 3,
-          activeAt: [3],
-        },
+          levels: [
+            {
+              expression: 'stdout: true',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 900,
     },
@@ -438,14 +589,14 @@ const FUNCS_CHAPTERS = [
     id: 'ch0',
     label: 'Chapter 0',
     title: 'Before You Begin',
-    href: '../../ch0/',
+    href: '/beta/Funcs/Ch0-1-Programs-Input-Output-Tour.html',
   },
   {
     n: 1,
     id: 'ch1',
     label: 'Chapter 1',
     title: 'Booleans',
-    href: 'Ch1 Roadmap.html',
+    href: '/beta/Funcs/Ch1-Chapter-Overview.html',
     current: true,
   },
   {
@@ -453,21 +604,21 @@ const FUNCS_CHAPTERS = [
     id: 'ch2',
     label: 'Chapter 2',
     title: 'Integers and Doubles',
-    href: 'Ch2 Numeric Data Memory Sequence.html',
+    href: '/beta/Funcs/Ch2-Numeric-Data-Memory-Sequence.html',
   },
   {
     n: 3,
     id: 'ch3',
     label: 'Chapter 3',
     title: 'Arrays',
-    href: '../../ch3/',
+    href: '/beta/Funcs/Ch3-Array-Memory-Sequence.html',
   },
   {
     n: 4,
     id: 'ch4',
     label: 'Chapter 4',
     title: 'Classes and Linked Lists',
-    href: '../../ch4/',
+    href: '/beta/Funcs/Ch4-Linked-Node-Chain-Sequence.html',
   },
 ];
 

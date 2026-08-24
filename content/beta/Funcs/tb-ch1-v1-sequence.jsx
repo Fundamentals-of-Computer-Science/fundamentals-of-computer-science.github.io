@@ -307,7 +307,47 @@ const CH1_REMAINING_LESSON_CONFIGS = [
       { label: 'Before execution', desc: 'No variables exist yet.', memory: [], console: [] },
       { label: 'After line 1', desc: 'hasKey stores true.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }], console: [] },
       { label: 'After line 2', desc: 'knowsCode stores false.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }, { name: 'knowsCode', type: 'bool', value: 'false' }], console: [] },
-      { label: 'After line 3', desc: 'OR short-circuits after hasKey evaluates to true.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }, { name: 'knowsCode', type: 'bool', value: 'false' }, { name: 'canEnter', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'OR short-circuit', sourceLine: 'bool canEnter = hasKey || knowsCode;', steps: [{ label: 'Left', note: 'Evaluate hasKey first.' }, { label: 'Decide', note: 'OR is already true when the left operand is true.' }, { label: 'Bind', note: 'Bind true to canEnter without needing the right operand.' }], frames: [{ expression: 'bool canEnter = hasKey || knowsCode', showAt: 0, stack: [{ showAt: 0, span: [16, 22], label: 'var', value: 'true' }], strike: { showAt: 1, span: [16, 35] }, arrowAfter: { showAt: 1 } }, { expression: 'bool canEnter = true', showAt: 1 }], minCanvasWidth: 940 } },
+      { label: 'After line 3', desc: 'OR short-circuits after hasKey evaluates to true.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }, { name: 'knowsCode', type: 'bool', value: 'false' }, { name: 'canEnter', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'OR short-circuit', sourceLine: 'bool canEnter = hasKey || knowsCode;', steps: [{ label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks the left operand.' }, { label: 'Read left', note: 'Read true from hasKey. That value already determines the OR result, so knowsCode is not evaluated.' }, { label: 'Substitute result', note: 'Substitute true into the declaration. The completed declaration stores true in canEnter.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'bool canEnter = hasKey || knowsCode',
+                showAt: 0,
+                evalSpan: [
+                  16,
+                  22
+                ],
+                label: 'var',
+                lineShowAt: 0,
+                strike: {
+                  showAt: 1,
+                  span: [
+                    16,
+                    35
+                  ]
+                }
+              },
+              {
+                expression: 'true',
+                showAt: 0
+              }
+            ],
+            arrowAfter: {
+              showAt: 1
+            }
+          },
+          {
+            showAt: 1,
+            levels: [
+              {
+                expression: 'bool canEnter = true',
+                showAt: 1
+              }
+            ]
+          }
+        ], minCanvasWidth: 940 } },
       { label: 'After line 4', desc: '!hasKey is false, so AND produces false.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }, { name: 'knowsCode', type: 'bool', value: 'false' }, { name: 'canEnter', type: 'bool', value: 'true' }, { name: 'needsHelp', type: 'bool', value: 'false' }], console: [] },
       { label: 'After line 5', desc: 'The console prints true.', memory: [{ name: 'hasKey', type: 'bool', value: 'true' }, { name: 'knowsCode', type: 'bool', value: 'false' }, { name: 'canEnter', type: 'bool', value: 'true' }, { name: 'needsHelp', type: 'bool', value: 'false' }], console: ['true'] },
     ],
@@ -372,7 +412,47 @@ const CH1_REMAINING_LESSON_CONFIGS = [
       { label: 'Before execution', desc: 'No variables exist yet.', memory: [], console: [] },
       { label: 'After line 1', desc: 'loggedIn is true.', memory: [{ name: 'loggedIn', type: 'bool', value: 'true' }], console: [] },
       { label: 'After line 2', desc: 'canEnter begins false outside the block.', memory: [{ name: 'loggedIn', type: 'bool', value: 'true' }, { name: 'canEnter', type: 'bool', value: 'false' }], console: [] },
-      { label: 'After line 3', desc: 'The if condition is true, so the assignment inside the block runs.', memory: [{ name: 'loggedIn', type: 'bool', value: 'true' }, { name: 'canEnter', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Choose the branch', sourceLine: 'if (loggedIn) { canEnter = true; }', steps: [{ label: 'Condition', note: 'Evaluate loggedIn.' }, { label: 'Decision', note: 'The condition is true, so the block runs.' }, { label: 'Write', note: 'The block writes true into canEnter.' }], frames: [{ expression: 'if (loggedIn)', showAt: 0, stack: [{ showAt: 0, span: [4, 12], label: 'var', value: 'true' }], strike: { showAt: 1, span: [4, 12] }, arrowAfter: { showAt: 1 } }, { expression: 'canEnter = true', showAt: 2 }], minCanvasWidth: 760 } },
+      { label: 'After line 3', desc: 'The if condition is true, so the assignment inside the block runs.', memory: [{ name: 'loggedIn', type: 'bool', value: 'true' }, { name: 'canEnter', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Choose the branch', sourceLine: 'if (loggedIn) { canEnter = true; }', steps: [{ label: 'Start', note: 'Start with the if condition. The evaluation bar marks loggedIn.' }, { label: 'Read condition', note: 'Read true from loggedIn.' }, { label: 'Select scope', note: 'Use the true condition to select the if scope, whose assignment writes true into canEnter.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'if (loggedIn)',
+                showAt: 0,
+                evalSpan: [
+                  4,
+                  12
+                ],
+                label: 'var',
+                lineShowAt: 0,
+                strike: {
+                  showAt: 1,
+                  span: [
+                    4,
+                    12
+                  ]
+                }
+              },
+              {
+                expression: 'true',
+                showAt: 0
+              }
+            ],
+            arrowAfter: {
+              showAt: 1
+            }
+          },
+          {
+            showAt: 2,
+            levels: [
+              {
+                expression: 'canEnter = true',
+                showAt: 2
+              }
+            ]
+          }
+        ], minCanvasWidth: 760 } },
       { label: 'After line 4', desc: 'The console prints true.', memory: [{ name: 'loggedIn', type: 'bool', value: 'true' }, { name: 'canEnter', type: 'bool', value: 'true' }], console: ['true'] },
     ],
     preQuiz: {
@@ -457,7 +537,122 @@ const CH1_REMAINING_LESSON_CONFIGS = [
     lines: [
       { text: 'bool done = false;', translation: 'Create the loop guard and start it false.' },
       { text: 'bool triedOnce = false;', translation: 'Track whether the loop body has run.' },
-      { text: 'while (!done) {', translation: 'Check !done before deciding whether the body runs.', state: { label: 'Line 3 guard', desc: '!done evaluates to true, so execution enters the loop body. No body assignment has run yet.', memory: [{ name: 'done', type: 'bool', value: 'false' }, { name: 'triedOnce', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Evaluate the loop guard', sourceLine: 'while (!done) {', steps: [{ label: 'Lookup', note: 'Read done from memory before running the body.' }, { label: 'Not', note: '!false evaluates to true.' }, { label: 'Decision', note: 'Because the guard is true, the next executed line is the first body line.' }], frames: [{ expression: 'while (!done)', showAt: 0, stack: [{ showAt: 0, span: [8, 12], label: 'var', value: 'false' }], strike: { showAt: 1, span: [7, 12] }, arrowAfter: { showAt: 1 } }, { expression: 'while (true)', showAt: 1 }, { expression: 'enter the loop body', showAt: 2 }], minCanvasWidth: 720 } }, scope: [{ text: 'triedOnce = true;', translation: 'Record that the loop body ran once.', state: { label: 'After line 3.1', desc: 'triedOnce changes to true. done is still false until the progress line runs.', memory: [{ name: 'done', type: 'bool', value: 'false' }, { name: 'triedOnce', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Write the body marker', sourceLine: 'triedOnce = true;', steps: [{ label: 'Right side', note: 'Evaluate the literal true.' }, { label: 'Write', note: 'Store true in triedOnce.' }], frames: [{ expression: 'triedOnce = true', showAt: 0 }, { expression: 'triedOnce stores true', showAt: 1 }], minCanvasWidth: 620 } } }, { text: 'done = true;', translation: 'Update the guard variable so the next check can stop.', state: { label: 'After line 3.2', desc: 'done changes to true. The next guard check would now stop the loop.', memory: [{ name: 'done', type: 'bool', value: 'true' }, { name: 'triedOnce', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Write the progress update', sourceLine: 'done = true;', steps: [{ label: 'Right side', note: 'Evaluate the literal true.' }, { label: 'Write', note: 'Store true in done.' }, { label: 'Future guard', note: 'On the next check, !done is !true, which is false.' }], frames: [{ expression: 'done = true', showAt: 0 }, { expression: 'done stores true', showAt: 1 }, { expression: 'next guard: !true -> false', showAt: 2 }], minCanvasWidth: 720 } } }], close: '}' },
+      { text: 'while (!done) {', translation: 'Check !done before deciding whether the body runs.', state: { label: 'Line 3 guard', desc: '!done evaluates to true, so execution enters the loop body. No body assignment has run yet.', memory: [{ name: 'done', type: 'bool', value: 'false' }, { name: 'triedOnce', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Evaluate the loop guard', sourceLine: 'while (!done) {', steps: [{ label: 'Start', note: 'Start with the complete guard. The evaluation bar marks done.' }, { label: 'Read', note: 'Read false from done.' }, { label: 'Substitute', note: 'Substitute false for done, preserving the surrounding NOT operator.' }, { label: 'Apply NOT', note: 'Evaluate !false to the Boolean value true.' }, { label: 'Substitute result', note: 'Substitute true into the while condition. Control flow can now use the completed guard value.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'while (!done)',
+                showAt: 0,
+                evalSpan: [
+                  8,
+                  12
+                ],
+                label: 'var',
+                lineShowAt: 0,
+                strike: {
+                  showAt: 1,
+                  span: [
+                    7,
+                    12
+                  ]
+                }
+              },
+              {
+                expression: 'false',
+                showAt: 0
+              }
+            ],
+            arrowAfter: {
+              showAt: 1
+            }
+          },
+          {
+            showAt: 1,
+            levels: [
+              {
+                expression: 'while (!false)',
+                showAt: 1,
+                evalSpan: [7, 13],
+                label: 'not',
+                strike: { showAt: 2, span: [7, 13] },
+              },
+              {
+                expression: 'true',
+                showAt: 2
+              }
+            ],
+            arrowAfter: {
+              showAt: 3
+            }
+          },
+          {
+            showAt: 3,
+            levels: [
+              {
+                expression: 'while (true)',
+                showAt: 3
+              }
+            ]
+          }
+        ], minCanvasWidth: 720 } }, scope: [{ text: 'triedOnce = true;', translation: 'Record that the loop body ran once.', state: { label: 'After line 3.1', desc: 'triedOnce changes to true. done is still false until the progress line runs.', memory: [{ name: 'done', type: 'bool', value: 'false' }, { name: 'triedOnce', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Write the body marker', sourceLine: 'triedOnce = true;', steps: [{ label: 'Start', note: 'Start with the complete assignment. The evaluation bar marks the right side.' }, { label: 'Read value', note: 'The literal true is already a Boolean value.' }, { label: 'Write', note: 'Use the completed right-side value to store true in triedOnce.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'triedOnce = true',
+                showAt: 0,
+                activeAt: [0, 1],
+                evalSpan: [12, 16],
+                label: 'literal',
+                lineShowAt: 0,
+                lineActiveAt: [0],
+                strike: { showAt: 1, activeAt: [1], span: [12, 16] },
+              },
+              { expression: 'true', showAt: 0, activeAt: [0, 1] },
+            ],
+            arrowAfter: { showAt: 1, activeAt: [1], label: 'write' },
+          },
+          {
+            showAt: 1,
+            levels: [
+              {
+                expression: 'triedOnce stores true',
+                showAt: 1
+              }
+            ]
+          }
+        ], minCanvasWidth: 620 } } }, { text: 'done = true;', translation: 'Update the guard variable so the next check can stop.', state: { label: 'After line 3.2', desc: 'done changes to true. The next guard check would now stop the loop.', memory: [{ name: 'done', type: 'bool', value: 'true' }, { name: 'triedOnce', type: 'bool', value: 'true' }], console: [], evalDetail: { title: 'Write the progress update', sourceLine: 'done = true;', steps: [{ label: 'Start', note: 'Start with the complete assignment. The evaluation bar marks the right side.' }, { label: 'Read value', note: 'The literal true is already a Boolean value.' }, { label: 'Write', note: 'Use the completed right-side value to store true in done. The lesson trace handles the next guard check separately.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'done = true',
+                showAt: 0,
+                activeAt: [0, 1],
+                evalSpan: [7, 11],
+                label: 'literal',
+                lineShowAt: 0,
+                lineActiveAt: [0],
+                strike: { showAt: 1, activeAt: [1], span: [7, 11] },
+              },
+              { expression: 'true', showAt: 0, activeAt: [0, 1] },
+            ],
+            arrowAfter: { showAt: 1, activeAt: [1], label: 'write' },
+          },
+          {
+            showAt: 1,
+            levels: [
+              {
+                expression: 'done stores true',
+                showAt: 1
+              }
+            ]
+          }
+        ], minCanvasWidth: 620 } } }], close: '}' },
       { text: 'Console.WriteLine(triedOnce);', translation: 'Print whether the body ran.' },
     ],
     states: [
@@ -490,7 +685,67 @@ const CH1_REMAINING_LESSON_CONFIGS = [
       { label: 'Before execution', desc: 'No names exist yet.', memory: [], console: [] },
       { label: 'After line 1', desc: 'The method name IsOpen is available for calls.', memory: [{ name: 'IsOpen', type: 'method', value: 'bool(bool)' }], console: [] },
       { label: 'After line 2', desc: 'locked stores true.', memory: [{ name: 'IsOpen', type: 'method', value: 'bool(bool)' }, { name: 'locked', type: 'bool', value: 'true' }], console: [] },
-      { label: 'After line 3', desc: 'IsOpen receives true, returns false, and open stores false.', memory: [{ name: 'IsOpen', type: 'method', value: 'bool(bool)' }, { name: 'locked', type: 'bool', value: 'true' }, { name: 'open', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Call and return a bool', sourceLine: 'bool open = IsOpen(locked);', steps: [{ label: 'Argument', note: 'Evaluate locked before the call.' }, { label: 'Parameter', note: 'The method receives true as locked.' }, { label: 'Return', note: 'return !locked evaluates to false.' }, { label: 'Bind', note: 'Bind the returned value to open.' }], frames: [{ expression: 'bool open = IsOpen(locked)', showAt: 0, stack: [{ showAt: 0, span: [19, 25], label: 'arg', value: 'true' }], strike: { showAt: 1, span: [19, 25] }, arrowAfter: { showAt: 1 } }, { expression: 'return !true -> false', showAt: 2 }, { expression: 'bool open = false', showAt: 3 }], minCanvasWidth: 900 } },
+      { label: 'After line 3', desc: 'IsOpen receives true, returns false, and open stores false.', memory: [{ name: 'IsOpen', type: 'method', value: 'bool(bool)' }, { name: 'locked', type: 'bool', value: 'true' }, { name: 'open', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Call and return a bool', sourceLine: 'bool open = IsOpen(locked);', steps: [{ label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks the argument locked.' }, { label: 'Read argument', note: 'Read true from locked.' }, { label: 'Substitute argument', note: 'Substitute true into the call. IsOpen receives that value through its parameter.' }, { label: 'Return value', note: 'Evaluate IsOpen(true). Its return expression !true produces false.' }, { label: 'Substitute result', note: 'Substitute false for the completed call. The declaration stores false in open.' }], layout: 'verticalStack',
+        blocks: [
+          {
+            showAt: 0,
+            levels: [
+              {
+                expression: 'bool open = IsOpen(locked)',
+                showAt: 0,
+                evalSpan: [
+                  19,
+                  25
+                ],
+                label: 'arg',
+                lineShowAt: 0,
+                strike: {
+                  showAt: 1,
+                  span: [
+                    19,
+                    25
+                  ]
+                }
+              },
+              {
+                expression: 'true',
+                showAt: 0
+              }
+            ],
+            arrowAfter: {
+              showAt: 1
+            }
+          },
+          {
+            showAt: 1,
+            levels: [
+              {
+                expression: 'bool open = IsOpen(true)',
+                showAt: 1,
+                evalSpan: [12, 24],
+                label: 'call',
+                lineShowAt: 1,
+                strike: { showAt: 3, span: [12, 24] },
+              },
+              {
+                expression: 'false',
+                showAt: 2
+              }
+            ],
+            arrowAfter: {
+              showAt: 3
+            }
+          },
+          {
+            showAt: 3,
+            levels: [
+              {
+                expression: 'bool open = false',
+                showAt: 3
+              }
+            ]
+          }
+        ], minCanvasWidth: 900 } },
       { label: 'After line 4', desc: 'The console prints false.', memory: [{ name: 'IsOpen', type: 'method', value: 'bool(bool)' }, { name: 'locked', type: 'bool', value: 'true' }, { name: 'open', type: 'bool', value: 'false' }], console: ['false'] },
     ],
     preQuiz: { title: 'Method Return Prediction', prompt: 'A value-returning method can be used on the right side of assignment.', answers: { arg: 'true', returned: 'false', printed: 'false' }, bank: ['true', 'false', 'locked', 'open'], prompts: [{ slot: 'arg', label: 'argument', prompt: 'What value is passed into IsOpen(locked)?', hint: 'Read locked before the call.' }, { slot: 'returned', label: 'return', prompt: 'What does return !locked produce?', hint: 'The parameter value is true.' }, { slot: 'printed', label: 'output', prompt: 'What does open print?', hint: 'open stores the returned value.' }] },
@@ -537,7 +792,47 @@ const CH1_EXTRA_CONFIGS = [
     learningTarget: CH1_V1_LESSON_MAP[9].learningTarget,
     reviewConcepts: CH1_V1_LESSON_MAP[9].reviewConcepts,
     lines: [{ text: 'Door first = new Door();', translation: 'Create a Door value named first.' }, { text: 'first.Open = true;', translation: 'Set first.Open to true.' }, { text: 'Door copy = first;', translation: 'Copy the current field values from first into copy.' }, { text: 'first.Open = false;', translation: 'Change first.Open after the copy.' }, { text: 'Console.WriteLine(copy.Open);', translation: 'Print the copied field value.' }],
-    states: [{ label: 'Before execution', desc: 'Door is available from the previous lesson.', memory: [{ name: 'Door', type: 'struct', value: 'Open, Locked' }], console: [] }, { label: 'After line 1', desc: 'first has default field values.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 2', desc: 'first.Open is true.', memory: [{ name: 'first.Open', type: 'bool', value: 'true' }, { name: 'first.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 3', desc: 'copy receives the current field values from first.', memory: [{ name: 'first.Open', type: 'bool', value: 'true' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Struct value copy', sourceLine: 'Door copy = first;', steps: [{ label: 'Read', note: 'Read the current fields of first.' }, { label: 'Copy', note: 'Create copy with the same field values.' }, { label: 'Separate', note: 'Later writes to first do not rewrite copy.' }], frames: [{ expression: 'Door copy = first', showAt: 0, stack: [{ showAt: 0, span: [12, 17], label: 'fields', value: 'Open=true' }], strike: { showAt: 1, span: [12, 17] }, arrowAfter: { showAt: 1 } }, { expression: 'copy.Open = true; copy.Locked = false', showAt: 1 }], minCanvasWidth: 920 } }, { label: 'After line 4', desc: 'first changes, but copy stays true.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 5', desc: 'The console prints the copied true value.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: ['true'] }],
+    states: [{ label: 'Before execution', desc: 'Door is available from the previous lesson.', memory: [{ name: 'Door', type: 'struct', value: 'Open, Locked' }], console: [] }, { label: 'After line 1', desc: 'first has default field values.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 2', desc: 'first.Open is true.', memory: [{ name: 'first.Open', type: 'bool', value: 'true' }, { name: 'first.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 3', desc: 'copy receives the current field values from first.', memory: [{ name: 'first.Open', type: 'bool', value: 'true' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: [], evalDetail: { title: 'Struct value copy', sourceLine: 'Door copy = first;', steps: [{ label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks first as the value to read.' }, { label: 'Read fields', note: 'Read first as the field values Open=true and Locked=false.' }, { label: 'Substitute copy', note: 'Use those completed field values to create copy. Later writes to first do not rewrite the separate copy.' }], layout: 'verticalStack',
+      blocks: [
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'Door copy = first',
+              showAt: 0,
+              evalSpan: [
+                12,
+                17
+              ],
+              label: 'fields',
+              lineShowAt: 0,
+              strike: {
+                showAt: 1,
+                span: [
+                  12,
+                  17
+                ]
+              }
+            },
+            {
+              expression: 'Open=true, Locked=false',
+              showAt: 0
+            }
+          ],
+          arrowAfter: {
+            showAt: 1
+          }
+        },
+        {
+          showAt: 1,
+          levels: [
+            {
+              expression: 'copy.Open = true; copy.Locked = false',
+              showAt: 1
+            }
+          ]
+        }
+      ], minCanvasWidth: 920 } }, { label: 'After line 4', desc: 'first changes, but copy stays true.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: [] }, { label: 'After line 5', desc: 'The console prints the copied true value.', memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'first.Locked', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }, { name: 'copy.Locked', type: 'bool', value: 'false' }], console: ['true'] }],
     preQuiz: { title: 'Struct Copy Prediction', prompt: 'A struct copy receives field values at the moment of copying.', answers: { copied: 'true', firstLater: 'false', output: 'true' }, bank: ['true', 'false', 'same storage', 'separate copy'], prompts: [{ slot: 'copied', label: 'copy.Open', prompt: 'What value does copy.Open receive when first.Open is true?', hint: 'Copy happens before first changes.' }, { slot: 'firstLater', label: 'first.Open', prompt: 'What is first.Open after line 4?', hint: 'Line 4 writes to first.' }, { slot: 'output', label: 'output', prompt: 'What does copy.Open print?', hint: 'copy is separate after line 3.' }] },
     mainLesson: { title: 'Struct Copies Preserve Field Values', label: 'Main Lesson', intro: 'Copying a struct copies its current fields. This is the same value-copy idea from booleans, now with a grouped value.', acts: [{ n: 1, title: 'Copy the group, not a link', body: ['Door copy = first reads the current field values.', 'copy receives its own field values.', 'Later writes to first do not rewrite copy.'], code: [{ text: 'Door copy = first;', translation: 'Copy the current Door value.' }, { text: 'first.Open = false;', translation: 'Change first after the copy.' }], memory: [{ name: 'first.Open', type: 'bool', value: 'false' }, { name: 'copy.Open', type: 'bool', value: 'true' }] }, { n: 2, title: 'Methods can read fields', body: ['A method that receives a Door can read door.Open or door.Locked.', 'The method returns a bool computed from the fields.', 'This is synthesis material for the door-checker exercises.'], code: [{ text: 'bool CanEnter(Door door) {', translation: 'Define a bool method that receives a Door value.', scope: [{ text: 'return door.Open && !door.Locked;', translation: 'Return a bool computed from fields.' }], close: '}' }], memory: [{ name: 'CanEnter', type: 'method', value: 'bool(Door)' }] }] },
     rigorousQuiz: { title: 'Door Checker Transfer', prompt: 'Trace copied fields and output.', transferCode: { lines: [{ text: 'Door front = new Door();' }, { text: 'front.Locked = true;' }, { text: 'Door snapshot = front;' }, { text: 'front.Locked = false;' }, { text: 'Console.WriteLine(snapshot.Locked);' }] }, columns: ['front.Locked', 'snapshot.Locked'], stateRows: [{ after: 1, 'front.Locked': 'false', 'snapshot.Locked': '-' }, { after: 2, 'front.Locked': 'true', 'snapshot.Locked': '-' }, { after: 3, 'front.Locked': 'true', 'snapshot.Locked': 'true' }, { after: 4, 'front.Locked': 'false', 'snapshot.Locked': 'true' }, { after: 5, 'front.Locked': 'false', 'snapshot.Locked': 'true' }], translations: [{ id: 'A', text: 'Create a Door value.' }, { id: 'B', text: 'Write true into front.Locked.' }, { id: 'C', text: 'Copy the current Door fields into snapshot.' }, { id: 'D', text: 'Change front.Locked after the copy.' }, { id: 'E', text: 'Print snapshot.Locked.' }], outputAnswers: { output: 'true', why: 'snapshot copied the earlier locked value' }, valueChoices: ['true', 'false', '-'], outputChoices: ['true', 'false', '(no output)'], reasonChoices: ['snapshot copied the earlier locked value', 'snapshot follows front automatically', 'WriteLine changes front'] },

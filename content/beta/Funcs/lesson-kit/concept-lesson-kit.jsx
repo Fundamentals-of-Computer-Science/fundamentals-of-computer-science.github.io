@@ -85,6 +85,14 @@ const FUNCS_EXERCISE_BLOCK_TYPES = {
   },
 };
 
+const FUNCS_LESSON_KIT_DOC_BREADCRUMBS = {
+  componentReference: 'doc-21',
+  authoringContract: 'doc-22',
+  prototypeGuide: 'doc-23',
+  evaluationPolicy: 'Base-only opening; one immediate result upward per action; substitution across on the following action.',
+  mainLessonLanguageSupport: 'Optional act definitions, displayed code translations, and unscored post-check recall cards use the shared Main Lesson renderer.',
+};
+
 // Visualizer grammar: pick the tool by the student's question, not by chapter.
 // Core tools:
 // - reduction: "what value does this term become?" Use evalDetail.
@@ -100,11 +108,14 @@ const FUNCS_VISUALIZER_GRAMMAR = {
     component: 'FuncsStackedEvaluationDetail',
     useWhen: 'A term, expression, operator, lookup, call, recursive call, or condition must be evaluated to a value.',
     rules: [
-      'Start with the full expression.',
+      'Open with only the full base expression at the bottom.',
       'Draw an evaluation bar above the term being evaluated.',
-      'If the result is an expression that is not a value, push another evaluation frame or vertical-stack level.',
-      'If the result is a value, pop with strike + arrow substitution.',
-      'Do not use strike + arrow substitution for returned expressions that still need evaluation.',
+      'Each Next action reveals exactly one immediate evaluation result above the previous layer.',
+      'Evaluate upward inside one vertical block until the selected term becomes a value or cannot be evaluated further.',
+      'If an upward step produces another expression, keep evaluating upward; do not substitute it yet.',
+      'On the Next action after the terminal upward result, use strike + arrow to simplify the containing expression across into the next block.',
+      'Do not reveal an evaluated result, substitution arrow, or future block before its action.',
+      'Every reduction walkthrough uses layout "verticalStack" with blocks; horizontal frames are not an authoring option.',
     ],
   },
   controlFlow: {
@@ -146,13 +157,19 @@ const FUNCS_VISUALIZER_GRAMMAR = {
   },
 };
 
-// Evaluation authoring rule: only substitute values. If evaluating a term
-// returns another expression, add another evaluation frame and keep evaluating
-// that expression. Use strike + arrow substitution only after the term has
-// become a value.
+// Evaluation authoring rule: open with the base expression, reveal one immediate
+// result upward per action, then simplify across on the action after the terminal
+// result. Future levels and blocks stay hidden until their own reveal action.
 const FUNCS_EVALUATION_AUTHORING_RULES = {
-  expressionReturnsKeepEvaluating: 'If evaluating a term returns an expression that is not also a value, add another evaluation frame for that expression instead of substituting it into the caller.',
-  substituteOnlyValues: 'Use strike + arrow substitution only when the evaluated term has become a value.',
+  baseOnlyAtOpen: 'The opening state shows only the containing expression at the bottom, with an evaluation bar over the selected term.',
+  oneResultPerAction: 'Each Next action adds exactly one immediate evaluation result above the prior layer. Earlier layers remain visible.',
+  evaluateUpward: 'Inside a vertical block, keep adding one result upward until the selected term becomes a value or cannot be evaluated further.',
+  expressionReturnsKeepEvaluating: 'If an upward step returns another expression that is not also a value, add another level above it and keep evaluating inside the same block.',
+  simplifyAcross: 'On the Next action after the terminal upward result, use strike + arrow to reveal the simplified containing expression in the next block.',
+  substituteOnlyTerminalResults: 'Only values or other terminal results may cross the arrow between blocks; unfinished expressions remain in the current upward evaluation.',
+  hideFutureWork: 'No evaluated result, substitution arrow, or future block may appear before its reveal action.',
+  engineOwnsTiming: 'Authors order blocks and levels; the shared engine derives every reveal index so fixtures cannot group multiple evaluation actions on one click.',
+  canonicalLayout: 'Every evalDetail uses layout "verticalStack" with blocks and one caption for every base, upward, or substitution reveal state. The horizontal frames payload is invalid.',
 };
 
 const FUNCS_EVALUATION_STEP_INTERACTION = {
@@ -163,30 +180,26 @@ const FUNCS_EVALUATION_STEP_INTERACTION = {
   authoringRules: FUNCS_EVALUATION_AUTHORING_RULES,
   triggerLabel: 'Show evaluation steps',
   returnLabel: 'Show memory state',
-  panelRole: 'stacked step-through evaluation detail',
+  panelRole: 'vertical evaluate-upward, simplify-across detail',
   sequenceField: 'steps',
-  frameField: 'frames',
   blockField: 'blocks',
-  note: 'On steps that include expression evaluation, use evalDetail.steps as the ordered control sequence and evalDetail.frames as the stacked lookup/substitution visual sequence. For recursive or nested evaluation, layout "verticalStack" with evalDetail.blocks may be used to stack returned expressions upward in one block. Returned expressions keep evaluating in new frames/levels; only returned values are substituted with strike + arrow.',
+  note: 'Use evalDetail.steps for the ordered controls and layout "verticalStack" with evalDetail.blocks for the visual sequence. Step 1 shows only the bottom base expression. Each later step reveals either one immediate result upward or one substitution event across. A substitution event appears only after the terminal upward result and reveals its strike, arrow, and next containing expression together.',
   requiredDetailFields: ['title', 'sourceLine', 'steps'],
+  requiredLayout: 'verticalStack',
+  minimumBlockCount: 2,
   stepShape: {
     label: 'short control label',
     note: 'student-facing explanation for this evaluation step',
   },
-  frameShape: {
-    expression: 'expression text shown in the stack',
-    showAt: '0-based step index when this expression appears',
-    stack: 'optional lookup/operator annotations with span, label, value, showAt',
-    strike: 'optional span struck when this expression is replaced',
-    arrowAfter: 'optional substitution arrow after this expression',
-  },
   blockShape: {
     stackSlots: 'optional evalDetail-level bottom-to-top reduction skeleton used by every block to preserve the same stack shape and inherited evaluation bars across substitutions',
-    levels: 'for layout "verticalStack", bottom-to-top expressions in one evaluation block',
+    revealTiming: 'derived by the shared engine from block and level order; authored showAt values are not used to decide click chronology',
+    baseLevelCount: 'optional number of existing context levels revealed together when a substitution recreates a waiting expression stack; defaults to 1 and the first block must use 1',
+    levels: 'bottom-to-top expressions in one upward evaluation block; base context levels appear with the block and each newly evaluated result uses a later unique reveal state',
     slot: 'optional level index into stackSlots or block.slots; replacement expressions stay anchored to that original stack level instead of reflowing; unchanged slot expressions inherit the slot evaluation bar unless inheritSlotLine is false',
     evalSpan: 'optional span on a level that draws the evaluation bar leading to the next visible level',
-    strike: 'optional span struck when a value is substituted out of this block',
-    arrowAfter: 'optional substitution arrow after this block, shown only when a value is ready',
+    strike: 'optional span struck on the same reveal state as the substitution arrow',
+    arrowAfter: 'required on every non-final block; its reveal state must follow the terminal upward result and match the next block base',
   },
 };
 
@@ -1636,7 +1649,13 @@ function FuncsMemoryStatePanel({ state }) {
   );
 }
 
-function FuncsChapterOverviewPanel({ lesson, variant = 'inline' }) {
+function FuncsChapterOverviewPanel({ lesson, variant = 'inline', onClose }) {
+  const AcademicChapterOverviewPanel = window.FuncsAcademicChapterOverviewPanel;
+  const academicChapter = window.FUNCS_BETA_CHAPTER_OVERVIEWS?.[lesson.chapterId];
+  if (AcademicChapterOverviewPanel && academicChapter) {
+    return <AcademicChapterOverviewPanel lesson={lesson} onClose={onClose} />;
+  }
+
   const { chapterExamples = [] } = lesson;
   const dropdown = variant === 'dropdown';
 
@@ -3390,6 +3409,72 @@ const FUNCS_DEFAULT_LESSON_RENDERERS = {
   exercises: FuncsExercisesPage,
 };
 
+function funcsEvaluationShowAt(definition, fallback = 0) {
+  return definition?.showAt ?? fallback;
+}
+
+function funcsBuildAtomicEvaluationDetail(detail) {
+  let revealStep = 0;
+
+  const blocks = (detail?.blocks || []).map((block, blockIndex) => {
+    const baseLevelCount = block.baseLevelCount ?? 1;
+    const blockShowAt = revealStep;
+    let levels = (block.levels || []).map((level, levelIndex) => {
+      const levelShowAt = levelIndex < baseLevelCount ? blockShowAt : ++revealStep;
+      const isCurrentBase = levelIndex === baseLevelCount - 1;
+
+      return {
+        ...level,
+        showAt: levelShowAt,
+        activeAt: levelIndex < baseLevelCount
+          ? (isCurrentBase ? [levelShowAt] : [])
+          : [levelShowAt],
+        ...(level.evalSpan || level.span
+          ? {
+              lineShowAt: levelShowAt,
+              lineActiveAt: [levelShowAt],
+            }
+          : {}),
+      };
+    });
+
+    let arrowAfter;
+    if (blockIndex < (detail?.blocks || []).length - 1 && block.arrowAfter) {
+      revealStep += 1;
+      arrowAfter = {
+        ...block.arrowAfter,
+        showAt: revealStep,
+        activeAt: [revealStep],
+      };
+      levels = levels.map(level => (
+        level.strike
+          ? {
+              ...level,
+              strike: {
+                ...level.strike,
+                showAt: revealStep,
+                activeAt: [revealStep],
+              },
+            }
+          : level
+      ));
+    }
+
+    return {
+      ...block,
+      showAt: blockShowAt,
+      levels,
+      ...(arrowAfter ? { arrowAfter } : {}),
+    };
+  });
+
+  return {
+    ...detail,
+    blocks,
+    revealCount: revealStep + 1,
+  };
+}
+
 function funcsValidateStackedEvaluationDetail(detail) {
   const missing = [];
 
@@ -3405,18 +3490,57 @@ function funcsValidateStackedEvaluationDetail(detail) {
     missing.push('steps[]');
   }
 
-  const hasFrames = Array.isArray(detail.frames) && detail.frames.length > 0;
   const hasBlocks = Array.isArray(detail.blocks) && detail.blocks.length > 0;
 
-  if (!hasFrames && !hasBlocks) {
-    missing.push('frames[] or blocks[]');
+  if (detail.layout !== FUNCS_EVALUATION_STEP_INTERACTION.requiredLayout) {
+    missing.push(`layout: "${FUNCS_EVALUATION_STEP_INTERACTION.requiredLayout}"`);
+  }
+  if (Object.prototype.hasOwnProperty.call(detail, 'frames')) {
+    missing.push('frames (horizontal payload is unsupported)');
+  }
+  if (!hasBlocks || detail.blocks.length < FUNCS_EVALUATION_STEP_INTERACTION.minimumBlockCount) {
+    missing.push(`blocks[] (at least ${FUNCS_EVALUATION_STEP_INTERACTION.minimumBlockCount})`);
+  } else {
+    detail.blocks.forEach((block, index) => {
+      if (!Array.isArray(block?.levels) || block.levels.length === 0) {
+        missing.push(`blocks[${index}].levels[]`);
+        return;
+      }
+
+      const baseLevelCount = block.baseLevelCount ?? 1;
+      if (!Number.isInteger(baseLevelCount) || baseLevelCount < 1 || baseLevelCount > block.levels.length) {
+        missing.push(`blocks[${index}].baseLevelCount (between 1 and levels.length)`);
+      }
+      if (index === 0 && baseLevelCount !== 1) {
+        missing.push('blocks[0].baseLevelCount (the opening state has one bottom base expression)');
+      }
+
+      if (index < detail.blocks.length - 1 && !block?.arrowAfter) {
+        missing.push(`blocks[${index}].arrowAfter`);
+      }
+
+      if (index === detail.blocks.length - 1 && block?.arrowAfter) {
+        missing.push(`blocks[${index}].arrowAfter (final block must not substitute again)`);
+      }
+
+    });
+
+    if (!detail.blocks.some(block => Array.isArray(block?.levels) && block.levels.length >= 2)) {
+      missing.push('blocks[].levels[] (upward evaluation)');
+    }
+
+    const atomicDetail = funcsBuildAtomicEvaluationDetail(detail);
+    if (Array.isArray(detail.steps) && detail.steps.length !== atomicDetail.revealCount) {
+      missing.push(`steps[] (one caption for each of ${atomicDetail.revealCount} atomic reveal states)`);
+    }
   }
 
   return {
     valid: missing.length === 0,
     missing,
     stepCount: Array.isArray(detail.steps) ? detail.steps.length : 0,
-    frameCount: hasFrames ? detail.frames.length : hasBlocks ? detail.blocks.length : 0,
+    frameCount: hasBlocks ? detail.blocks.length : 0,
+    blockCount: hasBlocks ? detail.blocks.length : 0,
   };
 }
 
@@ -3430,7 +3554,7 @@ function funcsFrameSpan(x, text, span, cw) {
 }
 
 function funcsLevelShowAt(level, fallback = 0) {
-  return level.showAt ?? fallback;
+  return funcsEvaluationShowAt(level, fallback);
 }
 
 function funcsActiveAt(def, fallback) {
@@ -3694,158 +3818,15 @@ function FuncsVerticalStackEvaluationScene({ detail, subStep }) {
 }
 
 function FuncsStackedEvaluationScene({ detail, subStep }) {
-  if (detail.layout === 'verticalStack' && Array.isArray(detail.blocks) && detail.blocks.length) {
-    return <FuncsVerticalStackEvaluationScene detail={detail} subStep={subStep} />;
-  }
-
-  const cw = detail.charWidth || 8.8;
-  const y = 108;
-  const lift = 38;
-  const lineOffset = 22;
-  const pad = 40;
-  const arrowWidth = 36;
-  const active = '#2563eb';
-  const inactive = '#cbd5e1';
-  const strike = '#dc2626';
-  const visibleFrames = (detail.frames || []).filter(frame => (frame.showAt ?? 0) <= subStep);
-
-  let x = 38;
-  const renderItems = [];
-
-  for (const [index, frame] of visibleFrames.entries()) {
-    const width = Math.max(frame.expression.length * cw, 18);
-    const isCurrentFrame = (frame.activeAt || [frame.showAt ?? 0]).includes(subStep);
-    const textColor = isCurrentFrame ? active : inactive;
-
-    renderItems.push(
-      <text
-        key={`frame-${index}`}
-        x={x}
-        y={y}
-        fontSize="14.5"
-        fontWeight={isCurrentFrame ? 700 : 500}
-        fill={textColor}
-      >
-        {frame.expression}
-      </text>
-    );
-
-    for (const [stackIndex, stack] of (frame.stack || []).entries()) {
-      if ((stack.showAt ?? 0) > subStep) continue;
-      const span = funcsFrameSpan(x, frame.expression, stack.span, cw);
-      const isCurrentStack = (stack.activeAt || [stack.showAt ?? 0]).includes(subStep);
-      const color = isCurrentStack ? active : inactive;
-      const strokeColor = isCurrentStack ? active : '#e2e8f0';
-
-      renderItems.push(
-        <g key={`stack-${index}-${stackIndex}`}>
-          <line
-            x1={span.start}
-            y1={y - lineOffset}
-            x2={span.end}
-            y2={y - lineOffset}
-            stroke={strokeColor}
-            strokeWidth={isCurrentStack ? 2.4 : 1.4}
-            strokeLinecap="round"
-          />
-          {stack.label && (
-            <text
-              x={span.start - 6}
-              y={y - lineOffset + 1}
-              textAnchor="end"
-              dominantBaseline="middle"
-              fontSize="10"
-              fontStyle="italic"
-              fontWeight="700"
-              fontFamily="'Source Sans 3', sans-serif"
-              fill={color}
-            >
-              {stack.label}
-            </text>
-          )}
-          <text
-            x={span.center}
-            y={y - lift}
-            textAnchor="middle"
-            fontSize="14.5"
-            fontWeight={isCurrentStack ? 700 : 500}
-            fill={color}
-          >
-            {stack.value}
-          </text>
-        </g>
-      );
-    }
-
-    if (frame.strike && (frame.strike.showAt ?? 0) <= subStep) {
-      const span = funcsFrameSpan(x, frame.expression, frame.strike.span, cw);
-      const isCurrentStrike = (frame.strike.activeAt || [frame.strike.showAt ?? 0]).includes(subStep);
-
-      renderItems.push(
-        <line
-          key={`strike-${index}`}
-          x1={span.start}
-          y1={y - 6}
-          x2={span.end}
-          y2={y - 6}
-          stroke={isCurrentStrike ? strike : '#e2e8f0'}
-          strokeWidth={isCurrentStrike ? 2.4 : 1.4}
-          strokeLinecap="round"
-          opacity={0.9}
-        />
-      );
-    }
-
-    x += width + pad;
-
-    if (frame.arrowAfter && (frame.arrowAfter.showAt ?? 0) <= subStep) {
-      const isCurrentArrow = (frame.arrowAfter.activeAt || [frame.arrowAfter.showAt ?? 0]).includes(subStep);
-      const color = isCurrentArrow ? active : inactive;
-
-      renderItems.push(
-        <g key={`arrow-${index}`}>
-          <text
-            x={x + 11}
-            y={y - 22}
-            textAnchor="middle"
-            fontSize="9.5"
-            fontStyle="italic"
-            fontFamily="'Source Sans 3', sans-serif"
-            fill={color}
-          >
-            {frame.arrowAfter.label || 'subst.'}
-          </text>
-          <text x={x} y={y - 10} fontSize="18" fill={color} fontWeight="bold">→</text>
-        </g>
-      );
-      x += arrowWidth;
-    }
-  }
-
-  const canvasWidth = Math.max(detail.minCanvasWidth || 760, x + 48);
-
-  return (
-    <svg
-      width={canvasWidth}
-      height={162}
-      style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        letterSpacing: 0,
-        flex: '0 0 auto',
-        minWidth: canvasWidth,
-      }}
-    >
-      <rect width="100%" height="100%" fill="#fafbfc" rx="5" />
-      {renderItems}
-    </svg>
-  );
+  return <FuncsVerticalStackEvaluationScene detail={detail} subStep={subStep} />;
 }
 
 function FuncsStackedEvaluationDetail({ detail, onClose }) {
   const [sub, setSub] = React.useState(0);
   const sceneScrollRef = React.useRef(null);
+  const atomicDetail = React.useMemo(() => funcsBuildAtomicEvaluationDetail(detail), [detail]);
   const validation = funcsValidateStackedEvaluationDetail(detail);
-  const maxSub = Math.max(0, (validation.stepCount || 1) - 1);
+  const maxSub = Math.max(0, atomicDetail.revealCount - 1);
 
   React.useEffect(() => {
     setSub(0);
@@ -3907,7 +3888,7 @@ function FuncsStackedEvaluationDetail({ detail, onClose }) {
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [detail, sub]);
+  }, [atomicDetail, sub]);
 
   if (!validation.valid) {
     return (
@@ -3919,7 +3900,7 @@ function FuncsStackedEvaluationDetail({ detail, onClose }) {
         fontSize: 13,
         fontStyle: 'italic',
       }}>
-        Evaluation detail is missing stacked steps: {validation.missing.join(', ')}
+        Evaluation detail violates the vertical stepping rule: {validation.missing.join(', ')}
       </div>
     );
   }
@@ -4016,7 +3997,7 @@ function FuncsStackedEvaluationDetail({ detail, onClose }) {
           justifyContent: 'flex-start',
           background: '#fafbfc',
         }} ref={sceneScrollRef}>
-          <FuncsStackedEvaluationScene detail={detail} subStep={sub} />
+          <FuncsStackedEvaluationScene detail={atomicDetail} subStep={sub} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <button
@@ -4164,11 +4145,13 @@ Object.assign(window, {
   FUNCS_DEFAULT_LESSON_SECTIONS,
   FUNCS_QUIZ_BLOCK_TYPES,
   FUNCS_EXERCISE_BLOCK_TYPES,
+  FUNCS_LESSON_KIT_DOC_BREADCRUMBS,
   FUNCS_VISUALIZER_GRAMMAR,
   FUNCS_EVALUATION_AUTHORING_RULES,
   FUNCS_EVALUATION_STEP_INTERACTION,
   FUNCS_LOOP_STEPPER_INTERACTION,
   FUNCS_DEFAULT_LESSON_RENDERERS,
+  funcsBuildAtomicEvaluationDetail,
   funcsValidateStackedEvaluationDetail,
   funcsValidateLoopTrace,
   FuncsStackedEvaluationDetail,

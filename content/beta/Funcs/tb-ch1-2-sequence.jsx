@@ -183,33 +183,117 @@ const CH1_2_FULL_STATES = [
       title: 'Evaluate NOT before binding',
       sourceLine: 'bool stayInside = !sunny;',
       steps: [
-        { label: 'Expression', note: 'Start with the complete right side before binding stayInside.' },
+        { label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks sunny as the first term to evaluate.' },
         { label: 'Lookup', note: 'Look up sunny in memory. It is currently true.' },
         { label: 'Substitute', note: 'Substitute true for sunny inside the expression.' },
-        { label: 'Apply NOT', note: 'NOT flips true to false, then that result is bound.' },
+        { label: 'Apply NOT', note: 'Evaluate !true to the Boolean value false.' },
+        { label: 'Substitute result', note: 'Substitute false into the declaration. The completed declaration stores false in stayInside.' },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'bool stayInside = !sunny',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [19, 24], label: 'var', value: 'true' }],
-          strike: { showAt: 2, activeAt: [2], span: [19, 24] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'bool stayInside = !sunny',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                19,
+                24
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  19,
+                  24
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'bool stayInside = !true',
           showAt: 2,
-          activeAt: [2, 3],
-          stack: [{ showAt: 3, activeAt: [3], span: [18, 23], label: 'not', value: 'false' }],
-          strike: { showAt: 3, activeAt: [3], span: [18, 23] },
-          arrowAfter: { showAt: 3, activeAt: [3] },
+          levels: [
+            {
+              expression: 'bool stayInside = !true',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ],
+              evalSpan: [
+                18,
+                23
+              ],
+              label: 'not',
+              lineShowAt: 3,
+              lineActiveAt: [
+                3
+              ],
+              strike: {
+                showAt: 3,
+                activeAt: [
+                  3
+                ],
+                span: [
+                  18,
+                  23
+                ]
+              }
+            },
+            {
+              expression: 'false',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 3,
+            activeAt: [
+              3
+            ]
+          }
         },
         {
-          expression: 'bool stayInside = false',
           showAt: 3,
-          activeAt: [3],
-        },
+          levels: [
+            {
+              expression: 'bool stayInside = false',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 980,
     },
@@ -228,43 +312,184 @@ const CH1_2_FULL_STATES = [
       title: 'Evaluate both operands before AND',
       sourceLine: 'bool goOutside = sunny && !weekend;',
       steps: [
-        { label: 'Expression', note: 'Start with the complete right side.' },
+        { label: 'Start', note: 'Start with the complete declaration. Evaluate the left operand first.' },
         { label: 'Left lookup', note: 'Evaluate the left operand first. sunny is true.' },
         { label: 'Substitute left', note: 'Replace sunny with true.' },
-        { label: 'Right lookup', note: 'Evaluate the right operand. weekend is false.' },
-        { label: 'Apply NOT', note: '!false becomes true.' },
-        { label: 'Apply AND', note: 'true && true produces true.' },
+        { label: 'Right lookup', note: 'Read false from weekend inside the right operand.' },
+        { label: 'Substitute right', note: 'Substitute false for weekend, preserving the surrounding NOT operator.' },
+        { label: 'Apply NOT', note: 'Evaluate !false to the Boolean value true.' },
+        { label: 'Substitute NOT', note: 'Substitute true for !false in the declaration to the right.' },
+        { label: 'Apply AND', note: 'Evaluate true && true to the Boolean value true.' },
+        { label: 'Substitute result', note: 'Substitute true into the declaration. The completed declaration stores true in goOutside.' },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'bool goOutside = sunny && !weekend',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [17, 22], label: 'var', value: 'true' }],
-          strike: { showAt: 2, activeAt: [2], span: [17, 22] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'bool goOutside = sunny && !weekend',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                17,
+                22
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  17,
+                  22
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'bool goOutside = true && !weekend',
           showAt: 2,
-          activeAt: [2, 3, 4],
-          stack: [{ showAt: 3, activeAt: [3], span: [26, 33], label: 'var', value: 'false' }],
-          strike: { showAt: 4, activeAt: [4], span: [25, 33] },
-          arrowAfter: { showAt: 4, activeAt: [4] },
+          levels: [
+            {
+              expression: 'bool goOutside = true && !weekend',
+              showAt: 2,
+              activeAt: [
+                2,
+                3,
+                4
+              ],
+              evalSpan: [
+                26,
+                33
+              ],
+              label: 'var',
+              lineShowAt: 3,
+              lineActiveAt: [
+                3
+              ],
+              strike: {
+                showAt: 4,
+                activeAt: [
+                  4
+                ],
+                span: [
+                  25,
+                  33
+                ]
+              }
+            },
+            {
+              expression: 'false',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 4,
+            activeAt: [
+              4
+            ]
+          }
         },
         {
-          expression: 'bool goOutside = true && true',
           showAt: 4,
-          activeAt: [4, 5],
-          stack: [{ showAt: 5, activeAt: [5], span: [17, 29], label: 'and', value: 'true' }],
-          strike: { showAt: 5, activeAt: [5], span: [17, 29] },
-          arrowAfter: { showAt: 5, activeAt: [5] },
+          levels: [
+            {
+              expression: 'bool goOutside = true && !false',
+              showAt: 4,
+              activeAt: [4, 5, 6],
+              evalSpan: [25, 31],
+              label: 'not',
+              lineShowAt: 5,
+              lineActiveAt: [5],
+              strike: { showAt: 6, activeAt: [6], span: [25, 31] },
+            },
+            { expression: 'true', showAt: 5, activeAt: [5] },
+          ],
+          arrowAfter: { showAt: 6, activeAt: [6] },
         },
         {
-          expression: 'bool goOutside = true',
-          showAt: 5,
-          activeAt: [5],
+          showAt: 6,
+          levels: [
+            {
+              expression: 'bool goOutside = true && true',
+              showAt: 6,
+              activeAt: [
+                6,
+                7
+              ],
+              evalSpan: [
+                17,
+                29
+              ],
+              label: 'and',
+              lineShowAt: 7,
+              lineActiveAt: [
+                7
+              ],
+              strike: {
+                showAt: 8,
+                activeAt: [
+                  8
+                ],
+                span: [
+                  17,
+                  29
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 7,
+              activeAt: [
+                7
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 8,
+            activeAt: [
+              8
+            ]
+          }
         },
+        {
+          showAt: 8,
+          levels: [
+            {
+              expression: 'bool goOutside = true',
+              showAt: 8,
+              activeAt: [
+                8
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 1040,
     },
@@ -288,26 +513,85 @@ const CH1_2_FULL_STATES = [
         { label: 'Substitute', note: 'Substitute true for goOutside.' },
         { label: 'Print', note: 'WriteLine sends the value to the console.' },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'Console.WriteLine(goOutside)',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [18, 27], label: 'var', value: 'true' }],
-          strike: { showAt: 2, activeAt: [2], span: [18, 27] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(goOutside)',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                18,
+                27
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  18,
+                  27
+                ]
+              }
+            },
+            {
+              expression: 'true',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'Console.WriteLine(true)',
           showAt: 2,
-          activeAt: [2, 3],
-          arrowAfter: { showAt: 3, activeAt: [3] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(true)',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 3,
+            activeAt: [
+              3
+            ]
+          }
         },
         {
-          expression: 'console output: true',
           showAt: 3,
-          activeAt: [3],
-        },
+          levels: [
+            {
+              expression: 'console output: true',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 820,
     },

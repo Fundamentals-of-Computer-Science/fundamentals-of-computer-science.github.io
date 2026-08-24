@@ -158,20 +158,62 @@ const CH1_BOOLEAN_VALUES_STATES = [
       title: 'Evaluate Boolean NOT',
       sourceLine: 'bool doorOpen = !doorClosed;',
       steps: [
-        { label: 'Read', note: 'Read false from doorClosed.' },
-        { label: 'NOT', note: '!false evaluates to true.' },
-        { label: 'Bind', note: 'Store true in doorOpen.' },
+        { label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks doorClosed as the first term to evaluate.' },
+        { label: 'Read', note: 'Read false from doorClosed. The result appears one level above the declaration.' },
+        { label: 'Substitute', note: 'Substitute false for doorClosed in the declaration to the right.' },
+        { label: 'NOT', note: 'Evaluate !false to the Boolean value true.' },
+        { label: 'Substitute', note: 'Substitute true into the declaration. The completed declaration stores true in doorOpen.' },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'bool doorOpen = !doorClosed',
           showAt: 0,
-          stack: [{ showAt: 0, span: [17, 27], label: 'var', value: 'false' }],
-          strike: { showAt: 1, span: [16, 27] },
-          arrowAfter: { showAt: 1 },
+          levels: [
+            {
+              expression: 'bool doorOpen = !doorClosed',
+              showAt: 0,
+              activeAt: [0],
+              evalSpan: [17, 27],
+              label: 'var',
+              lineShowAt: 0,
+              lineActiveAt: [0],
+              strike: { showAt: 0, activeAt: [0], span: [17, 27] },
+            },
+            { expression: 'false', showAt: 0, activeAt: [0] },
+          ],
+          arrowAfter: { showAt: 0, activeAt: [0] },
         },
-        { expression: 'bool doorOpen = true', showAt: 1 },
-        { expression: 'doorOpen stores true', showAt: 2 },
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'bool doorOpen = !false',
+              showAt: 0,
+              activeAt: [0, 1],
+              evalSpan: [16, 22],
+              label: '!',
+              lineShowAt: 1,
+              lineActiveAt: [1],
+              strike: { showAt: 1, activeAt: [1], span: [16, 22] },
+            },
+            { expression: 'true', showAt: 1, activeAt: [1] },
+          ],
+          arrowAfter: { showAt: 1, activeAt: [1] },
+        },
+        {
+          showAt: 1,
+          levels: [
+            {
+              expression: 'bool doorOpen = true',
+              showAt: 1,
+              activeAt: [1, 2],
+              evalSpan: [16, 20],
+              label: 'value',
+              lineShowAt: 1,
+              lineActiveAt: [1, 2],
+            },
+          ],
+        },
       ],
       minCanvasWidth: 680,
     },
@@ -190,17 +232,81 @@ const CH1_BOOLEAN_VALUES_STATES = [
       title: 'Evaluate Boolean AND',
       sourceLine: 'bool safeToStart = doorClosed && recordedDoorClosed;',
       steps: [
+        { label: 'Start', note: 'Start with the complete declaration. Evaluate the left operand first.' },
         { label: 'Read left', note: 'Read false from doorClosed.' },
+        { label: 'Substitute left', note: 'Substitute false for doorClosed in the declaration to the right.' },
         { label: 'Read right', note: 'Read true from recordedDoorClosed.' },
-        { label: 'AND', note: 'false && true evaluates to false.' },
-        { label: 'Bind', note: 'Store false in safeToStart.' },
+        { label: 'Substitute right', note: 'Substitute true for recordedDoorClosed in the declaration to the right.' },
+        { label: 'AND', note: 'Evaluate false && true to the Boolean value false.' },
+        { label: 'Substitute result', note: 'Substitute false into the declaration. The completed declaration stores false in safeToStart.' },
       ],
-      frames: [
-        { expression: 'doorClosed && recordedDoorClosed', showAt: 0 },
-        { expression: 'false && recordedDoorClosed', showAt: 0 },
-        { expression: 'false && true', showAt: 1 },
-        { expression: 'false', showAt: 2 },
-        { expression: 'safeToStart stores false', showAt: 3 },
+      layout: 'verticalStack',
+      blocks: [
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'bool safeToStart = doorClosed && recordedDoorClosed',
+              showAt: 0,
+              activeAt: [0],
+              evalSpan: [19, 29],
+              label: 'var',
+              lineShowAt: 0,
+              lineActiveAt: [0],
+              strike: { showAt: 0, activeAt: [0], span: [19, 29] },
+            },
+            { expression: 'false', showAt: 0, activeAt: [0] },
+          ],
+          arrowAfter: { showAt: 0, activeAt: [0] },
+        },
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'bool safeToStart = false && recordedDoorClosed',
+              showAt: 0,
+              activeAt: [0, 1],
+              evalSpan: [28, 46],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [1],
+              strike: { showAt: 1, activeAt: [1], span: [28, 46] },
+            },
+            { expression: 'true', showAt: 1, activeAt: [1] },
+          ],
+          arrowAfter: { showAt: 1, activeAt: [1] },
+        },
+        {
+          showAt: 1,
+          levels: [
+            {
+              expression: 'bool safeToStart = false && true',
+              showAt: 1,
+              activeAt: [1, 2],
+              evalSpan: [19, 32],
+              label: '&&',
+              lineShowAt: 2,
+              lineActiveAt: [2],
+              strike: { showAt: 2, activeAt: [2], span: [19, 32] },
+            },
+            { expression: 'false', showAt: 2, activeAt: [2] },
+          ],
+          arrowAfter: { showAt: 2, activeAt: [2] },
+        },
+        {
+          showAt: 2,
+          levels: [
+            {
+              expression: 'bool safeToStart = false',
+              showAt: 2,
+              activeAt: [2, 3],
+              evalSpan: [19, 24],
+              label: 'value',
+              lineShowAt: 2,
+              lineActiveAt: [2, 3],
+            },
+          ],
+        },
       ],
       minCanvasWidth: 760,
     },
@@ -220,17 +326,81 @@ const CH1_BOOLEAN_VALUES_STATES = [
       title: 'Evaluate Boolean equality',
       sourceLine: 'bool sameStatus = doorClosed == recordedDoorClosed;',
       steps: [
+        { label: 'Start', note: 'Start with the complete declaration. Evaluate the left comparison operand first.' },
         { label: 'Read left', note: 'Read false from doorClosed.' },
+        { label: 'Substitute left', note: 'Substitute false for doorClosed in the declaration to the right.' },
         { label: 'Read right', note: 'Read true from recordedDoorClosed.' },
-        { label: 'Compare', note: 'false == true evaluates to false.' },
-        { label: 'Bind', note: 'Store false in sameStatus.' },
+        { label: 'Substitute right', note: 'Substitute true for recordedDoorClosed in the declaration to the right.' },
+        { label: 'Compare', note: 'Evaluate false == true to the Boolean value false.' },
+        { label: 'Substitute result', note: 'Substitute false into the declaration. The completed declaration stores false in sameStatus.' },
       ],
-      frames: [
-        { expression: 'doorClosed == recordedDoorClosed', showAt: 0 },
-        { expression: 'false == recordedDoorClosed', showAt: 0 },
-        { expression: 'false == true', showAt: 1 },
-        { expression: 'false', showAt: 2 },
-        { expression: 'sameStatus stores false', showAt: 3 },
+      layout: 'verticalStack',
+      blocks: [
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'bool sameStatus = doorClosed == recordedDoorClosed',
+              showAt: 0,
+              activeAt: [0],
+              evalSpan: [18, 28],
+              label: 'var',
+              lineShowAt: 0,
+              lineActiveAt: [0],
+              strike: { showAt: 0, activeAt: [0], span: [18, 28] },
+            },
+            { expression: 'false', showAt: 0, activeAt: [0] },
+          ],
+          arrowAfter: { showAt: 0, activeAt: [0] },
+        },
+        {
+          showAt: 0,
+          levels: [
+            {
+              expression: 'bool sameStatus = false == recordedDoorClosed',
+              showAt: 0,
+              activeAt: [0, 1],
+              evalSpan: [27, 45],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [1],
+              strike: { showAt: 1, activeAt: [1], span: [27, 45] },
+            },
+            { expression: 'true', showAt: 1, activeAt: [1] },
+          ],
+          arrowAfter: { showAt: 1, activeAt: [1] },
+        },
+        {
+          showAt: 1,
+          levels: [
+            {
+              expression: 'bool sameStatus = false == true',
+              showAt: 1,
+              activeAt: [1, 2],
+              evalSpan: [18, 31],
+              label: '==',
+              lineShowAt: 2,
+              lineActiveAt: [2],
+              strike: { showAt: 2, activeAt: [2], span: [18, 31] },
+            },
+            { expression: 'false', showAt: 2, activeAt: [2] },
+          ],
+          arrowAfter: { showAt: 2, activeAt: [2] },
+        },
+        {
+          showAt: 2,
+          levels: [
+            {
+              expression: 'bool sameStatus = false',
+              showAt: 2,
+              activeAt: [2, 3],
+              evalSpan: [18, 23],
+              label: 'value',
+              lineShowAt: 2,
+              lineActiveAt: [2, 3],
+            },
+          ],
+        },
       ],
       minCanvasWidth: 760,
     },
@@ -332,7 +502,7 @@ const CH1_BOOLEAN_VALUES_LESSON = {
   id: 'ch1-1-boolean-values-state-visible-results',
   chapterId: 'ch1',
   source: 'ch1/ch1-1.md',
-  stableUrl: 'ch1/boolean-values-state-visible-results',
+  stableUrl: '/ch1/ch1-1.html',
   order: 1,
   title: 'Boolean Values, State, and Visible Results',
   kicker: 'Chapter 1',
@@ -417,26 +587,50 @@ const CH1_BOOLEAN_VALUES_LESSON = {
         n: 1,
         title: 'Store Boolean values in separate variables.',
         body: [
-          'C# names the Boolean type bool. Its only values are true and false. The quoted text "true" is a string value, not a Boolean value.',
-          'A variable is a named location in memory that holds a value of a specific type. A binding associates a variable name with its current value. Program state is the full set of bindings at one point in execution.',
-          'The first declaration creates powerAvailable and binds true. The second creates maintenanceMode and binds false. Each line adds one binding to state.',
+          'C# writes the Boolean type as bool. The literals true and false are Boolean values. The quoted text "true" is a string value instead.',
+          'Each declaration creates one variable and adds its binding to program state.',
+          'The first declaration creates powerAvailable and binds true. The second creates maintenanceMode and binds false.',
+        ],
+        definitions: [
+          { term: 'Boolean', definition: 'The type whose only values are true and false.' },
+          { term: 'Variable', definition: 'A named location in memory that holds a value of a specific type.' },
+          { term: 'Binding', definition: 'The association between a variable name and its current value.' },
+          { term: 'Program state', definition: 'The full set of bindings at one point in execution.' },
         ],
         code: [
           'bool powerAvailable = true;',
           'bool maintenanceMode = false;',
         ],
         translations: [
-          'Store true in powerAvailable. Store false in maintenanceMode.',
+          {
+            code: 'bool powerAvailable = true;',
+            text: 'Create a Boolean variable named powerAvailable and bind true to it.',
+          },
+          {
+            code: 'bool maintenanceMode = false;',
+            text: 'Create a Boolean variable named maintenanceMode and bind false to it.',
+          },
         ],
+        recall: {
+          cards: [
+            { id: 'bool-values', prompt: 'Which two values can a bool store?', answer: 'A bool can store true or false.' },
+            { id: 'program-state', prompt: 'What is program state?', answer: 'Program state is the full set of bindings at one point in execution.' },
+          ],
+        },
       },
       {
         n: 2,
         title: 'Copy a stored Boolean value before rebinding the original variable.',
         body: [
-          'A variable name on the right side of = is read before the surrounding declaration or assignment stores a result. Evaluating a variable means retrieving the value currently bound to that name.',
+          'A variable name on the right side of = is evaluated before the surrounding declaration or assignment stores a result.',
           'Line 2 evaluates originalStatus first. At that moment, originalStatus supplies true. The declaration creates savedStatus and binds true to it.',
-          'Booleans are value types. Assigning one Boolean variable to another copies the value into a separate binding. Line 3 changes originalStatus to false, but it does not write to savedStatus.',
+          'Assigning one Boolean variable to another copies the value into a separate binding. Line 3 changes originalStatus to false, but it does not write to savedStatus.',
           'The first line initializes a new variable. Rebinding replaces the value of a variable that already exists, so line 3 omits the bool type.',
+        ],
+        definitions: [
+          { term: 'Evaluate a variable', definition: 'Retrieve the value currently bound to that variable name.' },
+          { term: 'Value type', definition: 'A type whose value is copied into a separate binding when it is assigned to another variable.' },
+          { term: 'Rebind', definition: 'Replace the value currently bound to an existing variable.' },
         ],
         code: [
           'bool originalStatus = true;',
@@ -444,18 +638,40 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           'originalStatus = false;',
         ],
         translations: [
-          'Read true from originalStatus and copy it. Then replace only originalStatus with false.',
+          {
+            code: 'bool originalStatus = true;',
+            text: 'Create a Boolean variable named originalStatus and bind true to it.',
+          },
+          {
+            code: 'bool savedStatus = originalStatus;',
+            text: 'Evaluate originalStatus, then create savedStatus and bind the resulting value to it.',
+          },
+          {
+            code: 'originalStatus = false;',
+            text: 'Bind false to the existing variable originalStatus.',
+          },
         ],
+        recall: {
+          cards: [
+            { id: 'evaluate-variable', prompt: 'What happens when a variable name is evaluated?', answer: 'The program retrieves the value currently bound to that name.' },
+            { id: 'copy-independent', prompt: 'Why does savedStatus remain true after originalStatus changes?', answer: 'savedStatus received its own copied Boolean value before originalStatus was rebound.' },
+          ],
+        },
       },
       {
         n: 3,
         title: 'Compute and display Boolean results.',
         body: [
-          'An expression is code that evaluates to a value. A Boolean operator reads one or more Boolean inputs and supplies a Boolean result.',
-          'NOT, written !, is unary: it has one input and reverses its Boolean value. AND, written &&, is binary: it has two inputs and supplies true only when both inputs are true.',
+          'A Boolean operator reads one or more Boolean inputs and supplies a Boolean result.',
+          'NOT, written !, reverses one Boolean value. AND, written &&, supplies true only when both inputs are true.',
           'Equality, written ==, supplies true when two values are the same. Inequality, written !=, supplies true when they differ. Both comparison operators are binary.',
           'The assignment operator = binds a value to a variable. The equality operator == compares two values. The number of symbols changes the operation.',
           'Console.WriteLine reviews the Chapter 0 output procedure. Its argument is evaluated first, then WriteLine displays the supplied value without changing the Boolean binding it reads.',
+        ],
+        definitions: [
+          { term: 'Expression', definition: 'Code that evaluates to a value.' },
+          { term: 'Unary operator', definition: 'An operator with one input.' },
+          { term: 'Binary operator', definition: 'An operator with two input positions.' },
         ],
         code: [
           'bool opposite = !false;',
@@ -465,8 +681,29 @@ const CH1_BOOLEAN_VALUES_LESSON = {
           'Console.WriteLine(opposite);',
         ],
         translations: [
-          '!false produces true. true && false produces false. true == false produces false. true != false produces true.',
+          {
+            code: 'bool opposite = !false;',
+            text: 'Evaluate not false, then create opposite and bind the resulting value to it.',
+          },
+          {
+            code: 'bool bothReady = true && false;',
+            text: 'Evaluate true and false with AND, then create bothReady and bind the resulting value to it.',
+          },
+          {
+            code: 'bool sameValue = true == false;',
+            text: 'Compare true and false for equality, then create sameValue and bind the resulting value to it.',
+          },
+          {
+            code: 'Console.WriteLine(opposite);',
+            text: 'Evaluate opposite and display the resulting Boolean value in the console.',
+          },
         ],
+        recall: {
+          cards: [
+            { id: 'operator-arity', prompt: 'What is the difference between a unary and a binary operator?', answer: 'A unary operator has one input. A binary operator has two input positions.' },
+            { id: 'assignment-equality', prompt: 'What is the difference between = and ==?', answer: '= binds a value. == compares two values for equality.' },
+          ],
+        },
       },
     ],
   },

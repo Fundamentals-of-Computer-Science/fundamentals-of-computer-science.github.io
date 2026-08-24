@@ -1,5 +1,6 @@
 import micromorph from "micromorph"
 import { FullSlug, RelativeURL, getFullSlug, normalizeRelativeURLs } from "../../util/path"
+import { requiresFullDocumentNavigation } from "../../util/spa"
 import { fetchCanonical } from "./util"
 
 // adapted from `micromorph`
@@ -32,7 +33,9 @@ const getOpts = ({ target }: Event): { url: URL; scroll?: boolean } | undefined 
   if ("routerIgnore" in a.dataset) return
   const { href } = a
   if (!isLocalUrl(href)) return
-  return { url: new URL(href), scroll: "routerNoscroll" in a.dataset ? false : undefined }
+  const url = new URL(href)
+  if (requiresFullDocumentNavigation(url)) return
+  return { url, scroll: "routerNoscroll" in a.dataset ? false : undefined }
 }
 
 function notifyNav(url: FullSlug) {
@@ -58,6 +61,11 @@ function startLoading() {
 
 let p: DOMParser
 async function navigate(url: URL, isBack: boolean = false) {
+  if (requiresFullDocumentNavigation(url)) {
+    window.location.assign(url.href)
+    return
+  }
+
   startLoading()
   p = p || new DOMParser()
   const contents = await fetchCanonical(url)

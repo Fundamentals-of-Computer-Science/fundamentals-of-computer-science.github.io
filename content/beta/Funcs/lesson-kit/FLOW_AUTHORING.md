@@ -33,9 +33,13 @@ Start from `flow-lesson-template.jsx`. Use
    instructional function.
 5. Write `fullExample.states[]` and, when execution order matters,
    `fullExample.executionTrace[]`. State and console output must show the
-   evidence produced by each executable step.
+   evidence produced by each executable step. When a state includes expression
+   evaluation, author `evalDetail` with the mandatory vertical stepping rule
+   below.
 6. Write the three `mainLesson.acts[]`, one idea per act, then one local check
-   per act in `flow.mainLesson.checks[]`.
+   per act in `flow.mainLesson.checks[]`. When an act introduces vocabulary or
+   a reusable code reading, add `definitions[]`, displayed `translations[]`,
+   and one or two post-check `recall.cards[]`.
 7. Write a transfer program with the same procedure and different surface
    details.
 8. Write pre-quiz details and rigorous-quiz cards using only the shared
@@ -47,6 +51,80 @@ Start from `flow-lesson-template.jsx`. Use
     with data only.
 11. Run `flowValidateLesson(lesson)` and fix every missing path before browser
     review.
+
+## Evaluation stepping is a mandatory rule
+
+Every `evalDetail` uses one spatial grammar: **evaluate upward, then simplify
+across**.
+
+- Opening the detail shows only the complete base expression at the bottom.
+- Draw an evaluation bar over the selected term. Each **Next** action reveals
+  exactly one immediate result above the previous layer.
+- If an upward result is still an expression, keep evaluating upward inside
+  the same block.
+- On the **Next** action after the upward result is a value or cannot be
+  evaluated further, strike + arrow carries that result across and reveals the
+  next containing expression.
+- A future upward layer, arrow, or right-hand block never appears early.
+- Authors order `blocks[]` and `levels[]`; the shared engine derives reveal
+  timing. Do not coordinate click behavior with authored `showAt` numbers.
+- Use `layout: 'verticalStack'` and `blocks[]`. The horizontal `frames` payload
+  is invalid and is rejected by both the shared validator and
+  `flowValidateLesson`.
+- Supply at least two blocks, at least one block with two or more levels, and
+  `arrowAfter` on every non-final block. Supply one `steps[]` caption for the
+  opening base, every higher level, and every rightward substitution.
+- When a recursive substitution must repeat several waiting context levels in
+  the next block, set `baseLevelCount` on that block. It defaults to `1`; the
+  opening block always has one base expression.
+
+```js
+evalDetail: {
+  title: 'Create the branching value',
+  sourceLine: 'bool isReady = answer == "yes";',
+  steps: [
+    { label: 'Start', note: 'Start with the complete declaration.' },
+    { label: 'Read', note: 'Read the string value from answer.' },
+    { label: 'Substitute', note: 'Substitute the string into the declaration.' },
+    { label: 'Compare', note: 'Compare the two string values.' },
+    { label: 'Substitute result', note: 'Substitute the Boolean result into the declaration.' },
+  ],
+  layout: 'verticalStack',
+  blocks: [
+    {
+      levels: [
+        {
+          expression: 'bool isReady = answer == "yes"',
+          evalSpan: [15, 21],
+          label: 'var',
+          strike: { span: [15, 21] },
+        },
+        { expression: '"yes"' },
+      ],
+      arrowAfter: {},
+    },
+    {
+      levels: [
+        {
+          expression: 'bool isReady = "yes" == "yes"',
+          evalSpan: [15, 29],
+          label: '==',
+          strike: { span: [15, 29] },
+        },
+        { expression: 'true' },
+      ],
+      arrowAfter: {},
+    },
+    {
+      levels: [{ expression: 'bool isReady = true' }],
+    },
+  ],
+}
+```
+
+The block array records evaluation structure, not source-row timing. The shared
+engine converts the ordered structure above into five reveal states: base,
+lookup result, substitution, comparison result, and final substitution.
 
 ## Standard and extended sequences
 
@@ -111,7 +189,20 @@ const LESSON = {
     executionTrace: [],
   },
   preQuiz: { title: '', prompt: '' },
-  mainLesson: { title: '', label: 'Main Lesson', intro: '', acts: [] },
+  mainLesson: {
+    title: '',
+    label: 'Main Lesson',
+    intro: '',
+    acts: [{
+      n: 1,
+      title: '',
+      body: [],
+      definitions: [{ term: '', definition: '' }],
+      code: [],
+      translations: [{ code: '', text: '' }],
+      recall: { cards: [{ id: '', prompt: '', answer: '' }] },
+    }],
+  },
   rigorousQuiz: { title: '', prompt: '', transferCode: { lines: [] } },
   exercises: { title: '', label: 'Exercises', intro: '' },
   flow: {
@@ -128,6 +219,28 @@ const LESSON = {
 The fixture must not contain React elements, render callbacks, or
 lesson-specific components. Arrays, object fields, call frames, Intro content,
 and console values remain data rendered by the shared grammar.
+
+## Main Lesson language support
+
+The shared Main Lesson renderer accepts three optional fields on an act:
+
+- `definitions[]` renders a compact definition callout. Put the exact term in
+  `term`; the renderer bolds it. Keep `definition` to one direct sentence.
+- `translations[]` renders a displayed translation block. Put the source form
+  in `code` and its English reading in `text`; the renderer places them on
+  separate lines.
+- `recall.cards[]` renders one or two unscored flashcards after the act's
+  attention check. Each card needs `id`, `prompt`, and `answer`.
+
+The learner answers the attention check before the recall cards appear. The
+next act remains locked until every recall answer has been revealed. Recall is
+not scored, and correctness never blocks progress. Lessons that do not use
+these fields continue to follow the existing attention-check gate.
+
+Definitions and translations support the code-function subgoals; they do not
+become subgoals themselves. Keep labels attached to observable code jobs, and
+put definition or translation requests in prose, checks, recall cards, and
+Exercises.
 
 ## Quiz implementation rules
 
@@ -151,7 +264,29 @@ and console values remain data rendered by the shared grammar.
 
 ## Validation and preview
 
-The page wrapper loads the shared kit, the fixture, and then renders:
+For Chapter 1 and later, the entry HTML loads `chapter-overview.css`,
+`chapter-overview-fixtures.jsx`, and `chapter-overview-kit.jsx` before the
+concept kit, stage renderer, and lesson fixture. Wrap the lesson in
+`.funcs-edition-page`, identify the Beta edition, and link to that lesson's
+Primary counterpart. Every lesson in one chapter must use the same shared
+chapter-selector fixture so its available lessons, coming-soon lessons, current
+marker, and overview link do not change from page to page.
+
+In the chapter selector, an available lesson is one semantic row-level link.
+Its number, title, arc label, whitespace, and visible `Open beta` treatment all
+open the same exact lesson route, and the row receives the keyboard focus
+outline. Do not nest a second link inside that row. A route that is still being
+checked or is unavailable remains a non-link row with a disabled `Open beta`
+button.
+
+Cross-chapter route tables use absolute, normalized Beta entry routes. Keep
+these routes in the shared chapter data, cache-bust every active HTML consumer
+when they change, and verify the complete round trip against the generated
+site. The source HTTP preview loads components directly from their authored
+filenames; Quartz normalizes generated filenames and owns the publishable route
+surface.
+
+The page wrapper then renders:
 
 ```jsx
 <div className="candidate-shell flow-authoring-canonical">
@@ -168,9 +303,8 @@ rounded corners, border, or drop shadow. The frozen comparison pages keep their
 own experiment-specific wrappers.
 
 Give new standalone lesson HTML files their normalized, hyphenated public
-filename, and use that exact filename in fixture and roadmap links. The same
-relative link must work from the source HTTP preview and the generated Pages
-output. Cache-bust a roadmap fixture when its destination data changes.
+filename, and use that exact filename in fixture and roadmap links. Cache-bust
+a roadmap or shared navigation fixture when its destination data changes.
 
 `FlowLessonSequence` calls `flowValidateLesson` before rendering. For an
 explicit browser check, evaluate:
@@ -198,10 +332,14 @@ Then open a page under `http://127.0.0.1:8123/beta/Funcs/`. Do not use
   data-authored Intro pages.
 - Goal focus precedes executable source steps.
 - Code highlighting, memory state, and console output describe the same moment.
+- Every `evalDetail` opens base-only, reveals one upward result per action, and
+  uses a later action for each rightward substitution; no active lesson fixture
+  contains a horizontal `frames` payload.
 - Pre-quiz ordering gates details; all details gate Main Lesson.
 - Quiz questions include their own required source, avoid ordinal and
   answer-position cues, and keep reference code at full opacity.
-- Each lesson act has one check; later acts stay locked until it is answered.
+- Each lesson act has one check. When recall cards are authored, they appear
+  after the check and later acts stay locked until every answer is revealed.
 - Rigorous Quiz uses the transfer program and advances one card at a time.
 - Exercises are open-ended and do not introduce a new renderer.
 - Model answers and feedback diagnose the failed code subgoal when they are

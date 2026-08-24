@@ -39,6 +39,7 @@ const sandbox = {
   },
 };
 const context = vm.createContext(sandbox);
+evaluateJsx(conceptKitPath, context);
 const stagesSource = evaluateJsx(stagesPath, context);
 const fixtureSource = evaluateJsx(fixturePath, context);
 const pageSource = fs.readFileSync(pagePath, 'utf8');
@@ -51,6 +52,7 @@ const conceptKitSource = fs.readFileSync(conceptKitPath, 'utf8');
 
 const lesson = sandbox.window.CH1_BOOLEAN_VALUES_LESSON;
 assert.ok(lesson, 'The fixture must expose window.CH1_BOOLEAN_VALUES_LESSON.');
+assert.equal(lesson.stableUrl, '/ch1/ch1-1.html');
 
 const validation = sandbox.window.flowValidateLesson(lesson);
 assert.equal(validation.valid, true, `Fixture validator failures: ${Array.from(validation.missing).join(', ')}`);
@@ -59,6 +61,32 @@ assert.equal(Object.hasOwn(lesson.flow, 'sequence'), false, 'Chapter 1 lessons m
 assert.deepEqual(
   Array.from(sandbox.window.flowSequenceDescriptors(lesson), stage => stage.blockType),
   ['fullExample', 'preQuiz', 'mainLesson', 'rigorousQuiz', 'exercises'],
+);
+
+for (const [actIndex, act] of lesson.mainLesson.acts.entries()) {
+  assert.ok(act.definitions.length >= 1, `Main Lesson act ${actIndex + 1} needs at least one definition callout.`);
+  assert.ok(act.definitions.every(definition => definition.term && definition.definition), `Main Lesson act ${actIndex + 1} definitions need a bold term and definition.`);
+  assert.ok(act.translations.length >= 1, `Main Lesson act ${actIndex + 1} needs at least one displayed translation.`);
+  assert.ok(act.translations.every(translation => translation.code && translation.text), `Main Lesson act ${actIndex + 1} translations need code and English text.`);
+  assert.ok(act.recall.cards.length >= 1 && act.recall.cards.length <= 2, `Main Lesson act ${actIndex + 1} needs one or two recall cards.`);
+  assert.ok(act.recall.cards.every(card => card.prompt && card.answer), `Main Lesson act ${actIndex + 1} recall cards need prompts and answers.`);
+}
+const lessonWithoutLanguageSupport = JSON.parse(JSON.stringify(lesson));
+for (const act of lessonWithoutLanguageSupport.mainLesson.acts) {
+  delete act.definitions;
+  delete act.translations;
+  delete act.recall;
+}
+assert.equal(
+  sandbox.window.flowValidateLesson(lessonWithoutLanguageSupport).valid,
+  true,
+  'Definition, translation, and recall fields must remain optional for lessons that do not use them.',
+);
+const malformedLanguageSupport = JSON.parse(JSON.stringify(lesson));
+delete malformedLanguageSupport.mainLesson.acts[0].definitions[0].term;
+assert.ok(
+  sandbox.window.flowValidateLesson(malformedLanguageSupport).missing.includes('mainLesson.acts[0].definitions[0].term'),
+  'The shared validator must identify an incomplete definition callout.',
 );
 
 assert.deepEqual(
@@ -93,13 +121,36 @@ assert.deepEqual(
   Array.from(lesson.fullExample.states.at(-1).console),
   ['True', 'True', 'False', 'False'],
 );
+const expectedAtomicRevealCounts = new Map([[4, 5], [5, 7], [6, 7]]);
 for (const stateIndex of [4, 5, 6]) {
   const detail = lesson.fullExample.states[stateIndex].evalDetail;
   assert.ok(detail, `State ${stateIndex} must include reduction/evalDetail data.`);
   assert.equal(typeof detail.title, 'string');
   assert.equal(typeof detail.sourceLine, 'string');
   assert.ok(detail.steps.length >= 3);
-  assert.ok(detail.frames.length >= 2);
+  assert.equal(detail.layout, 'verticalStack', `State ${stateIndex} must evaluate upward before simplifying across.`);
+  assert.ok(detail.blocks.length >= 2, `State ${stateIndex} must simplify across at least two evaluation blocks.`);
+  assert.equal(Object.hasOwn(detail, 'frames'), false, `State ${stateIndex} must not use the horizontal frames payload.`);
+  assert.ok(
+    detail.blocks.some(block => block.levels.length >= 2),
+    `State ${stateIndex} must include an upward evaluation block.`,
+  );
+  const atomicDetail = sandbox.window.funcsBuildAtomicEvaluationDetail(detail);
+  assert.equal(atomicDetail.revealCount, expectedAtomicRevealCounts.get(stateIndex));
+  assert.equal(detail.steps.length, atomicDetail.revealCount, `State ${stateIndex} needs one caption per atomic reveal.`);
+  const openingVisible = atomicDetail.blocks.flatMap((block, blockIndex) =>
+    block.levels
+      .filter(level => level.showAt === 0)
+      .map(level => `${blockIndex}:${level.expression}`),
+  );
+  assert.deepEqual(
+    Array.from(openingVisible),
+    [`0:${detail.blocks[0].levels[0].expression}`],
+    `State ${stateIndex} must open with only its bottom base expression.`,
+  );
+  assert.equal(atomicDetail.blocks[0].levels[1].showAt, 1, `State ${stateIndex} must reveal one upward result on the first Next action.`);
+  assert.equal(atomicDetail.blocks[0].arrowAfter.showAt, 2, `State ${stateIndex} must substitute only after the first upward result.`);
+  assert.equal(atomicDetail.blocks[1].showAt, 2, `State ${stateIndex} must reveal the next block with its substitution arrow.`);
 }
 
 const supportedKinds = new Set(['choice', 'chips', 'order', 'row']);
@@ -139,8 +190,11 @@ assert.deepEqual(
 const mainLessonText = [
   lesson.mainLesson.intro,
   ...lesson.mainLesson.acts.flatMap(act => act.body),
+  ...lesson.mainLesson.acts.flatMap(act => act.definitions.flatMap(definition => [definition.term, definition.definition])),
+  ...lesson.mainLesson.acts.flatMap(act => act.translations.flatMap(translation => [translation.code, translation.text])),
+  ...lesson.mainLesson.acts.flatMap(act => act.recall.cards.flatMap(card => [card.prompt, card.answer])),
 ].join(' ');
-for (const term of ['variable', 'binding', 'state', 'initializes', 'Rebinding', 'value types', 'expression', 'unary', 'binary', 'equality', 'inequality']) {
+for (const term of ['variable', 'binding', 'state', 'initializes', 'Rebinding', 'value type', 'expression', 'unary', 'binary', 'equality', 'inequality']) {
   assert.match(mainLessonText, new RegExp(term, 'i'), `Main Lesson must introduce ${term}.`);
 }
 assert.match(lesson.flow.mainLesson.checks[1].q, /line that made the values differ/i);
@@ -188,6 +242,11 @@ assert.match(stagesSource, /part1Code/);
 assert.match(stagesSource, /contextCode/);
 assert.match(stagesSource, /state\.evalDetail/);
 assert.match(stagesSource, /FuncsStackedEvaluationDetail/);
+assert.match(stagesSource, /FlowDefinitionCallout/);
+assert.match(stagesSource, /FlowTranslationCallout/);
+assert.match(stagesSource, /FlowLessonRecall/);
+assert.match(stagesSource, /checkDoneFor\(i\).*<FlowLessonRecall/s, 'Recall must appear only after the act attention check is answered.');
+assert.match(stagesSource, /!checkDoneFor\(i\) \|\| !recallDoneFor\(i\)/, 'The next act must remain locked until both the attention check and recall reveal are complete.');
 assert.doesNotMatch(
   stagesSource,
   /<FuncsCodeBlock[^>]*runKeys=\{new Set\(\)\}/,
@@ -214,10 +273,25 @@ assert.match(
   'The roadmap must cache-bust its updated lesson-map fixture.',
 );
 assert.match(pageSource, /candidate-shell flow-authoring-canonical/);
+assert.match(pageSource, /lesson-kit\/concept-lesson-kit\.jsx\?v=task-72-5-1/);
+assert.match(pageSource, /lesson-kit\/flow-lesson-stages\.jsx\?v=task-72-5-1/);
+assert.match(pageSource, /flow-ch1-1-boolean-values\.jsx\?v=task-72-5-1/);
+assert.match(pageSource, /lesson-kit\/chapter-overview\.css\?v=task-78-2-3/);
+assert.match(pageSource, /chapter-overview-fixtures\.jsx\?v=task-78-2/);
+assert.match(pageSource, /lesson-kit\/chapter-overview-kit\.jsx\?v=task-78-2/);
+assert.match(pageSource, /tb-ch1-sequence\.jsx\?v=task-72-6-1/);
+assert.match(pageSource, /className="funcs-edition-page"/);
+assert.match(pageSource, /Reading: <strong>Beta<\/strong>/);
+assert.match(pageSource, /href="\/ch1\/ch1-1\.html">Switch to Primary<\/a>/);
 assert.match(
   presentationSource,
   /\.flow-authoring-canonical\s*\{[\s\S]*?padding:\s*0\s*!important;/,
   'Canonical standalone lessons must fill the viewport without an inset shell.',
+);
+assert.match(
+  presentationSource,
+  /\.funcs-edition-page\s*\{[\s\S]*?height:\s*100dvh;[\s\S]*?grid-template-rows:\s*auto minmax\(0, 1fr\);[\s\S]*?overflow:\s*hidden;/,
+  'The edition bar and canonical lesson must share one full viewport without page overflow.',
 );
 assert.match(
   presentationSource,

@@ -43,6 +43,11 @@ function customSort(a: any, b: any) {
   return a.file ? 1 : -1
 }
 
+// Keep the stable book explorer focused on the five published chapter trees.
+function publishedChapterFilter(node: any) {
+  return node.depth !== 1 || /^ch[0-4]$/.test(node.name)
+}
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -58,9 +63,11 @@ export const sharedPageComponents: SharedLayout = {
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
+    Component.EditionNavigation(),
     Component.Breadcrumbs(),
     Component.ArticleTitle(),
     Component.ContentMeta(),
+    Component.BetaLessonLink(),
     Component.TagList(),
   ],
   left: [
@@ -71,6 +78,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.DesktopOnly(Component.Explorer({
       folderClickBehavior: "link",
       folderDefaultState: "collapsed",
+      filterFn: publishedChapterFilter,
       sortFn: customSort,
     })),
   ],
@@ -83,7 +91,13 @@ export const defaultContentPageLayout: PageLayout = {
 
 // components for pages that display lists of pages  (e.g. tags or folders)
 export const defaultListPageLayout: PageLayout = {
-  beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
+  beforeBody: [
+    Component.EditionNavigation(),
+    Component.Breadcrumbs(),
+    Component.ArticleTitle(),
+    Component.ContentMeta(),
+    Component.BetaLessonLink(),
+  ],
   left: [
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
@@ -92,6 +106,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.DesktopOnly(Component.Explorer({
       folderClickBehavior: "link",
       folderDefaultState: "collapsed",
+      filterFn: publishedChapterFilter,
       sortFn: customSort,
     })),
   ],

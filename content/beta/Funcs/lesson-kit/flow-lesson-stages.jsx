@@ -367,20 +367,115 @@ function FlowLessonCheck({ check, index, answer, onAnswer }) {
   );
 }
 
+function FlowDefinitionCallout({ definitions }) {
+  if (!Array.isArray(definitions) || definitions.length === 0) return null;
+
+  return (
+    <aside className="flow-definition-callout" aria-label={definitions.length === 1 ? 'Definition' : 'Definitions'}>
+      <div className="flow-language-callout-label">{definitions.length === 1 ? 'Definition' : 'Definitions'}</div>
+      <div className="flow-definition-list">
+        {definitions.map((definition, index) => (
+          <div className="flow-definition-entry" key={definition.term || index}>
+            <strong>{definition.term}</strong>
+            <span>{definition.definition}</span>
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function FlowTranslationCallout({ translations }) {
+  if (!Array.isArray(translations) || translations.length === 0) return null;
+  const entries = translations.map(translation => typeof translation === 'string'
+    ? { text: translation }
+    : translation);
+
+  return (
+    <aside className="flow-translation-callout" aria-label={entries.length === 1 ? 'Translation' : 'Translations'}>
+      <div className="flow-language-callout-label">{entries.length === 1 ? 'Translation' : 'Translations'}</div>
+      <div className="flow-translation-list">
+        {entries.map((translation, index) => (
+          <div className="flow-translation-entry" key={translation.id || translation.code || index}>
+            {translation.code && <code>{translation.code}</code>}
+            <div className="flow-translation-reading">
+              <span>Reads as:</span>
+              <span>{translation.text}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function FlowLessonRecall({ recall, actIndex, revealed, onReveal }) {
+  const cards = Array.isArray(recall?.cards) ? recall.cards : [];
+  if (cards.length === 0) return null;
+  const keyFor = (card, cardIndex) => `${actIndex}:${card.id || cardIndex}`;
+  const revealedCount = cards.filter((card, cardIndex) => revealed[keyFor(card, cardIndex)]).length;
+  const complete = revealedCount === cards.length;
+
+  return (
+    <section className="flow-recall-panel" aria-label="Recall before continuing">
+      <div className="flow-recall-heading">
+        <div>
+          <span>Recall before continuing</span>
+          <p>{recall.prompt || 'Say or write your answer before revealing each card.'}</p>
+        </div>
+        <span>{revealedCount}/{cards.length} revealed</span>
+      </div>
+      <div className="flow-recall-cards">
+        {cards.map((card, cardIndex) => {
+          const cardKey = keyFor(card, cardIndex);
+          const isRevealed = Boolean(revealed[cardKey]);
+          const answerId = `flow-recall-answer-${actIndex}-${card.id || cardIndex}`;
+          return (
+            <button
+              type="button"
+              className="flow-recall-card"
+              key={cardKey}
+              aria-expanded={isRevealed}
+              aria-controls={answerId}
+              onClick={() => onReveal(cardKey)}
+            >
+              <span className="flow-recall-card-number">Card {cardIndex + 1}</span>
+              <span className="flow-recall-card-prompt">{card.prompt}</span>
+              {isRevealed ? (
+                <span className="flow-recall-card-answer" id={answerId} aria-live="polite">{card.answer}</span>
+              ) : (
+                <span className="flow-recall-card-action">Reveal answer</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {complete && <div className="flow-recall-complete">Recall complete. The next part is available.</div>}
+    </section>
+  );
+}
+
 function FlowMainLessonStage({ lesson, chrome, sequence, navigation }) {
   const { FlowStageFrame, FLOW_MONO, flowQuestionDone } = window;
   const main = lesson.mainLesson;
   const flow = flowBlock(lesson, 'mainLesson');
   const acts = main.acts;
   const checkFor = (index) => acts[index].check || flow.checks?.[index];
+  const recallCardsFor = (index) => Array.isArray(acts[index].recall?.cards) ? acts[index].recall.cards : [];
   const [given, setGiven] = React.useState({});
-  const firstLocked = acts.findIndex((act, i) => checkFor(i) && !flowQuestionDone(checkFor(i), given[i]));
-  const answered = acts.filter((act, i) => given[i] != null).length;
+  const [revealedRecall, setRevealedRecall] = React.useState({});
+  const checkDoneFor = (index) => !checkFor(index) || flowQuestionDone(checkFor(index), given[index]);
+  const recallDoneFor = (index) => recallCardsFor(index).every((card, cardIndex) => revealedRecall[`${index}:${card.id || cardIndex}`]);
+  const firstLocked = acts.findIndex((act, i) => !checkDoneFor(i) || !recallDoneFor(i));
+  const answered = acts.filter((act, i) => checkDoneFor(i)).length;
+  const totalRecall = acts.reduce((total, act, i) => total + recallCardsFor(i).length, 0);
+  const revealedCount = Object.values(revealedRecall).filter(Boolean).length;
   const complete = firstLocked === -1;
+  const progress = `${answered}/${acts.length} checks${totalRecall ? ` · ${revealedCount}/${totalRecall} recalls` : ''}`;
 
   const controls = {
     tone: 'read', backLabel: flowNavigationLabel('Back', navigation?.prev, 'Pre-Quiz'), canBack: Boolean(sequence?.goPrevPage), canNext: complete, nextLabel: flowNavigationLabel('Next', navigation?.next, 'Rigorous Quiz'),
-    status: complete ? `lesson complete · ${answered}/${acts.length} checks` : `${answered}/${acts.length} checks answered`,
+    status: complete ? `lesson complete · ${progress}` : progress,
     onBack: () => sequence?.goPrevPage(),
     onNext: () => sequence?.goNextPage(),
   };
@@ -406,18 +501,29 @@ function FlowMainLessonStage({ lesson, chrome, sequence, navigation }) {
                 <div style={{ display: 'grid', gap: 7 }}>
                   {act.body.map(p => <p key={p} style={{ margin: 0, fontSize: 14, lineHeight: 1.58, color: '#334155' }}>{p}</p>)}
                 </div>
+                <FlowDefinitionCallout definitions={act.definitions} />
                 {act.code && (
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, background: '#f8fafc', padding: '9px 12px', display: 'grid', gap: 5 }}>
+                  <div className="flow-main-lesson-code" style={{ border: '1px solid #e2e8f0', borderRadius: 8, background: '#f8fafc', padding: '9px 12px', display: 'grid', gap: 5 }}>
                     {act.code.map(line => <code key={line} style={{ fontFamily: FLOW_MONO, fontSize: 12.2, color: '#1e293b' }}>{line}</code>)}
-                    {act.translations?.map(t => <span key={t} style={{ fontSize: 12.2, color: '#64748b', lineHeight: 1.45 }}>{t}</span>)}
                   </div>
                 )}
+                <FlowTranslationCallout translations={act.translations} />
               </section>
               {check && !locked && (
                 <FlowLessonCheck check={check} index={i} answer={given[i]} onAnswer={(v) => setGiven(prev => ({ ...prev, [i]: v }))} />
               )}
+              {!locked && checkDoneFor(i) && (
+                <FlowLessonRecall
+                  recall={act.recall}
+                  actIndex={i}
+                  revealed={revealedRecall}
+                  onReveal={(key) => setRevealedRecall(prev => ({ ...prev, [key]: true }))}
+                />
+              )}
               {locked && i === firstLocked + 1 && (
-                <div style={{ marginTop: -8, fontFamily: FLOW_MONO, fontSize: 10.5, color: '#b45309', textAlign: 'center' }}>▲ answer the check to unblur the rest of the lesson</div>
+                <div style={{ marginTop: -8, fontFamily: FLOW_MONO, fontSize: 10.5, color: '#b45309', textAlign: 'center' }}>
+                  ▲ {checkDoneFor(firstLocked) ? 'reveal the recall cards' : 'answer the check'} to unblur the rest of the lesson
+                </div>
               )}
             </React.Fragment>
           );
@@ -628,10 +734,53 @@ function flowValidateLesson(lesson) {
   const checks = flow.mainLesson?.checks || [];
   (lesson.mainLesson?.acts || []).forEach((act, i) => {
     if (!act.check && !checks[i]) missing.push(`flow.mainLesson.checks[${i}]`);
+    if (act.definitions != null) {
+      if (!Array.isArray(act.definitions) || act.definitions.length === 0) {
+        missing.push(`mainLesson.acts[${i}].definitions[]`);
+      } else {
+        act.definitions.forEach((definition, definitionIndex) => {
+          if (!definition?.term) missing.push(`mainLesson.acts[${i}].definitions[${definitionIndex}].term`);
+          if (!definition?.definition) missing.push(`mainLesson.acts[${i}].definitions[${definitionIndex}].definition`);
+        });
+      }
+    }
+    if (act.translations != null) {
+      if (!Array.isArray(act.translations) || act.translations.length === 0) {
+        missing.push(`mainLesson.acts[${i}].translations[]`);
+      } else {
+        act.translations.forEach((translation, translationIndex) => {
+          if (typeof translation !== 'string' && !translation?.text) {
+            missing.push(`mainLesson.acts[${i}].translations[${translationIndex}].text`);
+          }
+        });
+      }
+    }
+    if (act.recall != null) {
+      if (!Array.isArray(act.recall.cards) || act.recall.cards.length === 0) {
+        missing.push(`mainLesson.acts[${i}].recall.cards[]`);
+      } else {
+        act.recall.cards.forEach((card, cardIndex) => {
+          if (!card?.prompt) missing.push(`mainLesson.acts[${i}].recall.cards[${cardIndex}].prompt`);
+          if (!card?.answer) missing.push(`mainLesson.acts[${i}].recall.cards[${cardIndex}].answer`);
+        });
+      }
+    }
   });
   if (!flow.rigorousQuiz?.cards?.length) missing.push('flow.rigorousQuiz.cards[]');
   if (!lesson.rigorousQuiz?.transferCode) missing.push('rigorousQuiz.transferCode');
   if (!flow.exercises?.problems?.length) missing.push('flow.exercises.problems[]');
+
+  (lesson.fullExample?.states || []).forEach((state, stateIndex) => {
+    if (!state?.evalDetail) return;
+    const validation = window.funcsValidateStackedEvaluationDetail?.(state.evalDetail);
+    if (!validation) {
+      missing.push('funcsValidateStackedEvaluationDetail');
+      return;
+    }
+    validation.missing.forEach(path => {
+      missing.push(`fullExample.states[${stateIndex}].evalDetail.${path}`);
+    });
+  });
 
   if (Object.prototype.hasOwnProperty.call(flow, 'sequence')) {
     if (!Array.isArray(flow.sequence) || flow.sequence.length === 0) {

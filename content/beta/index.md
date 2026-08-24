@@ -14,6 +14,7 @@ The data-authored five-stage flow is the current beta lesson format. Its
 presentation is the selected `redesign-existing-projects` result from the
 three-arm design experiment.
 
+- [Chapter 1 overview and lesson directory](/beta/Funcs/Ch1-Chapter-Overview.html)
 - [Chapter 0.1 interact with a program using the console](/beta/Funcs/Ch0-1-Programs-Input-Output-Tour.html)
 - [Chapter 1.1 Boolean values, state, and visible results](/beta/Funcs/Ch1-1-Boolean-Values-State-Visible-Results.html)
 - [Chapter 1.4 branching and scope](/beta/Funcs/Ch1-Branching-Scope-Authoring-Flow.html)
