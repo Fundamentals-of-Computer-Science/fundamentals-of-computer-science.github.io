@@ -62,7 +62,14 @@ function TBChapterNavLink({ item, direction }) {
   );
 }
 
-function TBChapterStrip({ chapters, lessonTitle, hasLessonSelector, lessonSelectorOpen, onToggleLessonSelector }) {
+function TBChapterStrip({
+  chapters,
+  lessonTitle,
+  hasLessonSelector,
+  lessonSelectorOpen,
+  onToggleLessonSelector,
+  selectorTriggerRef,
+}) {
   if (!chapters || !chapters.length) return null;
 
   return (
@@ -139,6 +146,7 @@ function TBChapterStrip({ chapters, lessonTitle, hasLessonSelector, lessonSelect
         if (selectorEnabled) {
           return (
             <button
+              ref={selectorTriggerRef}
               key={chapter.id || chapter.n}
               type="button"
               style={styles}
@@ -183,6 +191,15 @@ function TBFlowShell({
   const nextChapter = chapterNav && chapterNav.next;
   const chapters = chapterNav && chapterNav.chapters;
   const hasLessonSelector = Boolean(lessonSelector);
+  const selectorTriggerRef = React.useRef(null);
+  const closeLessonSelector = React.useCallback(() => {
+    if (!lessonSelectorOpen) return;
+    onToggleLessonSelector();
+    window.requestAnimationFrame(() => selectorTriggerRef.current?.focus());
+  }, [lessonSelectorOpen, onToggleLessonSelector]);
+  const resolvedLessonSelector = React.isValidElement(lessonSelector)
+    ? React.cloneElement(lessonSelector, { onClose: closeLessonSelector })
+    : lessonSelector;
 
   return (
     <div style={{
@@ -206,6 +223,7 @@ function TBFlowShell({
             hasLessonSelector={hasLessonSelector}
             lessonSelectorOpen={lessonSelectorOpen}
             onToggleLessonSelector={onToggleLessonSelector}
+            selectorTriggerRef={selectorTriggerRef}
           />
         ) : (
           <React.Fragment>
@@ -243,7 +261,7 @@ function TBFlowShell({
             zIndex: 40,
           }}
         >
-          {lessonSelector}
+          {resolvedLessonSelector}
         </div>
       )}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>

@@ -20,7 +20,7 @@
     "preview:beta": "node ./quartz/bootstrap-cli.mjs build -d content-next -o public-next --serve --port 8081 --wsPort 3002",
     "check": "tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
-    "test": "tsx ./quartz/util/path.test.ts && tsx ./quartz/depgraph.test.ts",
+    "test": "tsx ./quartz/util/spa.test.ts && tsx ./quartz/util/path.test.ts && tsx ./quartz/depgraph.test.ts",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1"
   },
   "engines": {

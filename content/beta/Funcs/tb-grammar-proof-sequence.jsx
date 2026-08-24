@@ -1,17 +1,17 @@
 /* tb-grammar-proof-sequence.jsx - source-backed visualizer grammar proof lessons */
 
 const GRAMMAR_CHAPTERS_CH3 = [
-  { n: 0, id: 'ch0', label: 'Chapter 0', title: 'Before You Begin', href: '../../ch0/' },
-  { n: 1, id: 'ch1', label: 'Chapter 1', title: 'Booleans', href: 'Ch1 Data Memory Sequence.html' },
-  { n: 2, id: 'ch2', label: 'Chapter 2', title: 'Integers and Doubles', href: 'Ch2 Numeric Data Memory Sequence.html' },
+  { n: 0, id: 'ch0', label: 'Chapter 0', title: 'Before You Begin', href: '/beta/Funcs/Ch0-1-Programs-Input-Output-Tour.html' },
+  { n: 1, id: 'ch1', label: 'Chapter 1', title: 'Booleans', href: '/beta/Funcs/Ch1-Chapter-Overview.html' },
+  { n: 2, id: 'ch2', label: 'Chapter 2', title: 'Integers and Doubles', href: '/beta/Funcs/Ch2-Numeric-Data-Memory-Sequence.html' },
   { n: 3, id: 'ch3', label: 'Chapter 3', title: 'Arrays', href: '#array-memory', current: true },
-  { n: 4, id: 'ch4', label: 'Chapter 4', title: 'Classes and Linked Lists', href: 'Ch4 Linked Node Chain Sequence.html' },
+  { n: 4, id: 'ch4', label: 'Chapter 4', title: 'Classes and Linked Lists', href: '/beta/Funcs/Ch4-Linked-Node-Chain-Sequence.html' },
 ];
 
 const GRAMMAR_CHAPTERS_CH4 = GRAMMAR_CHAPTERS_CH3.map(chapter => ({
   ...chapter,
   current: chapter.id === 'ch4',
-  href: chapter.id === 'ch3' ? 'Ch3 Array Memory Sequence.html' : chapter.href,
+  href: chapter.id === 'ch3' ? '/beta/Funcs/Ch3-Array-Memory-Sequence.html' : chapter.href,
 }));
 
 const GRAMMAR_TOKEN_SPEC = {
@@ -646,21 +646,78 @@ const CH3_ARRAY_STATES = [
       title: 'Read one array cell before binding',
       sourceLine: 'double today = temperatures[3];',
       steps: [
-        { label: 'Expression', note: 'Start with the array access on the right side.' },
+        { label: 'Start', note: 'Start with the complete declaration. The evaluation bar marks the array access.' },
         { label: 'Shift', note: 'Use the reference in temperatures and shift by index 3.' },
         { label: 'Read', note: 'The cell at index 3 currently stores 71.5.' },
-        { label: 'Bind', note: 'Bind the copied double value to today.' },
+        { label: 'Substitute result', note: 'Substitute 71.5 for the array access. The completed declaration binds the copied value to today.' },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'double today = temperatures[3]',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [15, 30], label: 'array[3]', value: '71.5' }],
-          strike: { showAt: 2, activeAt: [2], span: [15, 30] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'double today = temperatures[3]',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                15,
+                30
+              ],
+              label: 'array[3]',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  15,
+                  30
+                ]
+              }
+            },
+            {
+              expression: 'cell at index 3',
+              showAt: 1,
+              evalSpan: [0, 15],
+              label: 'read',
+            },
+            {
+              expression: '71.5',
+              showAt: 2,
+              activeAt: [
+                2
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
-        { expression: 'double today = 71.5', showAt: 2, activeAt: [2, 3] },
+        {
+          showAt: 2,
+          levels: [
+            {
+              expression: 'double today = 71.5',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 860,
     },

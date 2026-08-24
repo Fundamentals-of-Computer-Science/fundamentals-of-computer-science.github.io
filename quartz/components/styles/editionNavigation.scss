@@ -1,0 +1,148 @@
+@use "../../styles/variables.scss" as *;
+
+// Avoid the base 100vw root width extending beneath a vertical scrollbar.
+html:root {
+  width: auto;
+}
+
+.edition-navigation,
+.beta-lesson-link {
+  --edition-accent: #a34f36;
+  font-family: var(--headerFont);
+}
+
+.edition-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  min-height: 2.65rem;
+  margin: 0 0 1.15rem;
+  padding: 0.3rem 0.75rem;
+  border-top: 1px solid var(--lightgray);
+  border-bottom: 1px solid var(--lightgray);
+  color: var(--darkgray);
+  font-size: 0.83rem;
+  line-height: 1.3;
+  box-sizing: border-box;
+}
+
+.edition-navigation__status {
+  white-space: nowrap;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.edition-navigation__divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--lightgray);
+}
+
+.edition-navigation__switch,
+.beta-lesson-link a {
+  color: var(--edition-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.edition-navigation__switch:hover,
+.beta-lesson-link a:hover {
+  color: var(--edition-accent) !important;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.edition-navigation__switch:focus-visible,
+.beta-lesson-link a:focus-visible {
+  outline: 0.16rem solid var(--edition-accent);
+  outline-offset: 0.2rem;
+  border-radius: 0.1rem;
+}
+
+.beta-lesson-link {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+  margin: 1.15rem 0 1.75rem;
+  padding: 0.72rem 0.35rem;
+  border-top: 1px solid var(--lightgray);
+  border-bottom: 1px solid var(--lightgray);
+  color: var(--darkgray);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.beta-lesson-link__divider {
+  color: var(--gray);
+}
+
+:root[saved-theme="dark"] {
+  .edition-navigation,
+  .beta-lesson-link {
+    --edition-accent: #df8b6f;
+  }
+}
+
+@media all and ($mobile) {
+  body .page-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.4rem;
+    line-height: 1.15;
+
+    a {
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
+    }
+  }
+
+  body .search {
+    flex: 0 0 2rem;
+    min-width: 2rem;
+    max-width: 2rem;
+
+    > .search-button {
+      justify-content: center;
+      background: transparent;
+
+      > p {
+        display: none;
+      }
+
+      svg {
+        margin: 0;
+      }
+    }
+  }
+
+  body .darkmode {
+    flex: 0 0 1.25rem;
+    margin-inline: 0.2rem;
+  }
+
+  .edition-navigation {
+    justify-content: center;
+    gap: 0.85rem;
+    min-height: 2.5rem;
+    margin-bottom: 0.9rem;
+    padding-inline: 0.4rem;
+    font-size: 0.77rem;
+  }
+
+  .beta-lesson-link {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.12rem;
+    margin: 0.9rem 0 1.4rem;
+    padding: 0.72rem 0;
+    font-size: 0.84rem;
+  }
+
+  .beta-lesson-link__divider {
+    display: none;
+  }
+}

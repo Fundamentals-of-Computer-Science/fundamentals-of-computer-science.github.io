@@ -20,6 +20,7 @@ import MobileOnly from "./MobileOnly"
 import RecentNotes from "./RecentNotes"
 import Breadcrumbs from "./Breadcrumbs"
 import Comments from "./Comments"
+import EditionNavigation, { BetaLessonLink } from "./EditionNavigation"
 
 export {
   ArticleTitle,
@@ -44,4 +45,6 @@ export {
   NotFound,
   Breadcrumbs,
   Comments,
+  EditionNavigation,
+  BetaLessonLink,
 }

@@ -2,6 +2,7 @@
 title: Chapter 1 - Booleans
 draft: false
 permalink: ch1
+betaUrl: /beta/Funcs/Ch1-Chapter-Overview.html
 ---
 
 # Chapter 1: Booleans

@@ -146,27 +146,70 @@ const CH2_FULL_STATES = [
         },
         {
           label: 'Substitute',
-          note: 'Substitute `24` for `seats`.',
-        },
-        {
-          label: 'Bind',
-          note: 'Bind the copied value `24` to originalSeats.',
+          note: 'Substitute `24` for `seats`. The completed declaration binds the copied value to originalSeats.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'int originalSeats = seats',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [20, 25], label: 'var', value: '24' }],
-          strike: { showAt: 2, activeAt: [2], span: [20, 25] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'int originalSeats = seats',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                20,
+                25
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  20,
+                  25
+                ]
+              }
+            },
+            {
+              expression: '24',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'int originalSeats = 24',
           showAt: 2,
-          activeAt: [2, 3],
-        },
+          levels: [
+            {
+              expression: 'int originalSeats = 24',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 820,
     },
@@ -197,20 +240,66 @@ const CH2_FULL_STATES = [
           note: 'Write `30` into seats. originalSeats is a separate binding and does not change.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'seats = 30',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [8, 10], label: 'literal', value: '30' }],
-          strike: { showAt: 2, activeAt: [2], span: [8, 10] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'seats = 30',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                8,
+                10
+              ],
+              label: 'literal',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  8,
+                  10
+                ]
+              }
+            },
+            {
+              expression: '30',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'write seats = 30',
           showAt: 2,
-          activeAt: [2],
-        },
+          levels: [
+            {
+              expression: 'write seats = 30',
+              showAt: 2,
+              activeAt: [
+                2
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 700,
     },
@@ -245,26 +334,85 @@ const CH2_FULL_STATES = [
           note: 'WriteLine displays the evaluated integer value.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'Console.WriteLine(originalSeats)',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [18, 31], label: 'var', value: '24' }],
-          strike: { showAt: 2, activeAt: [2], span: [18, 31] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(originalSeats)',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                18,
+                31
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  18,
+                  31
+                ]
+              }
+            },
+            {
+              expression: '24',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'Console.WriteLine(24)',
           showAt: 2,
-          activeAt: [2, 3],
-          arrowAfter: { showAt: 3, activeAt: [3] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(24)',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 3,
+            activeAt: [
+              3
+            ]
+          }
         },
         {
-          expression: 'stdout: 24',
           showAt: 3,
-          activeAt: [3],
-        },
+          levels: [
+            {
+              expression: 'stdout: 24',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 940,
     },
@@ -299,26 +447,85 @@ const CH2_FULL_STATES = [
           note: 'WriteLine displays the evaluated decimal value.',
         },
       ],
-      frames: [
+      layout: 'verticalStack',
+      blocks: [
         {
-          expression: 'Console.WriteLine(ticketPrice)',
           showAt: 0,
-          activeAt: [0, 1, 2],
-          stack: [{ showAt: 1, activeAt: [1], span: [18, 29], label: 'var', value: '12.50' }],
-          strike: { showAt: 2, activeAt: [2], span: [18, 29] },
-          arrowAfter: { showAt: 2, activeAt: [2] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(ticketPrice)',
+              showAt: 0,
+              activeAt: [
+                0,
+                1,
+                2
+              ],
+              evalSpan: [
+                18,
+                29
+              ],
+              label: 'var',
+              lineShowAt: 1,
+              lineActiveAt: [
+                1
+              ],
+              strike: {
+                showAt: 2,
+                activeAt: [
+                  2
+                ],
+                span: [
+                  18,
+                  29
+                ]
+              }
+            },
+            {
+              expression: '12.50',
+              showAt: 1,
+              activeAt: [
+                1
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 2,
+            activeAt: [
+              2
+            ]
+          }
         },
         {
-          expression: 'Console.WriteLine(12.50)',
           showAt: 2,
-          activeAt: [2, 3],
-          arrowAfter: { showAt: 3, activeAt: [3] },
+          levels: [
+            {
+              expression: 'Console.WriteLine(12.50)',
+              showAt: 2,
+              activeAt: [
+                2,
+                3
+              ]
+            }
+          ],
+          arrowAfter: {
+            showAt: 3,
+            activeAt: [
+              3
+            ]
+          }
         },
         {
-          expression: 'stdout: 12.50',
           showAt: 3,
-          activeAt: [3],
-        },
+          levels: [
+            {
+              expression: 'stdout: 12.50',
+              showAt: 3,
+              activeAt: [
+                3
+              ]
+            }
+          ]
+        }
       ],
       minCanvasWidth: 980,
     },
@@ -424,11 +631,11 @@ const CH2_EXERCISES = [
 ];
 
 const CH2_CHAPTERS = [
-  { n: 0, id: 'ch0', label: 'Chapter 0', title: 'Before You Begin', href: '../../ch0/' },
-  { n: 1, id: 'ch1', label: 'Chapter 1', title: 'Booleans', href: 'Ch1 Data Memory Sequence.html' },
+  { n: 0, id: 'ch0', label: 'Chapter 0', title: 'Before You Begin', href: '/beta/Funcs/Ch0-1-Programs-Input-Output-Tour.html' },
+  { n: 1, id: 'ch1', label: 'Chapter 1', title: 'Booleans', href: '/beta/Funcs/Ch1-Chapter-Overview.html' },
   { n: 2, id: 'ch2', label: 'Chapter 2', title: 'Integers and Doubles', href: '#numeric-data-memory', current: true },
-  { n: 3, id: 'ch3', label: 'Chapter 3', title: 'Arrays', href: '../../ch3/' },
-  { n: 4, id: 'ch4', label: 'Chapter 4', title: 'Classes and Linked Lists', href: '../../ch4/' },
+  { n: 3, id: 'ch3', label: 'Chapter 3', title: 'Arrays', href: '/beta/Funcs/Ch3-Array-Memory-Sequence.html' },
+  { n: 4, id: 'ch4', label: 'Chapter 4', title: 'Classes and Linked Lists', href: '/beta/Funcs/Ch4-Linked-Node-Chain-Sequence.html' },
 ];
 
 const CH2_CHAPTER_EXAMPLES = [
@@ -1427,22 +1634,18 @@ const CH2_RECURSION_LESSON = {
           title: 'Evaluate a recursive call',
           sourceLine: 'int answer = SumTo(3);',
           steps: [
-            { label: 'Expression', note: 'Start with the assignment. The value for SumTo(3) is not known yet.' },
+            { label: 'Start', note: 'Start with the complete assignment. The evaluation bar marks SumTo(3).' },
             { label: 'Evaluate', note: 'Evaluate SumTo(3). It returns the expression 3 + SumTo(2), not a value, so the returned expression must be evaluated next.' },
             { label: 'Evaluate', note: 'Evaluate SumTo(2) inside 3 + SumTo(2). It returns 2 + SumTo(1), not a value, so keep evaluating.' },
             { label: 'Evaluate', note: 'Evaluate SumTo(1) inside 2 + SumTo(1). It returns 1 + SumTo(0), not a value, so keep evaluating.' },
             { label: 'Evaluate', note: 'Evaluate SumTo(0). The base case returns the value 0.' },
-            { label: 'Substitute', note: 'Replace SumTo(0) with 0.' },
+            { label: 'Substitute', note: 'Substitute 0 for SumTo(0) in the waiting expression to the right.' },
             { label: 'Evaluate', note: 'Evaluate 1 + 0 to the value 1.' },
-            { label: 'Substitute', note: 'Now that 1 + 0 has become the value 1, collapse it to that value.' },
             { label: 'Substitute', note: 'Substitute the value 1 into the waiting expression 2 + SumTo(1).' },
             { label: 'Evaluate', note: 'Evaluate 2 + 1 to the value 3.' },
-            { label: 'Substitute', note: 'Now that 2 + 1 has become the value 3, collapse it to that value.' },
             { label: 'Substitute', note: 'Substitute the value 3 into the waiting expression 3 + SumTo(2).' },
             { label: 'Evaluate', note: 'Evaluate 3 + 3 to the value 6.' },
-            { label: 'Substitute', note: 'Now that 3 + 3 has become the value 6, collapse it to that value.' },
-            { label: 'Substitute', note: 'Substitute the final value 6 into the original assignment.' },
-            { label: 'Bind', note: 'Bind the final value 6 to answer.' },
+            { label: 'Substitute', note: 'Substitute the final value 6 into the original assignment. The completed assignment binds 6 to answer.' },
           ],
           layout: 'verticalStack',
           charWidth: 7.3,
@@ -1472,31 +1675,34 @@ const CH2_RECURSION_LESSON = {
             },
             {
               showAt: 5,
+              baseLevelCount: 4,
               levels: [
                 { expression: 'int answer = SumTo(3)', slot: 0, showAt: 5, activeAt: [] },
                 { expression: '3 + SumTo(2)', slot: 1, showAt: 5, activeAt: [] },
                 { expression: '2 + SumTo(1)', slot: 2, showAt: 5, activeAt: [], strike: { showAt: 8, activeAt: [8], span: [4, 12] } },
-                { expression: '1 + 0', slot: 3, showAt: 5, activeAt: [5, 6, 7], evalSpan: [0, 5], lineShowAt: 6, label: '+', strike: { showAt: 7, activeAt: [7], span: [0, 5] } },
+                { expression: '1 + 0', slot: 3, showAt: 5, activeAt: [5, 6], evalSpan: [0, 5], lineShowAt: 6, label: '+' },
                 { expression: '1', showAt: 6, activeAt: [6] },
               ],
               arrowAfter: { showAt: 8, activeAt: [8], level: 2 },
             },
             {
               showAt: 8,
+              baseLevelCount: 3,
               levels: [
                 { expression: 'int answer = SumTo(3)', slot: 0, showAt: 8, activeAt: [] },
                 { expression: '3 + SumTo(2)', slot: 1, showAt: 8, activeAt: [], strike: { showAt: 11, activeAt: [11], span: [4, 12] } },
-                { expression: '2 + 1', slot: 2, showAt: 8, activeAt: [8, 9, 10, 11], evalSpan: [0, 5], lineShowAt: 9, label: '+', strike: { showAt: 10, activeAt: [10], span: [0, 5] } },
-                { expression: '3', showAt: 9, activeAt: [9, 10] },
+                { expression: '2 + 1', slot: 2, showAt: 8, activeAt: [8, 9], evalSpan: [0, 5], lineShowAt: 9, label: '+' },
+                { expression: '3', showAt: 9, activeAt: [9] },
               ],
               arrowAfter: { showAt: 11, activeAt: [11], level: 1 },
             },
             {
               showAt: 11,
+              baseLevelCount: 2,
               levels: [
                 { expression: 'int answer = SumTo(3)', slot: 0, showAt: 11, activeAt: [], strike: { showAt: 14, activeAt: [14], span: [13, 21] } },
-                { expression: '3 + 3', slot: 1, showAt: 11, activeAt: [11, 12, 13], evalSpan: [0, 5], lineShowAt: 12, label: '+', strike: { showAt: 13, activeAt: [13], span: [0, 5] } },
-                { expression: '6', showAt: 12, activeAt: [12, 13] },
+                { expression: '3 + 3', slot: 1, showAt: 11, activeAt: [11, 12], evalSpan: [0, 5], lineShowAt: 12, label: '+' },
+                { expression: '6', showAt: 12, activeAt: [12] },
               ],
               arrowAfter: { showAt: 14, activeAt: [14], level: 0 },
             },
